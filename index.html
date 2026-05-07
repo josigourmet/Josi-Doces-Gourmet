@@ -102,7 +102,7 @@
         .btn-entendi { background: #5d4037; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
         .btn-duvida { background: #25D366; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; text-decoration: none; display: block; box-sizing: border-box; margin-bottom: 10px; }
 
-        #modalPromo { display: none; }
+        #modalPromo, #modalMae { display: none; }
         .promo-fullscreen-content {
             background: #fff; margin: 5% auto; padding: 12px;
             border-radius: 20px; width: 85%; max-width: 350px; 
@@ -178,7 +178,15 @@
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
 </a>
 
-<div class="reabrir-promo" onclick="abrirBannerPromo()">🔥 PROMOÇÃO</div>
+<div class="reabrir-promo" onclick="abrirBannerMae()">🔥 PROMOÇÕES</div>
+
+<div id="modalMae" class="modal-aviso">
+    <div class="promo-fullscreen-content">
+        <img src="https://i.postimg.cc/y8svDKx6/IMG-20260505-WA0002.jpg" alt="Promoção Dia das Mães">
+        <button class="btn-promo-add" onclick="addPromoMae(); fecharBannerMae();">💖 APROVEITAR PROMOÇÃO DIA DAS MÃES (R$ 25,00)</button>
+        <button class="btn-promo-close" onclick="fecharBannerMae(); abrirBannerPromo();">Próxima promoção ➔</button>
+    </div>
+</div>
 
 <div id="modalPromo" class="modal-aviso">
     <div class="promo-fullscreen-content">
@@ -193,6 +201,7 @@
         <h2 style="color: #5d4037; font-size: 22px; margin-bottom: 5px;">📸 Nossas Delícias</h2>
         <p class="instrucao-slide">Deslize para o lado para ver mais ➔</p>
         <div class="galeria-inicial">
+            <img src="https://i.postimg.cc/Vv8cGFX9/IMG-20260507-WA0004.jpg">
             <img src="https://i.postimg.cc/1nW5qZdc/20260420-111103.jpg">
             <img src="https://i.postimg.cc/WF9bkPyn/20260420-120648.jpg">
             <img src="https://i.postimg.cc/DJCyXKNP/20260420-120704.jpg">
@@ -377,7 +386,9 @@
 
 <script>
 function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
-function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; abrirBannerPromo(); }
+function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; abrirBannerMae(); }
+function abrirBannerMae() { document.getElementById("modalMae").style.display = "block"; }
+function fecharBannerMae() { document.getElementById("modalMae").style.display = "none"; }
 function abrirBannerPromo() { document.getElementById("modalPromo").style.display = "block"; }
 function fecharBannerPromo() { document.getElementById("modalPromo").style.display = "none"; }
 
@@ -526,7 +537,7 @@ function removerPorNome(nome) {
 
 function remover(index) {
     if (carrinho[index].fixo) {
-        const temCombo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite");
+        const temCombo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite" || i.nome === "PROMOÇÃO DIA DAS MÃES");
         if (!temCombo) promoAtiva = false;
     }
     if (carrinho[index].qtd > 1) {
@@ -534,9 +545,9 @@ function remover(index) {
     } else {
         const itemRemovido = carrinho[index].nome;
         carrinho.splice(index, 1);
-        if (itemRemovido === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite") {
-            const aindaTemCombo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite");
-            if (!aindaTemCombo) {
+        if (itemRemovido === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite" || itemRemovido === "PROMOÇÃO DIA DAS MÃES") {
+            const aindaTemPromo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite" || i.nome === "PROMOÇÃO DIA DAS MÃES");
+            if (!aindaTemPromo) {
                 const idxFrete = carrinho.findIndex(i => i.nome === 'FRETE GRÁTIS (Ativado)');
                 if (idxFrete !== -1) carrinho.splice(idxFrete, 1);
                 promoAtiva = false;
@@ -612,6 +623,20 @@ function addPromoCombo() {
     salvarDados(); atualizar(); verificarPgto();
 }
 
+function addPromoMae() {
+    promoAtiva = true;
+    const nomePromo = "PROMOÇÃO DIA DAS MÃES";
+    const precoPromo = 25;
+    const itemExistente = carrinho.find(i => i.nome === nomePromo);
+    if (itemExistente) itemExistente.qtd += 1;
+    else carrinho.push({nome: nomePromo, preco: precoPromo, qtd: 1});
+    if (!carrinho.find(i => i.nome === 'FRETE GRÁTIS (Ativado)')) {
+        carrinho.push({nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true});
+    }
+    if(document.getElementById("carrinhoBox").style.display !== "block") toggleVisibilidadeCarrinho();
+    salvarDados(); atualizar(); verificarPgto();
+}
+
 function alternarEndereco() { 
     document.getElementById("blocoEndereco").style.display = (document.getElementById("bairro").value === "retirada") ? "none" : "block"; 
     verificarPgto();
@@ -661,19 +686,13 @@ function finalizarZap() {
 function copiarPix() { const t = document.getElementById("brcode"); t.select(); navigator.clipboard.writeText(t.value); alert("Pix Copiado!"); }
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert", "_blank"); }
 
-// FUNÇÃO AJUSTADA: Agora limpa bairro e endereço ao esvaziar o carrinho
 function limparCarrinhoCompleto() { 
     if(confirm("Limpar pedido?")) { 
         carrinho = []; 
         promoAtiva = false; 
-        
-        // Reseta os campos de endereço
         document.getElementById("bairro").value = "retirada";
         document.getElementById("endereco").value = "";
-        
-        // Esconde a caixa de endereço visualmente
         alternarEndereco();
-        
         salvarDados(); 
         resetPagamentoFluxo(); 
         atualizar(); 
@@ -683,4 +702,4 @@ function limparCarrinhoCompleto() {
 window.onload = carregarDados;
 </script>
 </body>
-  </html>
+</html>
