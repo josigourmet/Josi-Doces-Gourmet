@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Josi Doces Gourmet</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    
+    <style>
+        /* Cores: Marrom e Creme */
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #fdf5e6; color: #4b3621; scroll-behavior: smooth; }
+        
+        header { 
+            background: linear-gradient(135deg, #5d4037, #8d6e63); 
+            color: #fff; text-align: center; padding: 40px 20px;
+            border-bottom-left-radius: 30px; border-bottom-right-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .logo-container {
+            width: 130px; height: 130px; background: #fff; border-radius: 50%;
+            margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;
+            border: 5px solid #d7ccc8; box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .logo-content { text-align: center; color: #5d4037; line-height: 1.1; }
+        .logo-content .name-josi { font-size: 24px; font-weight: bold; font-family: 'Georgia', serif; display: block; }
+        .logo-content .name-doces { font-size: 16px; text-transform: uppercase; letter-spacing: 1px; display: block; border-top: 1px solid #d7ccc8; margin-top: 2px; padding-top: 2px; }
+        .logo-content .name-gourmet { font-size: 10px; font-weight: bold; color: #8d6e63; display: block; }
+        .logo-content .name-contato { font-size: 9px; font-weight: bold; color: #5d4037; display: block; margin-top: 20px; }
+
+        .insta-header {
+            display: inline-flex; align-items: center; justify-content: center;
+            background: #fff; color: #5d4037 !important; padding: 8px 15px;
+            border-radius: 20px; text-decoration: none; font-size: 14px;
+            margin-top: 15px; font-weight: bold; transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .insta-header img { margin-right: 8px; }
+        .insta-header:hover { transform: scale(1.05); background: #fdf5e6; }
+
+        .insta-float {
+            position: fixed; top: 20px; right: 20px; z-index: 1002;
+            background: white; padding: 10px; border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center; transition: 0.3s;
+        }
+        .insta-float:hover { transform: rotate(15deg) scale(1.1); }
+
+        .container { padding: 20px; max-width: 500px; margin: auto; padding-bottom: 350px; } 
+        label { display: block; margin-top: 20px; font-weight: bold; color: #5d4037; font-size: 15px; }
+        input, select, textarea { width: 100%; padding: 12px; margin-top: 8px; border-radius: 10px; border: 1px solid #d7ccc8; box-sizing: border-box; background: white; font-size: 16px; }
+
+        .card-evento {
+            background: linear-gradient(135deg, #8d6e63, #5d4037);
+            color: white; padding: 20px; border-radius: 15px; text-align: center;
+            margin-bottom: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); border: 2px solid #d7ccc8;
+        }
+        .card-evento h3 { margin-top: 0; color: #fdf5e6; }
+        .btn-evento {
+            background: #fdf5e6; color: #5d4037; border: none; padding: 10px 20px;
+            border-radius: 8px; font-weight: bold; cursor: pointer; margin-top: 10px;
+            display: inline-block; text-decoration: none; transition: 0.3s;
+        }
+
+        .card { background: white; padding: 20px; border-radius: 15px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 20px; border: 1px solid #d7ccc8; }
+        .price { color: #8d6e63; font-weight: bold; font-size: 1.3em; margin: 10px 0; }
+        
+        .controles-quantidade { display: flex; align-items: center; justify-content: center; gap: 15px; margin-top: 10px; }
+        .btn-menor { background: #e74c3c !important; width: 40px !important; }
+        .btn-maior { background: #25D366 !important; width: 40px !important; }
+        .qtd-display { font-weight: bold; font-size: 18px; min-width: 20px; }
+        
+        button { color: white; border: none; padding: 14px; border-radius: 10px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.3s; font-size: 16px; }
+        
+        .btn-add { background: #25D366; } 
+        
+        .btn-finalizar { background: #25D366; padding: 10px; font-size: 14px; margin-top: 15px; } 
+        .btn-finalizar:disabled, .btn-pix:disabled, .btn-mp:disabled { background: #ccc !important; cursor: not-allowed; opacity: 0.6; }
+        
+        .btn-pix { background: #5d4037; padding: 10px; font-size: 14px; }
+        .btn-mp { background: #009ee3; padding: 10px; font-size: 14px; }
+        .btn-limpar { background: #e74c3c; padding: 8px; font-size: 12px; margin-top: 10px; opacity: 0.8; }
+        
+        #secaoDadosPedido { display: none; margin-top: 30px; border-top: 2px dashed #d7ccc8; padding-top: 10px; }
+
+        .modal-aviso {
+            display: none; position: fixed; z-index: 9999;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.9); backdrop-filter: blur(8px); overflow-y: auto;
+        }
+
+        .modal-conteudo {
+            background-color: #fff; margin: 5% auto; padding: 25px;
+            border-radius: 25px; width: 90%; max-width: 450px;
+            text-align: center; border: 3px solid #5d4037;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn { 0% { transform: scale(0.7); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+
+        .btn-entendi { background: #5d4037; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
+        .btn-duvida { background: #25D366; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; text-decoration: none; display: block; box-sizing: border-box; margin-bottom: 10px; }
+
+        #modalPromo { display: none; }
+        .promo-fullscreen-content {
+            background: #fff; margin: 5% auto; padding: 12px;
+            border-radius: 20px; width: 85%; max-width: 350px; 
+            text-align: center; position: relative; border: 4px solid #5d4037;
+        }
+        .promo-fullscreen-content img { 
+            width: 100%; 
+            max-height: 55vh; 
+            object-fit: cover; 
+            image-rendering: -webkit-optimize-contrast; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        .btn-promo-add { background: #25D366; color: white; font-size: 16px; padding: 12px; border-radius: 12px; border: none; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 8px; }
+        .btn-promo-close { background: #fdf5e6; color: #5d4037; font-size: 13px; padding: 8px; border-radius: 10px; border: 1px solid #d7ccc8; cursor: pointer; width: 100%; }
+
+        .reabrir-promo {
+            position: fixed; top: 80px; left: 10px; z-index: 998;
+            background: #e67e22; color: white; padding: 8px 12px;
+            border-radius: 20px; font-size: 12px; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
+            border: 2px solid white; animation: pulse 2s infinite;
+        }
+
+        #carrinhoBox { 
+            position: fixed; bottom: 10px; right: 10px; left: 50px; 
+            background: white; padding: 15px; border-radius: 20px; 
+            box-shadow: 0 -5px 25px rgba(0,0,0,0.2); z-index: 1000; 
+            max-height: 80vh; overflow-y: auto; display: none; border: 2px solid #d7ccc8;
+        }
+
+        .toggle-carrinho {
+            position: fixed; bottom: 20px; left: 10px; width: 45px; height: 45px;
+            background: #007bff; color: white; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1001; box-shadow: 0 4px 10px rgba(0,0,0,0.2); font-size: 20px; cursor: pointer;
+        }
+        .cart-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: #e74c3c; color: white; border-radius: 50%;
+            padding: 2px 6px; font-size: 12px; font-weight: bold; border: 2px solid white;
+        }
+        
+        .item-carrinho { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 8px 0; font-size: 14px; }
+        .remover { color: red; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        #resumo { margin-top: 15px; font-size: 18px; text-align: center; color: #5d4037; border-top: 2px solid #eee; padding-top: 10px; }
+
+        .galeria-inicial {
+            display: flex; overflow-x: auto; gap: 12px; padding: 15px 0;
+            scroll-snap-type: x mandatory; scrollbar-width: none;
+        }
+        .galeria-inicial::-webkit-scrollbar { display: none; }
+        
+        .galeria-inicial img {
+            width: 300px;
+            height: 300px; 
+            object-fit: cover; 
+            border-radius: 15px; 
+            scroll-snap-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15); border: 2px solid #d7ccc8;
+        }
+        
+        .instrucao-slide { font-size: 12px; color: #8d6e63; margin-bottom: 10px; }
+        
+        .erro-tel { color: red; font-size: 11px; font-weight: bold; display: none; margin-top: 5px; }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
+</a>
+
+<div class="reabrir-promo" onclick="abrirBannerPromo()">🔥 PROMOÇÃO</div>
+
+<div id="modalPromo" class="modal-aviso">
+    <div class="promo-fullscreen-content">
+        <img src="https://i.postimg.cc/DwQjSTgx/IMG-20260430-WA0003.jpg" alt="Promoção">
+        <button class="btn-promo-add" onclick="addPromoCombo(); fecharBannerPromo();">🚀 APROVEITAR COMBO: BOLO COM PUDIM + TORTA DE BOLACHA COM DOCE DE LEITE + FRETE GRÁTIS POR (R$ 22,00)</button>
+        <button class="btn-promo-close" onclick="fecharBannerPromo()">Ver outros produtos</button>
+    </div>
+</div>
+
+<div id="modalFotosIniciais" class="modal-aviso" style="display: block;">
+    <div class="modal-conteudo">
+        <h2 style="color: #5d4037; font-size: 22px; margin-bottom: 5px;">📸 Nossas Delícias</h2>
+        <p class="instrucao-slide">Deslize para o lado para ver mais ➔</p>
+        <div class="galeria-inicial">
+            <img src="https://i.postimg.cc/1nW5qZdc/20260420-111103.jpg">
+            <img src="https://i.postimg.cc/WF9bkPyn/20260420-120648.jpg">
+            <img src="https://i.postimg.cc/DJCyXKNP/20260420-120704.jpg">
+            <img src="https://i.postimg.cc/34LJvHqZ/20260420-120716.jpg">
+            <img src="https://i.postimg.cc/T5p2j48b/IMG-20260418-WA0008.jpg">
+            <img src="https://i.postimg.cc/WF9bkPyX/IMG-20260418-WA0010.jpg">
+            <img src="https://i.postimg.cc/28M6M4QK/1777779837866.png">
+        </div>
+        <button class="btn-entendi" onclick="fecharGaleriaAbrirHorarios()">Ver Cardápio e Preços</button>
+    </div>
+</div>
+
+<div id="modalAviso" class="modal-aviso">
+    <div class="modal-conteudo">
+        <h2>⚠️ Horários de Funcionamento</h2>
+        <p>Confira nossos horários para pedidos e agendamentos:</p>
+        <ul style="text-align: left; font-size: 14px; color: #555;">
+            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos das 08h às 12h.</li>
+            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos das 08h às 17h.</li>
+            <li>⏰ <b>Atenção:</b> Pedidos fora desses horários ficam bloqueados automaticamente.</li>
+        </ul>
+        <a href="https://wa.me/5551985803243?text=Olá Josi! Tenho uma dúvida sobre agendamentos." target="_blank" class="btn-duvida">💬 Dúvidas no WhatsApp</a>
+        <button class="btn-entendi" onclick="fecharModalAviso()">Fazer meu Pedido ➔</button>
+    </div>
+</div>
+
+<header>
+    <div class="logo-container">
+        <div class="logo-content">
+            <span class="name-josi">Josi</span>
+            <span class="name-doces">Doces</span>
+            <span class="name-gourmet">GOURMET</span>
+            <span class="name-contato">(51) 98580-3243</span>
+        </div>
+    </div>
+    <h1>🍬 Josi Doces Gourmet</h1>
+    <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="18"> Siga @josigourmet
+    </a>
+</header>
+
+<div class="container">
+    <div class="card-evento">
+        <h3>✨ Encomendas para Eventos</h3>
+        <p>Temos condições especiais para grandes quantidades!</p>
+        <a href="https://wa.me/5551985803243?text=Olá Josi! Gostaria de um orçamento para evento." target="_blank" class="btn-evento">Solicitar Orçamento</a>
+    </div>
+
+    <div class="card"><h3>Torta de Bolacha (1kg)</h3><p class="price">R$ 55,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha (1Kg)')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Bolacha (1Kg)">0</span>
+            <button class="btn-maior" onclick="add('Torta de Bolacha (1Kg)', 55)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Torta de Bolacha Pequena (250g)</h3><p class="price">R$ 10,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha Pequena')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Bolacha Pequena">0</span>
+            <button class="btn-maior" onclick="add('Torta de Bolacha Pequena', 10)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Torta de Bolacha Grande (300g)</h3><p class="price">R$ 12,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha Grande')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Bolacha Grande">0</span>
+            <button class="btn-maior" onclick="add('Torta de Bolacha Grande', 12)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Torta de Ninho Pequena (250g)</h3><p class="price">R$ 10,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Torta de Ninho Pequena')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Ninho Pequena">0</span>
+            <button class="btn-maior" onclick="add('Torta de Ninho Pequena', 10)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Bolo de Chocolate no Pote</h3><p class="price">R$ 12,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Bolo de Chocolate no Pote')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Chocolate no Pote">0</span>
+            <button class="btn-maior" onclick="add('Bolo de Chocolate no Pote', 12)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Bolo de Brigadeiro no Pote</h3><p class="price">R$ 12,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Bolo de Brigadeiro no Pote')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Brigadeiro no Pote">0</span>
+            <button class="btn-maior" onclick="add('Bolo de Brigadeiro no Pote', 12)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Bolo no Pote com Pudim</h3><p class="price">R$ 14,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Bolo no Pote com Pudim')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo no Pote com Pudim">0</span>
+            <button class="btn-maior" onclick="add('Bolo no Pote com Pudim', 14)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Bolo de Stikadinho no Pote</h3><p class="price">R$ 12,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Bolo de Stikadinho no Pote')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Stikadinho no Pote">0</span>
+            <button class="btn-maior" onclick="add('Bolo de Stikadinho no Pote', 12)">+</button>
+        </div>
+    </div>
+
+    <div class="card"><h3>Bolo de Cenoura no Pote</h3><p class="price">R$ 12,00</p>
+        <div class="controles-quantidade">
+            <button class="btn-menor" onclick="removerPorNome('Bolo de Cenoura no Pote')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Cenoura no Pote">0</span>
+            <button class="btn-maior" onclick="add('Bolo de Cenoura no Pote', 12)">+</button>
+        </div>
+    </div>
+
+    <div id="secaoDadosPedido">
+        <label>👤 Seus Dados</label>
+        <input type="text" id="nome" placeholder="Seu Nome Completo" oninput="salvarDados(); verificarPgto();">
+        <input type="tel" id="telefone" placeholder="(51) 99999-9999" maxlength="15" oninput="mascaraTelefone(this); salvarDados(); verificarPgto();">
+        <div id="erroTelefone" class="erro-tel">O número deve começar com o dígito 9.</div>
+        
+        <label>🚚 Entrega e Região</label>
+        <select id="bairro" onchange="alternarEndereco(); salvarDados(); verificarPgto();">
+            <option value="retirada">Vou retirar no local (R$ 0,00)</option>
+            <option value="5">Centro (R$ 5,00)</option>
+            <option value="10">Acesso Dona Leopoldina / Parque (R$ 10,00)</option>
+            <option value="10">Cidade Nova (R$ 10,00)</option>
+            <option value="5">Cruzeiro (R$ 5,00)</option>
+            <option value="10">Gressler (R$ 10,00)</option>
+            <option value="30">Interior / Outros (R$ 30,00)</option>
+            <option value="0">Coronel Brito (R$ 0,00)</option>
+            <option value="10">Santa Tecla (R$ 10,00)</option>
+        </select>
+
+        <div id="blocoEndereco">
+            <label>📍 Endereço de Entrega</label>
+            <textarea id="endereco" placeholder="Rua, número e referência" oninput="salvarDados(); verificarPgto();"></textarea>
+        </div>
+
+        <label>⏰ Data e Horário de Recebimento</label>
+        <div style="display:flex; gap:5px;">
+            <input type="date" id="dataAgendamento" onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
+            <input type="time" id="horaAgendamento" onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
+        </div>
+
+        <label>💳 Forma de Pagamento</label>
+        <select id="pagamento" onchange="resetPagamentoFluxo(); salvarDados(); verificarPgto();">
+            <option value="Pix">Pix</option>
+            <option value="Cartão de Crédito">Cartão de Crédito</option>
+            <option value="Cartão de Débito">Cartão de Débito</option>
+            <option value="Dinheiro">Dinheiro</option>
+        </select>
+    </div>
+</div>
+
+<div id="btnToggle" class="toggle-carrinho" onclick="toggleVisibilidadeCarrinho()">
+    🛒 <span id="cartBadge" class="cart-badge">0</span>
+</div>
+
+<div id="carrinhoBox">
+    <div style="text-align: right;"><span onclick="toggleVisibilidadeCarrinho()" style="cursor:pointer; font-weight:bold; color:#5d4037">FECHAR [X]</span></div>
+    <h3 style="margin-top:0; color:#5d4037;">🛒 Seu Pedido</h3>
+    <div id="itensCarrinhoLista"></div>
+    <button class="btn-limpar" onclick="limparCarrinhoCompleto()">🗑️ Esvaziar Carrinho</button>
+    <div id="resumo"><b>Total: R$ 0,00</b></div>
+    <div style="margin-top:15px;">
+        <button id="btnPagarMP" onclick="abrirMercadoPago()" class="btn-mp" style="display:none;">💳 Pagar no Cartão (Link)</button>
+        <button id="btnGerarPix" onclick="gerarPixReal()" class="btn-pix" style="display:none;">💎 Gerar PIX</button>
+        <div id="pixDisplay" style="display:none; margin-top:10px; background:#f9f9f9; padding:10px; border-radius:10px;">
+            <div id="qrcode" style="display: flex; justify-content: center; margin-bottom:10px;"></div>
+            <textarea id="brcode" readonly style="font-size: 10px; height: 50px; width: 100%;"></textarea>
+            <button onclick="copiarPix()" style="background:#444; padding: 8px; font-size: 12px; width:100%;">Copiar Código Pix</button>
+        </div>
+        <button id="btnWhatsapp" onclick="finalizarZap()" class="btn-finalizar" disabled>⚠️ Preencha os dados no formulário</button>
+    </div>
+</div>
+
+<script>
+function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
+function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; abrirBannerPromo(); }
+function abrirBannerPromo() { document.getElementById("modalPromo").style.display = "block"; }
+function fecharBannerPromo() { document.getElementById("modalPromo").style.display = "none"; }
+
+let promoAtiva = false;
+let carrinho = [];
+let pixGerado = false;
+const CHAVE_PIX = "00431179026"; 
+const NOME_RECEBEDOR = "JOSI DOCES";
+const CIDADE_RECEBEDOR = "VENANCIO AIRES";
+
+function configurarLimitesData() {
+    const hoje = new Date();
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoje.getDate()).padStart(2, '0');
+    const dataMinima = `${ano}-${mes}-${dia}`;
+    document.getElementById('dataAgendamento').setAttribute('min', dataMinima);
+}
+
+function validarDataHora() {
+    const dataInput = document.getElementById('dataAgendamento');
+    const horaInput = document.getElementById('horaAgendamento');
+    if (!dataInput.value) return;
+    const agora = new Date();
+    const dataSelecionada = new Date(dataInput.value + 'T00:00:00');
+    const hojeApenasData = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate());
+    if (dataSelecionada < hojeApenasData) {
+        alert("Ops! Você não pode selecionar uma data que já passou.");
+        dataInput.value = ""; horaInput.value = ""; return;
+    }
+    if (dataSelecionada.getTime() === hojeApenasData.getTime() && horaInput.value) {
+        const [horaSel, minSel] = horaInput.value.split(':');
+        const dataHoraSelecionada = new Date();
+        dataHoraSelecionada.setHours(horaSel, minSel, 0, 0);
+        if (dataHoraSelecionada < agora) {
+            alert("Este horário já passou! Por favor, escolha um horário futuro.");
+            horaInput.value = "";
+        }
+    }
+}
+
+function verificarLojaAberta() {
+    const agora = new Date();
+    const diaSemana = agora.getDay();
+    const horaAtual = agora.getHours();
+    const feriados = ["01/01", "17/02", "03/04", "21/04", "01/05", "04/06", "07/09", "12/10", "02/11", "15/11", "25/12"];
+    const hojeFormatado = agora.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+    const ehFeriado = feriados.includes(hojeFormatado);
+    let aberta = false;
+    if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
+        if (horaAtual >= 8 && horaAtual < 12) aberta = true;
+    } else {
+        if (horaAtual >= 8 && horaAtual < 17) aberta = true;
+    }
+    return aberta;
+}
+
+function toggleVisibilidadeCarrinho() {
+    const box = document.getElementById("carrinhoBox");
+    box.style.display = (box.style.display === "none" || box.style.display === "") ? "block" : "none";
+    verificarPgto();
+}
+
+function mascaraTelefone(i) {
+    let v = i.value.replace(/\D/g, "");
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+    v = v.replace(/(\d)(\d{4})$/, "$1-$2");
+    i.value = v;
+}
+
+function salvarDados() {
+    const dados = {
+        nome: document.getElementById("nome").value,
+        telefone: document.getElementById("telefone").value,
+        bairro: document.getElementById("bairro").value,
+        endereco: document.getElementById("endereco").value,
+        data: document.getElementById('dataAgendamento').value,
+        hora: document.getElementById('horaAgendamento').value,
+        pagamento: document.getElementById("pagamento").value,
+        carrinho: carrinho,
+        promoAtiva: promoAtiva
+    };
+    localStorage.setItem('pedidoJosiDoces', JSON.stringify(dados));
+}
+
+function carregarDados() {
+    configurarLimitesData();
+    const salvo = localStorage.getItem('pedidoJosiDoces');
+    if (salvo) {
+        const d = JSON.parse(salvo);
+        document.getElementById("nome").value = d.nome || "";
+        document.getElementById("telefone").value = d.telefone || "";
+        document.getElementById("bairro").value = d.bairro || "retirada";
+        document.getElementById("endereco").value = d.endereco || "";
+        document.getElementById("pagamento").value = d.pagamento || "Pix";
+        carrinho = d.carrinho || [];
+        promoAtiva = d.promoAtiva || false;
+        document.getElementById('dataAgendamento').value = d.data || "";
+        document.getElementById('horaAgendamento').value = d.hora || "";
+        alternarEndereco();
+        validarDataHora();
+        verificarPgto();
+    }
+}
+
+function atualizar() {
+    const valorBairro = document.getElementById("bairro").value;
+    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
+    const total = subtotal + frete;
+    const qtdTotal = carrinho.reduce((acc, item) => acc + (item.nome !== 'FRETE GRÁTIS (Ativado)' ? item.qtd : 0), 0);
+    
+    document.getElementById("cartBadge").innerText = qtdTotal;
+    
+    const btnToggle = document.getElementById("btnToggle");
+    if (qtdTotal > 0) {
+        btnToggle.style.background = "#25D366";
+    } else {
+        btnToggle.style.background = "#007bff";
+    }
+
+    const todosDisplays = document.querySelectorAll('.qtd-display');
+    todosDisplays.forEach(span => span.innerText = "0");
+    carrinho.forEach(item => {
+        const span = document.getElementById(`qtd-${item.nome}`);
+        if(span) span.innerText = item.qtd;
+    });
+
+    const listaDiv = document.getElementById("itensCarrinhoLista");
+    listaDiv.innerHTML = "";
+    carrinho.forEach((item, index) => {
+        listaDiv.innerHTML += `<div class="item-carrinho"><span>${item.qtd}x ${item.nome}</span><span>R$ ${(item.preco*item.qtd).toFixed(2).replace('.', ',')} <span class="remover" onclick="remover(${index})">×</span></span></div>`;
+    });
+    document.getElementById("resumo").innerHTML = `<b>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</b>`;
+    
+    const aberta = verificarLojaAberta();
+    document.getElementById("secaoDadosPedido").style.display = (carrinho.length > 0 && aberta) ? "block" : "none";
+    document.getElementById("btnToggle").style.display = "flex";
+    return total;
+}
+
+function removerPorNome(nome) {
+    const index = carrinho.findIndex(i => i.nome === nome);
+    if (index !== -1) remover(index);
+}
+
+function remover(index) {
+    if (carrinho[index].fixo) {
+        const temCombo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite");
+        if (!temCombo) promoAtiva = false;
+    }
+    if (carrinho[index].qtd > 1) {
+        carrinho[index].qtd -= 1;
+    } else {
+        const itemRemovido = carrinho[index].nome;
+        carrinho.splice(index, 1);
+        if (itemRemovido === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite") {
+            const aindaTemCombo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite");
+            if (!aindaTemCombo) {
+                const idxFrete = carrinho.findIndex(i => i.nome === 'FRETE GRÁTIS (Ativado)');
+                if (idxFrete !== -1) carrinho.splice(idxFrete, 1);
+                promoAtiva = false;
+            }
+        }
+    }
+    if (carrinho.length === 0) promoAtiva = false;
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
+}
+
+function resetPagamentoFluxo() { pixGerado = false; document.getElementById("pixDisplay").style.display = "none"; verificarPgto(); }
+
+function verificarPgto() {
+    const pag = document.getElementById("pagamento").value;
+    const btnZap = document.getElementById("btnWhatsapp");
+    const btnPix = document.getElementById("btnGerarPix");
+    const btnMP = document.getElementById("btnPagarMP");
+    const nome = document.getElementById("nome").value.trim();
+    const telRaw = document.getElementById("telefone").value.replace(/\D/g, "");
+    const data = document.getElementById("dataAgendamento").value;
+    const hora = document.getElementById("horaAgendamento").value;
+    const bairro = document.getElementById("bairro").value;
+    const endereco = document.getElementById("endereco").value.trim();
+
+    atualizar();
+    const aberta = verificarLojaAberta();
+    let telValido = false;
+    if (telRaw.length === 11 && telRaw[2] === "9") telValido = true;
+    else if (telRaw.length === 9 && telRaw[0] === "9") telValido = true;
+    document.getElementById("erroTelefone").style.display = (telRaw.length > 0 && !telValido) ? "block" : "none";
+
+    if (!aberta) {
+        btnPix.style.display = "none"; btnMP.style.display = "none";
+        btnZap.disabled = true; btnZap.style.background = "#e74c3c"; btnZap.innerText = "🔴 LOJA FECHADA AGORA";
+        return;
+    }
+
+    const basicoOk = (nome !== "" && telValido && data !== "" && hora !== "");
+    const entregaOk = (bairro === "retirada" || (bairro !== "retirada" && endereco !== ""));
+    const tudoPronto = (basicoOk && entregaOk);
+    btnPix.style.display = (pag === "Pix" && !pixGerado) ? "block" : "none";
+    btnMP.style.display = (pag.includes("Cartão")) ? "block" : "none";
+    btnPix.disabled = !tudoPronto; btnMP.disabled = !tudoPronto;
+    const pixObrigatorioOk = (pag === "Pix" ? pixGerado : true);
+
+    if (tudoPronto && pixObrigatorioOk) {
+        btnZap.disabled = false; btnZap.innerText = "✅ Enviar no WhatsApp"; btnZap.style.background = "#25D366";
+    } else {
+        btnZap.disabled = true; btnZap.style.background = "#ccc";
+        if (!basicoOk) btnZap.innerText = "⚠️ Nome/Tel(9)/Data incompletos";
+        else if (!entregaOk) btnZap.innerText = "📍 Preencha o Endereço";
+        else if (!pixObrigatorioOk) btnZap.innerText = "💎 Gere o Pix primeiro";
+    }
+}
+
+function add(n, p) {
+    const item = carrinho.find(i => i.nome === n);
+    if (item) item.qtd += 1; else carrinho.push({nome: n, preco: p, qtd: 1});
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
+}
+
+function addPromoCombo() {
+    promoAtiva = true;
+    const nomeCombo = "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite";
+    const precoCombo = 22;
+    const itemExistente = carrinho.find(i => i.nome === nomeCombo);
+    if (itemExistente) itemExistente.qtd += 1;
+    else carrinho.push({nome: nomeCombo, preco: precoCombo, qtd: 1});
+    if (!carrinho.find(i => i.nome === 'FRETE GRÁTIS (Ativado)')) {
+        carrinho.push({nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true});
+    }
+    if(document.getElementById("carrinhoBox").style.display !== "block") toggleVisibilidadeCarrinho();
+    salvarDados(); atualizar(); verificarPgto();
+}
+
+function alternarEndereco() { 
+    document.getElementById("blocoEndereco").style.display = (document.getElementById("bairro").value === "retirada") ? "none" : "block"; 
+    verificarPgto();
+}
+
+function gerarPixReal() {
+    const valor = atualizar().toFixed(2);
+    const fv = (id, v) => id + v.length.toString().padStart(2, '0') + v;
+    const conta = fv("00", "BR.GOV.BCB.PIX") + fv("01", CHAVE_PIX);
+    let payload = fv("00", "01") + fv("26", conta) + fv("52", "0000") + fv("53", "986") + fv("54", valor) + fv("58", "BR") + fv("59", NOME_RECEBEDOR) + fv("60", CIDADE_RECEBEDOR) + fv("62", fv("05", "***")) + "6304";
+    const crc16 = (d) => {
+        let c = 0xFFFF;
+        for (let i=0; i<d.length; i++) {
+            c ^= d.charCodeAt(i) << 8;
+            for (let j=0; j<8; j++) c = (c & 0x8000) ? (c << 1) ^ 0x1021 : c << 1;
+        }
+        return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+    };
+    const res = payload + crc16(payload);
+    pixGerado = true;
+    document.getElementById("pixDisplay").style.display = "block";
+    document.getElementById("brcode").value = res;
+    document.getElementById("qrcode").innerHTML = "";
+    new QRCode(document.getElementById("qrcode"), { text: res, width: 120, height: 120 });
+    verificarPgto();
+}
+
+function finalizarZap() {
+    const nome = document.getElementById("nome").value;
+    const tel = document.getElementById("telefone").value;
+    const data = document.getElementById('dataAgendamento').value.split('-').reverse().join('/');
+    const hora = document.getElementById('horaAgendamento').value;
+    const pag = document.getElementById("pagamento").value;
+    const bairroSel = document.getElementById("bairro");
+    const bairroTexto = bairroSel.options[bairroSel.selectedIndex].text;
+    const endereco = document.getElementById("endereco").value;
+    const total = atualizar().toFixed(2).replace('.', ',');
+    let itensTexto = "";
+    carrinho.forEach(i => { itensTexto += `▪️ ${i.qtd}x ${i.nome} - R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n`; });
+    let localTexto = `🚚 *ENTREGA:* ${bairroTexto}`;
+    if (bairroSel.value === "retirada") localTexto = `🏠 *RETIRADA:* O cliente irá retirar no local.`;
+    else localTexto += `\n📍 *ENDEREÇO:* ${endereco}`;
+    const msg = `*🍮 NOVO PEDIDO - JOSI DOCES*\n\n👤 *CLIENTE:* ${nome}\n📱 *WHATSAPP:* ${tel}\n\n🛒 *--- PRODUTOS ---*\n${itensTexto}\n${localTexto}\n\n📅 *DATA:* ${data}\n⏰ *HORÁRIO:* ${hora}\n\n💳 *PAGAMENTO:* ${pag}\n💰 *TOTAL DO PEDIDO: R$ ${total}*\n\n_Pedido enviado via Catálogo Digital_`;
+    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
+}
+
+function copiarPix() { const t = document.getElementById("brcode"); t.select(); navigator.clipboard.writeText(t.value); alert("Pix Copiado!"); }
+function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert", "_blank"); }
+
+// FUNÇÃO AJUSTADA: Agora limpa bairro e endereço ao esvaziar o carrinho
+function limparCarrinhoCompleto() { 
+    if(confirm("Limpar pedido?")) { 
+        carrinho = []; 
+        promoAtiva = false; 
+        
+        // Reseta os campos de endereço
+        document.getElementById("bairro").value = "retirada";
+        document.getElementById("endereco").value = "";
+        
+        // Esconde a caixa de endereço visualmente
+        alternarEndereco();
+        
+        salvarDados(); 
+        resetPagamentoFluxo(); 
+        atualizar(); 
+    } 
+}
+
+window.onload = carregarDados;
+</script>
+</body>
+  </html>
