@@ -172,7 +172,7 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body onload="carregarBannerDinamico(); carregarDados();">
+<body onload="saudacaoInicial(); carregarBannerDinamico(); carregarDados();">
 
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
@@ -180,10 +180,8 @@
 
 <div class="reabrir-promo" id="btnReabrirPromo" onclick="abrirBannerPromo()">🔥 PROMOÇÃO</div>
 
-<!-- ESTRUTURA DO BANNER (PREENCHIDA PELO JAVASCRIPT) -->
 <div id="modalPromo" class="modal-aviso">
     <div class="promo-fullscreen-content" id="conteudoBanner">
-        <!-- O JS vai colocar a imagem e o botão aqui dentro -->
     </div>
 </div>
 
@@ -192,13 +190,12 @@
         <h2 style="color: #5d4037; font-size: 22px; margin-bottom: 5px;">📸 Nossas Delícias</h2>
         <p class="instrucao-slide">Deslize para o lado para ver mais ➔</p>
         <div class="galeria-inicial">
-            <img src="https://i.postimg.cc/1nW5qZdc/20260420-111103.jpg">
-            <img src="https://i.postimg.cc/WF9bkPyn/20260420-120648.jpg">
-            <img src="https://i.postimg.cc/DJCyXKNP/20260420-120704.jpg">
-            <img src="https://i.postimg.cc/34LJvHqZ/20260420-120716.jpg">
-            <img src="https://i.postimg.cc/T5p2j48b/IMG-20260418-WA0008.jpg">
-            <img src="https://i.postimg.cc/WF9bkPyX/IMG-20260418-WA0010.jpg">
-            <img src="https://i.postimg.cc/28M6M4QK/1777779837866.png">
+          <img src="https://i.postimg.cc/BQtwsX6P/IMG-20260508-WA0009.jpg">
+          <img src="https://i.postimg.cc/0yR3f9k8/IMG-20260508-WA0008.jpg">
+          <img src="https://i.postimg.cc/tJP0qJqM/IMG-20260507-WA0006.jpg">
+          <img src="https://i.postimg.cc/T5p2j48b/IMG-20260418-WA0008.jpg">
+          <img src="https://i.postimg.cc/WF9bkPyX/IMG-20260418-WA0010.jpg">
+          <img src="https://i.postimg.cc/28M6M4QK/1777779837866.png">
         </div>
         <button class="btn-entendi" onclick="fecharGaleriaAbrirHorarios()">Ver Cardápio e Preços</button>
     </div>
@@ -380,13 +377,25 @@
 // 🚀 CONFIGURAÇÃO DO BANNER (ALTERE AQUI)
 // ==========================================
 const CONFIG_PROMO = {
-    ativa: true, // Mude para false para esconder a promoção do site todo
+    ativa: true,
     imagemUrl: "https://i.postimg.cc/T3BNcdCq/1777779837866.png",
     nomeProduto: "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite",
     preco: 25.00,
     textoBotao: "🚀 APROVEITAR COMBO: BOLO COM PUDIM + TORTA DE BOLACHA COM DOCE DE LEITE + FRETE GRÁTIS POR (R$ 25,00)",
     textoBotaoFlutuante: "🔥 PROMOÇÃO"
 };
+
+// MENSAGEM DE BOAS-VINDAS
+function saudacaoInicial() {
+    const agora = new Date();
+    const hora = agora.getHours();
+    let saudacao;
+    if (hora >= 5 && hora < 12) saudacao = "☀️ Bom dia!";
+    else if (hora >= 12 && hora < 18) saudacao = "🍰 Boa tarde!";
+    else saudacao = "🌙 Boa noite!";
+    
+    alert(saudacao + " Bem-vindo(a) à Josi Doces Gourmet! Preparamos tudo com muito carinho para você.");
+}
 
 function carregarBannerDinamico() {
     const container = document.getElementById("conteudoBanner");
@@ -396,16 +405,13 @@ function carregarBannerDinamico() {
         btnFlutuante.style.display = "none";
         return;
     }
-
     btnFlutuante.innerText = CONFIG_PROMO.textoBotaoFlutuante;
-    
     container.innerHTML = `
         <img src="${CONFIG_PROMO.imagemUrl}" alt="Promoção">
         <button class="btn-promo-add" onclick="addPromoCombo(); fecharBannerPromo();">${CONFIG_PROMO.textoBotao}</button>
         <button class="btn-promo-close" onclick="fecharBannerPromo()">Ver outros produtos</button>
     `;
 }
-// ==========================================
 
 function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
 function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; abrirBannerPromo(); }
@@ -514,6 +520,27 @@ function carregarDados() {
     }
 }
 
+function add(nome, preco) {
+    const item = carrinho.find(i => i.nome === nome);
+    if (item) item.qtd++;
+    else carrinho.push({ nome, preco, qtd: 1 });
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
+}
+
+function addPromoCombo() {
+    carrinho = carrinho.filter(i => i.nome !== CONFIG_PROMO.nomeProduto && i.nome !== 'FRETE GRÁTIS (Ativado)');
+    carrinho.push({ nome: CONFIG_PROMO.nomeProduto, preco: CONFIG_PROMO.preco, qtd: 1, fixo: true });
+    carrinho.push({ nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true });
+    promoAtiva = true;
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
+    toggleVisibilidadeCarrinho();
+}
+
+function alternarEndereco() {
+    const bairro = document.getElementById("bairro").value;
+    document.getElementById("blocoEndereco").style.display = (bairro === "retirada") ? "none" : "block";
+}
+
 function atualizar() {
     const valorBairro = document.getElementById("bairro").value;
     let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
@@ -522,13 +549,8 @@ function atualizar() {
     const qtdTotal = carrinho.reduce((acc, item) => acc + (item.nome !== 'FRETE GRÁTIS (Ativado)' ? item.qtd : 0), 0);
     
     document.getElementById("cartBadge").innerText = qtdTotal;
-    
     const btnToggle = document.getElementById("btnToggle");
-    if (qtdTotal > 0) {
-        btnToggle.style.background = "#25D366";
-    } else {
-        btnToggle.style.background = "#007bff";
-    }
+    btnToggle.style.background = (qtdTotal > 0) ? "#25D366" : "#007bff";
 
     const todosDisplays = document.querySelectorAll('.qtd-display');
     todosDisplays.forEach(span => span.innerText = "0");
@@ -556,10 +578,6 @@ function removerPorNome(nome) {
 }
 
 function remover(index) {
-    if (carrinho[index].fixo) {
-        const temCombo = carrinho.some(i => i.nome === CONFIG_PROMO.nomeProduto);
-        if (!temCombo) promoAtiva = false;
-    }
     if (carrinho[index].qtd > 1) {
         carrinho[index].qtd -= 1;
     } else {
@@ -568,8 +586,7 @@ function remover(index) {
         if (itemRemovido === CONFIG_PROMO.nomeProduto) {
             const aindaTemCombo = carrinho.some(i => i.nome === CONFIG_PROMO.nomeProduto);
             if (!aindaTemCombo) {
-                const idxFrete = carrinho.findIndex(i => i.nome === 'FRETE GRÁTIS (Ativado)');
-                if (idxFrete !== -1) carrinho.splice(idxFrete, 1);
+                carrinho = carrinho.filter(i => i.nome !== 'FRETE GRÁTIS (Ativado)');
                 promoAtiva = false;
             }
         }
@@ -594,9 +611,7 @@ function verificarPgto() {
 
     atualizar();
     const aberta = verificarLojaAberta();
-    let telValido = false;
-    if (telRaw.length === 11 && telRaw[2] === "9") telValido = true;
-    else if (telRaw.length === 9 && telRaw[0] === "9") telValido = true;
+    let telValido = (telRaw.length === 11 && telRaw[2] === "9") || (telRaw.length === 9 && telRaw[0] === "9");
     document.getElementById("erroTelefone").style.display = (telRaw.length > 0 && !telValido) ? "block" : "none";
 
     if (!aberta) {
@@ -605,118 +620,66 @@ function verificarPgto() {
         return;
     }
 
-    const basicoOk = (nome !== "" && telValido && data !== "" && hora !== "");
-    const entregaOk = (bairro === "retirada" || (bairro !== "retirada" && endereco !== ""));
-    const tudoPronto = (basicoOk && entregaOk);
+    const tudoPronto = (nome !== "" && telValido && data !== "" && hora !== "" && (bairro === "retirada" || endereco !== ""));
     btnPix.style.display = (pag === "Pix" && !pixGerado) ? "block" : "none";
     btnMP.style.display = (pag.includes("Cartão")) ? "block" : "none";
     btnPix.disabled = !tudoPronto; btnMP.disabled = !tudoPronto;
-    const pixObrigatorioOk = (pag === "Pix" ? pixGerado : true);
-
-    if (tudoPronto && pixObrigatorioOk) {
+    
+    if (tudoPronto && (pag === "Pix" ? pixGerado : true)) {
         btnZap.disabled = false; btnZap.innerText = "✅ Enviar no WhatsApp"; btnZap.style.background = "#25D366";
     } else {
         btnZap.disabled = true; btnZap.style.background = "#ccc";
-        if (!basicoOk) btnZap.innerText = "⚠️ Nome/Tel(9)/Data incompletos";
-        else if (!entregaOk) btnZap.innerText = "📍 Preencha o Endereço";
-        else if (!pixObrigatorioOk) btnZap.innerText = "💎 Gere o Pix primeiro";
+        btnZap.innerText = (pag === "Pix" && !pixGerado) ? "💎 Gere o PIX primeiro" : "⚠️ Preencha os dados";
     }
 }
 
-function add(n, p) {
-    const item = carrinho.find(i => i.nome === n);
-    if (item) item.qtd += 1; else carrinho.push({nome: n, preco: p, qtd: 1});
-    salvarDados(); resetPagamentoFluxo(); verificarPgto();
-}
-
-function addPromoCombo() {
-    promoAtiva = true;
-    const nomeCombo = CONFIG_PROMO.nomeProduto;
-    const precoCombo = CONFIG_PROMO.preco;
-    const itemExistente = carrinho.find(i => i.nome === nomeCombo);
-    if (itemExistente) itemExistente.qtd += 1;
-    else carrinho.push({nome: nomeCombo, preco: precoCombo, qtd: 1});
-    if (!carrinho.find(i => i.nome === 'FRETE GRÁTIS (Ativado)')) {
-        carrinho.push({nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true});
-    }
-    salvarDados(); resetPagamentoFluxo(); verificarPgto();
-}
-
-function alternarEndereco() {
-    const b = document.getElementById("bairro").value;
-    document.getElementById("blocoEndereco").style.display = (b === "retirada") ? "none" : "block";
-    resetPagamentoFluxo();
-}
-
-function limparCarrinhoCompleto() {
-    if(confirm("Deseja esvaziar o carrinho?")) {
-        carrinho = [];
-        promoAtiva = false;
-        pixGerado = false;
-        document.getElementById("pixDisplay").style.display = "none";
-        localStorage.removeItem('pedidoJosiDoces');
-        atualizar();
-        verificarPgto();
-    }
-}
-
-// Funções de Pagamento e WhatsApp (Mantidas Lógica Anterior)
 function gerarPixReal() {
-    const total = atualizar();
-    if (total <= 0) return;
-    const valorFormatado = total.toFixed(2).replace('.', '');
-    const payload = `00020101021226580014br.gov.bcb.pix0111${CHAVE_PIX}52040000530398654${valorFormatado.length.toString().padStart(2, '0')}${valorFormatado}5802BR5911${NOME_RECEBEDOR}6014${CIDADE_RECEBEDOR}62070503***6304`;
-    
-    document.getElementById("qrcode").innerHTML = "";
-    new QRCode(document.getElementById("qrcode"), { text: payload, width: 150, height: 150 });
-    document.getElementById("brcode").value = payload;
+    const valor = atualizar();
+    const qrcodeContainer = document.getElementById("qrcode");
+    qrcodeContainer.innerHTML = "";
+    const pixCod = `00020126360014BR.GOV.BCB.PIX0111${CHAVE_PIX}520400005303986540${valor.toFixed(2)}5802BR5910${NOME_RECEBEDOR}6014${CIDADE_RECEBEDOR}62070503***6304`;
+    new QRCode(qrcodeContainer, { text: pixCod, width: 150, height: 150 });
+    document.getElementById("brcode").value = pixCod;
     document.getElementById("pixDisplay").style.display = "block";
     pixGerado = true;
     verificarPgto();
 }
 
-function copiarPix() {
-    const copyText = document.getElementById("brcode");
-    copyText.select();
-    copyText.setSelectionRange(0, 99999);
-    navigator.clipboard.writeText(copyText.value);
-    alert("Código Pix copiado!");
-}
+function copiarPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
 
-function abrirMercadoPago() {
-    const total = atualizar();
-    alert("Você será redirecionado para o WhatsApp para receber o link de pagamento de R$ " + total.toFixed(2));
-    finalizarZap();
+function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josigourmet", "_blank"); }
+
+function limparCarrinhoCompleto() {
+    if(confirm("Deseja limpar todo o carrinho?")) {
+        carrinho = []; promoAtiva = false;
+        salvarDados(); resetPagamentoFluxo(); verificarPgto();
+        toggleVisibilidadeCarrinho();
+    }
 }
 
 function finalizarZap() {
-    const total = atualizar();
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
-    const pag = document.getElementById("pagamento").value;
     const bairroSel = document.getElementById("bairro");
-    const bairroTexto = bairroSel.options[bairroSel.selectedIndex].text;
+    const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
     const endereco = document.getElementById("endereco").value;
-    const data = document.getElementById("dataAgendamento").value.split('-').reverse().join('/');
+    const data = document.getElementById("dataAgendamento").value;
     const hora = document.getElementById("horaAgendamento").value;
-
-    let msg = `*Novo Pedido - Josi Doces*\n\n`;
-    msg += `👤 *Cliente:* ${nome}\n`;
-    msg += `📞 *Contato:* ${tel}\n`;
-    msg += `🗓️ *Entrega:* ${data} às ${hora}\n\n`;
-    msg += `🛒 *Itens:*\n`;
-    carrinho.forEach(i => msg += `- ${i.qtd}x ${i.nome}\n`);
-    msg += `\n📍 *Região:* ${bairroTexto}\n`;
-    if(document.getElementById("bairro").value !== "retirada") msg += `🏠 *Endereço:* ${endereco}\n`;
-    msg += `\n💳 *Pagamento:* ${pag}\n`;
-    msg += `💰 *TOTAL:* R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    const pag = document.getElementById("pagamento").value;
+    const total = atualizar();
     
-    if (pag === "Pix") msg += `✅ *Pix já gerado no sistema.*`;
+    let msg = `*Novo Pedido - Josi Doces Gourmet*\n\n`;
+    msg += `👤 *Cliente:* ${nome}\n📞 *Whats:* ${tel}\n`;
+    msg += `📅 *Data:* ${data}\n⏰ *Hora:* ${hora}\n\n`;
+    msg += `🛒 *Itens:* \n`;
+    carrinho.forEach(i => msg += `• ${i.qtd}x ${i.nome} - R$ ${(i.preco*i.qtd).toFixed(2)}\n`);
+    msg += `\n📍 *Entrega:* ${bairroNome}\n`;
+    if(endereco) msg += `🏠 *Endereço:* ${endereco}\n`;
+    msg += `💳 *Pagamento:* ${pag}\n`;
+    msg += `💰 *TOTAL:* R$ ${total.toFixed(2)}`;
     
-    const url = `https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`;
-    window.open(url, '_blank');
+    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
 </script>
-
 </body>
-    </html>
+</html>
