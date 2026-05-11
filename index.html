@@ -102,6 +102,32 @@
         .btn-entendi { background: #5d4037; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
         .btn-duvida { background: #25D366; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; text-decoration: none; display: block; box-sizing: border-box; margin-bottom: 10px; }
 
+        #modalPromo { display: none; }
+        .promo-fullscreen-content {
+            background: #fff; margin: 5% auto; padding: 12px;
+            border-radius: 20px; width: 85%; max-width: 350px; 
+            text-align: center; position: relative; border: 4px solid #5d4037;
+        }
+        .promo-fullscreen-content img { 
+            width: 100%; 
+            max-height: 55vh; 
+            object-fit: cover; 
+            image-rendering: -webkit-optimize-contrast; 
+            border-radius: 10px; 
+            margin-bottom: 10px; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
+        }
+        .btn-promo-add { background: #25D366; color: white; font-size: 16px; padding: 12px; border-radius: 12px; border: none; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 8px; }
+        .btn-promo-close { background: #fdf5e6; color: #5d4037; font-size: 13px; padding: 8px; border-radius: 10px; border: 1px solid #d7ccc8; cursor: pointer; width: 100%; }
+
+        .reabrir-promo {
+            position: fixed; top: 80px; left: 10px; z-index: 998;
+            background: #e67e22; color: white; padding: 8px 12px;
+            border-radius: 20px; font-size: 12px; font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
+            border: 2px solid white; animation: pulse 2s infinite;
+        }
+
         #carrinhoBox { 
             position: fixed; bottom: 10px; right: 10px; left: 50px; 
             background: white; padding: 15px; border-radius: 20px; 
@@ -146,19 +172,26 @@
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
 </head>
-<body>
+<body onload="carregarBannerDinamico(); carregarDados();">
 
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
 </a>
+
+<div class="reabrir-promo" id="btnReabrirPromo" onclick="abrirBannerPromo()">🔥 PROMOÇÃO</div>
+
+<!-- ESTRUTURA DO BANNER (PREENCHIDA PELO JAVASCRIPT) -->
+<div id="modalPromo" class="modal-aviso">
+    <div class="promo-fullscreen-content" id="conteudoBanner">
+        <!-- O JS vai colocar a imagem e o botão aqui dentro -->
+    </div>
+</div>
 
 <div id="modalFotosIniciais" class="modal-aviso" style="display: block;">
     <div class="modal-conteudo">
         <h2 style="color: #5d4037; font-size: 22px; margin-bottom: 5px;">📸 Nossas Delícias</h2>
         <p class="instrucao-slide">Deslize para o lado para ver mais ➔</p>
         <div class="galeria-inicial">
-            <img src="https://i.postimg.cc/8cXsz2bk/IMG-20260508-WA0009.jpg">
-            <img src="https://i.postimg.cc/Vv8cGFX9/IMG-20260507-WA0004.jpg">
             <img src="https://i.postimg.cc/1nW5qZdc/20260420-111103.jpg">
             <img src="https://i.postimg.cc/WF9bkPyn/20260420-120648.jpg">
             <img src="https://i.postimg.cc/DJCyXKNP/20260420-120704.jpg">
@@ -207,6 +240,7 @@
         <a href="https://wa.me/5551985803243?text=Olá Josi! Gostaria de um orçamento para evento." target="_blank" class="btn-evento">Solicitar Orçamento</a>
     </div>
 
+    <!-- PRODUTOS -->
     <div class="card"><h3>Torta de Bolacha (1kg)</h3><p class="price">R$ 55,00</p>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha (1Kg)')">-</button>
@@ -342,9 +376,43 @@
 </div>
 
 <script>
-function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
-function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; }
+// ==========================================
+// 🚀 CONFIGURAÇÃO DO BANNER (ALTERE AQUI)
+// ==========================================
+const CONFIG_PROMO = {
+    ativa: true, // Mude para false para esconder a promoção do site todo
+    imagemUrl: "https://i.postimg.cc/T3BNcdCq/1777779837866.png",
+    nomeProduto: "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite",
+    preco: 25.00,
+    textoBotao: "🚀 APROVEITAR COMBO: BOLO COM PUDIM + TORTA DE BOLACHA COM DOCE DE LEITE + FRETE GRÁTIS POR (R$ 25,00)",
+    textoBotaoFlutuante: "🔥 PROMOÇÃO"
+};
 
+function carregarBannerDinamico() {
+    const container = document.getElementById("conteudoBanner");
+    const btnFlutuante = document.getElementById("btnReabrirPromo");
+    
+    if (!CONFIG_PROMO.ativa) {
+        btnFlutuante.style.display = "none";
+        return;
+    }
+
+    btnFlutuante.innerText = CONFIG_PROMO.textoBotaoFlutuante;
+    
+    container.innerHTML = `
+        <img src="${CONFIG_PROMO.imagemUrl}" alt="Promoção">
+        <button class="btn-promo-add" onclick="addPromoCombo(); fecharBannerPromo();">${CONFIG_PROMO.textoBotao}</button>
+        <button class="btn-promo-close" onclick="fecharBannerPromo()">Ver outros produtos</button>
+    `;
+}
+// ==========================================
+
+function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
+function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; abrirBannerPromo(); }
+function abrirBannerPromo() { if(CONFIG_PROMO.ativa) document.getElementById("modalPromo").style.display = "block"; }
+function fecharBannerPromo() { document.getElementById("modalPromo").style.display = "none"; }
+
+let promoAtiva = false;
 let carrinho = [];
 let pixGerado = false;
 const CHAVE_PIX = "00431179026"; 
@@ -420,7 +488,8 @@ function salvarDados() {
         data: document.getElementById('dataAgendamento').value,
         hora: document.getElementById('horaAgendamento').value,
         pagamento: document.getElementById("pagamento").value,
-        carrinho: carrinho
+        carrinho: carrinho,
+        promoAtiva: promoAtiva
     };
     localStorage.setItem('pedidoJosiDoces', JSON.stringify(dados));
 }
@@ -436,6 +505,7 @@ function carregarDados() {
         document.getElementById("endereco").value = d.endereco || "";
         document.getElementById("pagamento").value = d.pagamento || "Pix";
         carrinho = d.carrinho || [];
+        promoAtiva = d.promoAtiva || false;
         document.getElementById('dataAgendamento').value = d.data || "";
         document.getElementById('horaAgendamento').value = d.hora || "";
         alternarEndereco();
@@ -446,10 +516,10 @@ function carregarDados() {
 
 function atualizar() {
     const valorBairro = document.getElementById("bairro").value;
-    let frete = (valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
     const total = subtotal + frete;
-    const qtdTotal = carrinho.reduce((acc, item) => acc + item.qtd, 0);
+    const qtdTotal = carrinho.reduce((acc, item) => acc + (item.nome !== 'FRETE GRÁTIS (Ativado)' ? item.qtd : 0), 0);
     
     document.getElementById("cartBadge").innerText = qtdTotal;
     
@@ -480,36 +550,32 @@ function atualizar() {
     return total;
 }
 
-function add(nome, preco) {
-    const item = carrinho.find(i => i.nome === nome);
-    if (item) { item.qtd += 1; } else { carrinho.push({nome, preco, qtd: 1}); }
-    salvarDados(); resetPagamentoFluxo(); verificarPgto();
-}
-
 function removerPorNome(nome) {
     const index = carrinho.findIndex(i => i.nome === nome);
     if (index !== -1) remover(index);
 }
 
 function remover(index) {
+    if (carrinho[index].fixo) {
+        const temCombo = carrinho.some(i => i.nome === CONFIG_PROMO.nomeProduto);
+        if (!temCombo) promoAtiva = false;
+    }
     if (carrinho[index].qtd > 1) {
         carrinho[index].qtd -= 1;
     } else {
+        const itemRemovido = carrinho[index].nome;
         carrinho.splice(index, 1);
+        if (itemRemovido === CONFIG_PROMO.nomeProduto) {
+            const aindaTemCombo = carrinho.some(i => i.nome === CONFIG_PROMO.nomeProduto);
+            if (!aindaTemCombo) {
+                const idxFrete = carrinho.findIndex(i => i.nome === 'FRETE GRÁTIS (Ativado)');
+                if (idxFrete !== -1) carrinho.splice(idxFrete, 1);
+                promoAtiva = false;
+            }
+        }
     }
+    if (carrinho.length === 0) promoAtiva = false;
     salvarDados(); resetPagamentoFluxo(); verificarPgto();
-}
-
-function limparCarrinhoCompleto() {
-    carrinho = [];
-    salvarDados();
-    resetPagamentoFluxo();
-    verificarPgto();
-}
-
-function alternarEndereco() {
-    const b = document.getElementById("bairro").value;
-    document.getElementById("blocoEndereco").style.display = (b === "retirada") ? "none" : "block";
 }
 
 function resetPagamentoFluxo() { pixGerado = false; document.getElementById("pixDisplay").style.display = "none"; verificarPgto(); }
@@ -542,11 +608,9 @@ function verificarPgto() {
     const basicoOk = (nome !== "" && telValido && data !== "" && hora !== "");
     const entregaOk = (bairro === "retirada" || (bairro !== "retirada" && endereco !== ""));
     const tudoPronto = (basicoOk && entregaOk);
-    
     btnPix.style.display = (pag === "Pix" && !pixGerado) ? "block" : "none";
     btnMP.style.display = (pag.includes("Cartão")) ? "block" : "none";
     btnPix.disabled = !tudoPronto; btnMP.disabled = !tudoPronto;
-    
     const pixObrigatorioOk = (pag === "Pix" ? pixGerado : true);
 
     if (tudoPronto && pixObrigatorioOk) {
@@ -559,14 +623,53 @@ function verificarPgto() {
     }
 }
 
+function add(n, p) {
+    const item = carrinho.find(i => i.nome === n);
+    if (item) item.qtd += 1; else carrinho.push({nome: n, preco: p, qtd: 1});
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
+}
+
+function addPromoCombo() {
+    promoAtiva = true;
+    const nomeCombo = CONFIG_PROMO.nomeProduto;
+    const precoCombo = CONFIG_PROMO.preco;
+    const itemExistente = carrinho.find(i => i.nome === nomeCombo);
+    if (itemExistente) itemExistente.qtd += 1;
+    else carrinho.push({nome: nomeCombo, preco: precoCombo, qtd: 1});
+    if (!carrinho.find(i => i.nome === 'FRETE GRÁTIS (Ativado)')) {
+        carrinho.push({nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true});
+    }
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
+}
+
+function alternarEndereco() {
+    const b = document.getElementById("bairro").value;
+    document.getElementById("blocoEndereco").style.display = (b === "retirada") ? "none" : "block";
+    resetPagamentoFluxo();
+}
+
+function limparCarrinhoCompleto() {
+    if(confirm("Deseja esvaziar o carrinho?")) {
+        carrinho = [];
+        promoAtiva = false;
+        pixGerado = false;
+        document.getElementById("pixDisplay").style.display = "none";
+        localStorage.removeItem('pedidoJosiDoces');
+        atualizar();
+        verificarPgto();
+    }
+}
+
+// Funções de Pagamento e WhatsApp (Mantidas Lógica Anterior)
 function gerarPixReal() {
     const total = atualizar();
-    const dataVenc = new Date(); dataVenc.setMinutes(dataVenc.getMinutes() + 30);
-    const pixCode = `00020126360014BR.GOV.BCB.PIX0111${CHAVE_PIX}520400005303986540${total.toFixed(2)}5802BR5910${NOME_RECEBEDOR}6014${CIDADE_RECEBEDOR}62070503***6304`;
+    if (total <= 0) return;
+    const valorFormatado = total.toFixed(2).replace('.', '');
+    const payload = `00020101021226580014br.gov.bcb.pix0111${CHAVE_PIX}52040000530398654${valorFormatado.length.toString().padStart(2, '0')}${valorFormatado}5802BR5911${NOME_RECEBEDOR}6014${CIDADE_RECEBEDOR}62070503***6304`;
     
     document.getElementById("qrcode").innerHTML = "";
-    new QRCode(document.getElementById("qrcode"), { text: pixCode, width: 150, height: 150 });
-    document.getElementById("brcode").value = pixCode;
+    new QRCode(document.getElementById("qrcode"), { text: payload, width: 150, height: 150 });
+    document.getElementById("brcode").value = payload;
     document.getElementById("pixDisplay").style.display = "block";
     pixGerado = true;
     verificarPgto();
@@ -574,41 +677,46 @@ function gerarPixReal() {
 
 function copiarPix() {
     const copyText = document.getElementById("brcode");
-    copyText.select(); copyText.setSelectionRange(0, 99999);
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
     navigator.clipboard.writeText(copyText.value);
-    alert("Código Pix Copiado!");
+    alert("Código Pix copiado!");
 }
 
 function abrirMercadoPago() {
     const total = atualizar();
-    const msg = `Olá! Gostaria do link para pagamento no cartão de R$ ${total.toFixed(2)}. Nome: ${document.getElementById("nome").value}`;
-    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`, '_blank');
+    alert("Você será redirecionado para o WhatsApp para receber o link de pagamento de R$ " + total.toFixed(2));
+    finalizarZap();
 }
 
 function finalizarZap() {
+    const total = atualizar();
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
-    const bairro = document.getElementById("bairro").value;
-    const end = document.getElementById("endereco").value;
     const pag = document.getElementById("pagamento").value;
-    const dataPed = document.getElementById("dataAgendamento").value.split('-').reverse().join('/');
-    const horaPed = document.getElementById("horaAgendamento").value;
-    const total = atualizar();
+    const bairroSel = document.getElementById("bairro");
+    const bairroTexto = bairroSel.options[bairroSel.selectedIndex].text;
+    const endereco = document.getElementById("endereco").value;
+    const data = document.getElementById("dataAgendamento").value.split('-').reverse().join('/');
+    const hora = document.getElementById("horaAgendamento").value;
 
-    let itens = carrinho.map(i => ` - ${i.qtd}x ${i.nome}`).join('\n');
-    let texto = `*NOVO PEDIDO - JOSI DOCES*\n\n`;
-    texto += `👤 *Cliente:* ${nome}\n📞 *Tel:* ${tel}\n`;
-    texto += `🗓️ *Data:* ${dataPed} às ${horaPed}\n`;
-    texto += `📍 *Entrega:* ${bairro === "retirada" ? "Retirada no Local" : bairro + " - " + end}\n`;
-    texto += `💳 *Pagamento:* ${pag}\n\n`;
-    texto += `🛒 *Itens:*\n${itens}\n\n`;
-    texto += `💰 *TOTAL:* R$ ${total.toFixed(2).replace('.', ',')}`;
-
-    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(texto)}`, '_blank');
+    let msg = `*Novo Pedido - Josi Doces*\n\n`;
+    msg += `👤 *Cliente:* ${nome}\n`;
+    msg += `📞 *Contato:* ${tel}\n`;
+    msg += `🗓️ *Entrega:* ${data} às ${hora}\n\n`;
+    msg += `🛒 *Itens:*\n`;
+    carrinho.forEach(i => msg += `- ${i.qtd}x ${i.nome}\n`);
+    msg += `\n📍 *Região:* ${bairroTexto}\n`;
+    if(document.getElementById("bairro").value !== "retirada") msg += `🏠 *Endereço:* ${endereco}\n`;
+    msg += `\n💳 *Pagamento:* ${pag}\n`;
+    msg += `💰 *TOTAL:* R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    
+    if (pag === "Pix") msg += `✅ *Pix já gerado no sistema.*`;
+    
+    const url = `https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`;
+    window.open(url, '_blank');
 }
-
-window.onload = carregarDados;
 </script>
 
 </body>
-</html>
+    </html>
