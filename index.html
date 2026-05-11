@@ -102,32 +102,6 @@
         .btn-entendi { background: #5d4037; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; margin-top: 10px; }
         .btn-duvida { background: #25D366; color: white; border: none; padding: 12px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; width: 100%; text-decoration: none; display: block; box-sizing: border-box; margin-bottom: 10px; }
 
-        #modalPromo, #modalMae { display: none; }
-        .promo-fullscreen-content {
-            background: #fff; margin: 5% auto; padding: 12px;
-            border-radius: 20px; width: 85%; max-width: 350px; 
-            text-align: center; position: relative; border: 4px solid #5d4037;
-        }
-        .promo-fullscreen-content img { 
-            width: 100%; 
-            max-height: 55vh; 
-            object-fit: cover; 
-            image-rendering: -webkit-optimize-contrast; 
-            border-radius: 10px; 
-            margin-bottom: 10px; 
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); 
-        }
-        .btn-promo-add { background: #25D366; color: white; font-size: 16px; padding: 12px; border-radius: 12px; border: none; cursor: pointer; width: 100%; font-weight: bold; margin-bottom: 8px; }
-        .btn-promo-close { background: #fdf5e6; color: #5d4037; font-size: 13px; padding: 8px; border-radius: 10px; border: 1px solid #d7ccc8; cursor: pointer; width: 100%; }
-
-        .reabrir-promo {
-            position: fixed; top: 80px; left: 10px; z-index: 998;
-            background: #e67e22; color: white; padding: 8px 12px;
-            border-radius: 20px; font-size: 12px; font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
-            border: 2px solid white; animation: pulse 2s infinite;
-        }
-
         #carrinhoBox { 
             position: fixed; bottom: 10px; right: 10px; left: 50px; 
             background: white; padding: 15px; border-radius: 20px; 
@@ -177,24 +151,6 @@
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
 </a>
-
-<div class="reabrir-promo" onclick="abrirBannerMae()">🔥 PROMOÇÕES</div>
-
-<div id="modalMae" class="modal-aviso">
-    <div class="promo-fullscreen-content">
-        <img src="https://i.postimg.cc/y8svDKx6/IMG-20260505-WA0002.jpg" alt="Promoção Dia das Mães">
-        <button class="btn-promo-add" onclick="addPromoMae(); fecharBannerMae();">💖 APROVEITAR PROMOÇÃO DIA DAS MÃES (R$ 25,00)</button>
-        <button class="btn-promo-close" onclick="fecharBannerMae(); abrirBannerPromo();">Próxima promoção ➔</button>
-    </div>
-</div>
-
-<div id="modalPromo" class="modal-aviso">
-    <div class="promo-fullscreen-content">
-        <img src="https://i.postimg.cc/DwQjSTgx/IMG-20260430-WA0003.jpg" alt="Promoção">
-        <button class="btn-promo-add" onclick="addPromoCombo(); fecharBannerPromo();">🚀 APROVEITAR COMBO: BOLO COM PUDIM + TORTA DE BOLACHA COM DOCE DE LEITE + FRETE GRÁTIS POR (R$ 22,00)</button>
-        <button class="btn-promo-close" onclick="fecharBannerPromo()">Ver outros produtos</button>
-    </div>
-</div>
 
 <div id="modalFotosIniciais" class="modal-aviso" style="display: block;">
     <div class="modal-conteudo">
@@ -387,13 +343,8 @@
 
 <script>
 function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
-function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; abrirBannerMae(); }
-function abrirBannerMae() { document.getElementById("modalMae").style.display = "block"; }
-function fecharBannerMae() { document.getElementById("modalMae").style.display = "none"; }
-function abrirBannerPromo() { document.getElementById("modalPromo").style.display = "block"; }
-function fecharBannerPromo() { document.getElementById("modalPromo").style.display = "none"; }
+function fecharModalAviso() { document.getElementById("modalAviso").style.display = "none"; }
 
-let promoAtiva = false;
 let carrinho = [];
 let pixGerado = false;
 const CHAVE_PIX = "00431179026"; 
@@ -469,8 +420,7 @@ function salvarDados() {
         data: document.getElementById('dataAgendamento').value,
         hora: document.getElementById('horaAgendamento').value,
         pagamento: document.getElementById("pagamento").value,
-        carrinho: carrinho,
-        promoAtiva: promoAtiva
+        carrinho: carrinho
     };
     localStorage.setItem('pedidoJosiDoces', JSON.stringify(dados));
 }
@@ -486,7 +436,6 @@ function carregarDados() {
         document.getElementById("endereco").value = d.endereco || "";
         document.getElementById("pagamento").value = d.pagamento || "Pix";
         carrinho = d.carrinho || [];
-        promoAtiva = d.promoAtiva || false;
         document.getElementById('dataAgendamento').value = d.data || "";
         document.getElementById('horaAgendamento').value = d.hora || "";
         alternarEndereco();
@@ -497,10 +446,10 @@ function carregarDados() {
 
 function atualizar() {
     const valorBairro = document.getElementById("bairro").value;
-    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    let frete = (valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
     const total = subtotal + frete;
-    const qtdTotal = carrinho.reduce((acc, item) => acc + (item.nome !== 'FRETE GRÁTIS (Ativado)' ? item.qtd : 0), 0);
+    const qtdTotal = carrinho.reduce((acc, item) => acc + item.qtd, 0);
     
     document.getElementById("cartBadge").innerText = qtdTotal;
     
@@ -531,32 +480,36 @@ function atualizar() {
     return total;
 }
 
+function add(nome, preco) {
+    const item = carrinho.find(i => i.nome === nome);
+    if (item) { item.qtd += 1; } else { carrinho.push({nome, preco, qtd: 1}); }
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
+}
+
 function removerPorNome(nome) {
     const index = carrinho.findIndex(i => i.nome === nome);
     if (index !== -1) remover(index);
 }
 
 function remover(index) {
-    if (carrinho[index].fixo) {
-        const temCombo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite" || i.nome === "PROMOÇÃO DIA DAS MÃES");
-        if (!temCombo) promoAtiva = false;
-    }
     if (carrinho[index].qtd > 1) {
         carrinho[index].qtd -= 1;
     } else {
-        const itemRemovido = carrinho[index].nome;
         carrinho.splice(index, 1);
-        if (itemRemovido === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite" || itemRemovido === "PROMOÇÃO DIA DAS MÃES") {
-            const aindaTemPromo = carrinho.some(i => i.nome === "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite" || i.nome === "PROMOÇÃO DIA DAS MÃES");
-            if (!aindaTemPromo) {
-                const idxFrete = carrinho.findIndex(i => i.nome === 'FRETE GRÁTIS (Ativado)');
-                if (idxFrete !== -1) carrinho.splice(idxFrete, 1);
-                promoAtiva = false;
-            }
-        }
     }
-    if (carrinho.length === 0) promoAtiva = false;
     salvarDados(); resetPagamentoFluxo(); verificarPgto();
+}
+
+function limparCarrinhoCompleto() {
+    carrinho = [];
+    salvarDados();
+    resetPagamentoFluxo();
+    verificarPgto();
+}
+
+function alternarEndereco() {
+    const b = document.getElementById("bairro").value;
+    document.getElementById("blocoEndereco").style.display = (b === "retirada") ? "none" : "block";
 }
 
 function resetPagamentoFluxo() { pixGerado = false; document.getElementById("pixDisplay").style.display = "none"; verificarPgto(); }
@@ -589,9 +542,11 @@ function verificarPgto() {
     const basicoOk = (nome !== "" && telValido && data !== "" && hora !== "");
     const entregaOk = (bairro === "retirada" || (bairro !== "retirada" && endereco !== ""));
     const tudoPronto = (basicoOk && entregaOk);
+    
     btnPix.style.display = (pag === "Pix" && !pixGerado) ? "block" : "none";
     btnMP.style.display = (pag.includes("Cartão")) ? "block" : "none";
     btnPix.disabled = !tudoPronto; btnMP.disabled = !tudoPronto;
+    
     const pixObrigatorioOk = (pag === "Pix" ? pixGerado : true);
 
     if (tudoPronto && pixObrigatorioOk) {
@@ -604,103 +559,56 @@ function verificarPgto() {
     }
 }
 
-function add(n, p) {
-    const item = carrinho.find(i => i.nome === n);
-    if (item) item.qtd += 1; else carrinho.push({nome: n, preco: p, qtd: 1});
-    salvarDados(); resetPagamentoFluxo(); verificarPgto();
-}
-
-function addPromoCombo() {
-    promoAtiva = true;
-    const nomeCombo = "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite";
-    const precoCombo = 22;
-    const itemExistente = carrinho.find(i => i.nome === nomeCombo);
-    if (itemExistente) itemExistente.qtd += 1;
-    else carrinho.push({nome: nomeCombo, preco: precoCombo, qtd: 1});
-    if (!carrinho.find(i => i.nome === 'FRETE GRÁTIS (Ativado)')) {
-        carrinho.push({nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true});
-    }
-    if(document.getElementById("carrinhoBox").style.display !== "block") toggleVisibilidadeCarrinho();
-    salvarDados(); atualizar(); verificarPgto();
-}
-
-function addPromoMae() {
-    promoAtiva = true;
-    const nomePromo = "PROMOÇÃO DIA DAS MÃES";
-    const precoPromo = 25;
-    const itemExistente = carrinho.find(i => i.nome === nomePromo);
-    if (itemExistente) itemExistente.qtd += 1;
-    else carrinho.push({nome: nomePromo, preco: precoPromo, qtd: 1});
-    if (!carrinho.find(i => i.nome === 'FRETE GRÁTIS (Ativado)')) {
-        carrinho.push({nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true});
-    }
-    if(document.getElementById("carrinhoBox").style.display !== "block") toggleVisibilidadeCarrinho();
-    salvarDados(); atualizar(); verificarPgto();
-}
-
-function alternarEndereco() { 
-    document.getElementById("blocoEndereco").style.display = (document.getElementById("bairro").value === "retirada") ? "none" : "block"; 
-    verificarPgto();
-}
-
 function gerarPixReal() {
-    const valor = atualizar().toFixed(2);
-    const fv = (id, v) => id + v.length.toString().padStart(2, '0') + v;
-    const conta = fv("00", "BR.GOV.BCB.PIX") + fv("01", CHAVE_PIX);
-    let payload = fv("00", "01") + fv("26", conta) + fv("52", "0000") + fv("53", "986") + fv("54", valor) + fv("58", "BR") + fv("59", NOME_RECEBEDOR) + fv("60", CIDADE_RECEBEDOR) + fv("62", fv("05", "***")) + "6304";
-    const crc16 = (d) => {
-        let c = 0xFFFF;
-        for (let i=0; i<d.length; i++) {
-            c ^= d.charCodeAt(i) << 8;
-            for (let j=0; j<8; j++) c = (c & 0x8000) ? (c << 1) ^ 0x1021 : c << 1;
-        }
-        return (c & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-    };
-    const res = payload + crc16(payload);
-    pixGerado = true;
-    document.getElementById("pixDisplay").style.display = "block";
-    document.getElementById("brcode").value = res;
+    const total = atualizar();
+    const dataVenc = new Date(); dataVenc.setMinutes(dataVenc.getMinutes() + 30);
+    const pixCode = `00020126360014BR.GOV.BCB.PIX0111${CHAVE_PIX}520400005303986540${total.toFixed(2)}5802BR5910${NOME_RECEBEDOR}6014${CIDADE_RECEBEDOR}62070503***6304`;
+    
     document.getElementById("qrcode").innerHTML = "";
-    new QRCode(document.getElementById("qrcode"), { text: res, width: 120, height: 120 });
+    new QRCode(document.getElementById("qrcode"), { text: pixCode, width: 150, height: 150 });
+    document.getElementById("brcode").value = pixCode;
+    document.getElementById("pixDisplay").style.display = "block";
+    pixGerado = true;
     verificarPgto();
+}
+
+function copiarPix() {
+    const copyText = document.getElementById("brcode");
+    copyText.select(); copyText.setSelectionRange(0, 99999);
+    navigator.clipboard.writeText(copyText.value);
+    alert("Código Pix Copiado!");
+}
+
+function abrirMercadoPago() {
+    const total = atualizar();
+    const msg = `Olá! Gostaria do link para pagamento no cartão de R$ ${total.toFixed(2)}. Nome: ${document.getElementById("nome").value}`;
+    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`, '_blank');
 }
 
 function finalizarZap() {
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
-    const data = document.getElementById('dataAgendamento').value.split('-').reverse().join('/');
-    const hora = document.getElementById('horaAgendamento').value;
+    const bairro = document.getElementById("bairro").value;
+    const end = document.getElementById("endereco").value;
     const pag = document.getElementById("pagamento").value;
-    const bairroSel = document.getElementById("bairro");
-    const bairroTexto = bairroSel.options[bairroSel.selectedIndex].text;
-    const endereco = document.getElementById("endereco").value;
-    const total = atualizar().toFixed(2).replace('.', ',');
-    let itensTexto = "";
-    carrinho.forEach(i => { itensTexto += `▪️ ${i.qtd}x ${i.nome} - R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n`; });
-    let localTexto = `🚚 *ENTREGA:* ${bairroTexto}`;
-    if (bairroSel.value === "retirada") localTexto = `🏠 *RETIRADA:* O cliente irá retirar no local.`;
-    else localTexto += `\n📍 *ENDEREÇO:* ${endereco}`;
-    const msg = `*🍮 NOVO PEDIDO - JOSI DOCES*\n\n👤 *CLIENTE:* ${nome}\n📱 *WHATSAPP:* ${tel}\n\n🛒 *--- PRODUTOS ---*\n${itensTexto}\n${localTexto}\n\n📅 *DATA:* ${data}\n⏰ *HORÁRIO:* ${hora}\n\n💳 *PAGAMENTO:* ${pag}\n💰 *TOTAL DO PEDIDO: R$ ${total}*\n\n_Pedido enviado via Catálogo Digital_`;
-    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
-}
+    const dataPed = document.getElementById("dataAgendamento").value.split('-').reverse().join('/');
+    const horaPed = document.getElementById("horaAgendamento").value;
+    const total = atualizar();
 
-function copiarPix() { const t = document.getElementById("brcode"); t.select(); navigator.clipboard.writeText(t.value); alert("Pix Copiado!"); }
-function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert", "_blank"); }
+    let itens = carrinho.map(i => ` - ${i.qtd}x ${i.nome}`).join('\n');
+    let texto = `*NOVO PEDIDO - JOSI DOCES*\n\n`;
+    texto += `👤 *Cliente:* ${nome}\n📞 *Tel:* ${tel}\n`;
+    texto += `🗓️ *Data:* ${dataPed} às ${horaPed}\n`;
+    texto += `📍 *Entrega:* ${bairro === "retirada" ? "Retirada no Local" : bairro + " - " + end}\n`;
+    texto += `💳 *Pagamento:* ${pag}\n\n`;
+    texto += `🛒 *Itens:*\n${itens}\n\n`;
+    texto += `💰 *TOTAL:* R$ ${total.toFixed(2).replace('.', ',')}`;
 
-function limparCarrinhoCompleto() { 
-    if(confirm("Limpar pedido?")) { 
-        carrinho = []; 
-        promoAtiva = false; 
-        document.getElementById("bairro").value = "retirada";
-        document.getElementById("endereco").value = "";
-        alternarEndereco();
-        salvarDados(); 
-        resetPagamentoFluxo(); 
-        atualizar(); 
-    } 
+    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
 window.onload = carregarDados;
 </script>
+
 </body>
 </html>
