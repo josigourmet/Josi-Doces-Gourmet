@@ -634,15 +634,76 @@ function verificarPgto() {
 }
 
 function gerarPixReal() {
-    const valor = atualizar();
+
+    const valor = atualizar().toFixed(2);
+
+    const chavePix = CHAVE_PIX.replace(/\D/g, "");
+    const nome = NOME_RECEBEDOR.substring(0, 25).toUpperCase();
+    const cidade = CIDADE_RECEBEDOR.substring(0, 15).toUpperCase();
+
+    function format(id, value) {
+        const size = value.length.toString().padStart(2, '0');
+        return id + size + value;
+    }
+
+    function crc16(payload) {
+        let polinomio = 0x1021;
+        let resultado = 0xFFFF;
+
+        for (let i = 0; i < payload.length; i++) {
+            resultado ^= (payload.charCodeAt(i) << 8);
+
+            for (let j = 0; j < 8; j++) {
+                if ((resultado <<= 1) & 0x10000) {
+                    resultado ^= polinomio;
+                }
+
+                resultado &= 0xFFFF;
+            }
+        }
+
+        return resultado.toString(16).toUpperCase().padStart(4, '0');
+    }
+
+    const payloadSemCRC =
+        format("00", "01") +
+        format("26",
+            format("00", "BR.GOV.BCB.PIX") +
+            format("01", chavePix)
+        ) +
+        format("52", "0000") +
+        format("53", "986") +
+        format("54", valor) +
+        format("58", "BR") +
+        format("59", nome) +
+        format("60", cidade) +
+        format("62",
+            format("05", "***")
+        ) +
+        "6304";
+
+    const crc = crc16(payloadSemCRC);
+
+    const pixCopiaECola = payloadSemCRC + crc;
+
     const qrcodeContainer = document.getElementById("qrcode");
+
     qrcodeContainer.innerHTML = "";
-    const pixCod = `00020126360014BR.GOV.BCB.PIX0111${CHAVE_PIX}520400005303986540${valor.toFixed(2)}5802BR5910${NOME_RECEBEDOR}6014${CIDADE_RECEBEDOR}62070503***6304`;
-    new QRCode(qrcodeContainer, { text: pixCod, width: 150, height: 150 });
-    document.getElementById("brcode").value = pixCod;
+
+    new QRCode(qrcodeContainer, {
+        text: pixCopiaECola,
+        width: 180,
+        height: 180
+    });
+
+    document.getElementById("brcode").value = pixCopiaECola;
+
     document.getElementById("pixDisplay").style.display = "block";
+
     pixGerado = true;
+
     verificarPgto();
+
 }
 
 function copiarPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
