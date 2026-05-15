@@ -206,8 +206,8 @@
         <h2>⚠️ Horários de Funcionamento</h2>
         <p>Confira nossos horários para pedidos e agendamentos:</p>
         <ul style="text-align: left; font-size: 14px; color: #555;">
-            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos das 08h às 12h.</li>
-            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos das 08h às 17h.</li>
+            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos das 05h às 12h.</li>
+            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos das 05h às 17h.</li>
             <li>⏰ <b>Atenção:</b> Pedidos fora desses horários ficam bloqueados automaticamente.</li>
         </ul>
         <a href="https://wa.me/5551985803243?text=Olá Josi! Tenho uma dúvida sobre agendamentos." target="_blank" class="btn-duvida">💬 Dúvidas no WhatsApp</a>
@@ -465,9 +465,13 @@ function verificarLojaAberta() {
     const ehFeriado = feriados.includes(hojeFormatado);
     let aberta = false;
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-        if (horaAtual >= 8 && horaAtual < 12) aberta = true;
-    } else {
-        if (horaAtual >= 8 && horaAtual < 17) aberta = true;
+        if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
+    // Segunda a sexta: das 05h às 12h
+    if (horaAtual >= 5 && horaAtual < 12) aberta = true;
+} else {
+    // Finais de semana e feriados: das 05h às 17h
+    if (horaAtual >= 5 && horaAtual < 17) aberta = true;
+}
     }
     return aberta;
 }
@@ -564,7 +568,20 @@ function atualizar() {
     carrinho.forEach((item, index) => {
         listaDiv.innerHTML += `<div class="item-carrinho"><span>${item.qtd}x ${item.nome}</span><span>R$ ${(item.preco*item.qtd).toFixed(2).replace('.', ',')} <span class="remover" onclick="remover(${index})">×</span></span></div>`;
     });
-    document.getElementById("resumo").innerHTML = `<b>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</b>`;
+    const tipoEntrega = (valorBairro === "retirada") ? "Retirada no local" : "Entrega";
+
+document.getElementById("resumo").innerHTML = `
+    <div style="font-size:14px; text-align:left; line-height:1.6;">
+        <div>🧁 <b>Itens:</b> ${qtdTotal}</div>
+        <div>💰 <b>Subtotal:</b> R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
+        <div>🚚 <b>Frete:</b> R$ ${frete.toFixed(2).replace('.', ',')}</div>
+        <div>📍 <b>Forma:</b> ${tipoEntrega}</div>
+        <hr style="margin:8px 0;">
+        <div style="font-size:20px; color:#5d4037;">
+            <b>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</b>
+        </div>
+    </div>
+`;
     
     const aberta = verificarLojaAberta();
     document.getElementById("secaoDadosPedido").style.display = (carrinho.length > 0 && aberta) ? "block" : "none";
@@ -721,24 +738,76 @@ function limparCarrinhoCompleto() {
 function finalizarZap() {
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
+
     const bairroSel = document.getElementById("bairro");
     const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
+
     const endereco = document.getElementById("endereco").value;
+
     const data = document.getElementById("dataAgendamento").value;
     const hora = document.getElementById("horaAgendamento").value;
+
     const pag = document.getElementById("pagamento").value;
-    const total = atualizar();
-    
-    let msg = `*Novo Pedido - Josi Doces Gourmet*\n\n`;
-    msg += `👤 *Cliente:* ${nome}\n📞 *Whats:* ${tel}\n`;
-    msg += `📅 *Data:* ${data}\n⏰ *Hora:* ${hora}\n\n`;
-    msg += `🛒 *Itens:* \n`;
-    carrinho.forEach(i => msg += `• ${i.qtd}x ${i.nome} - R$ ${(i.preco*i.qtd).toFixed(2)}\n`);
-    msg += `\n📍 *Entrega:* ${bairroNome}\n`;
-    if(endereco) msg += `🏠 *Endereço:* ${endereco}\n`;
-    msg += `💳 *Pagamento:* ${pag}\n`;
-    msg += `💰 *TOTAL:* R$ ${total.toFixed(2)}`;
-    
+
+    const valorBairro = document.getElementById("bairro").value;
+
+    let frete = (promoAtiva || valorBairro === "retirada")
+        ? 0
+        : parseFloat(valorBairro);
+
+    let subtotal = carrinho.reduce((acc, item) =>
+        acc + (item.preco * item.qtd), 0);
+
+    let totalItens = carrinho.reduce((acc, item) =>
+        acc + item.qtd, 0);
+
+    let total = subtotal + frete;
+
+    let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `👤 *CLIENTE*\n`;
+    msg += `🙍 Nome: ${nome}\n`;
+    msg += `☎️ WhatsApp: ${tel}\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `🛒 *ITENS DO PEDIDO*\n`;
+
+    carrinho.forEach(i => {
+        msg += `🍰 ${i.qtd}x ${i.nome}\n`;
+        msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
+    });
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `📦 *RESUMO DO PEDIDO*\n`;
+    msg += `🧁 Itens: ${totalItens}\n`;
+    msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
+    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `🚚 *ENTREGA / RETIRADA*\n`;
+    msg += `📍 Local: ${bairroNome}\n`;
+
+    if (endereco) {
+        msg += `🏠 Endereço: ${endereco}\n`;
+    }
+
+    msg += `\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `⏰ *AGENDAMENTO*\n`;
+    msg += `📅 Data: ${data}\n`;
+    msg += `🕒 Horário: ${hora}\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `💳 *PAGAMENTO*\n`;
+    msg += `💰 Forma: ${pag}\n\n`;
+
+    msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
+
+    msg += `❤️ Obrigado pela preferência!`;
+
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
 </script>
