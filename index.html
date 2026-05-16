@@ -337,7 +337,9 @@
         <label>⏰ Data e Horário de Recebimento</label>
         <div style="display:flex; gap:5px;">
             <input type="date" id="dataAgendamento" onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
-            <input type="time" id="horaAgendamento" onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
+            <input type="time" id="horaAgendamento" 
+onclick="avisoHorario()"
+onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
         </div>
 
         <label>💳 Forma de Pagamento</label>
@@ -373,6 +375,11 @@
 </div>
 
 <script>
+  // Aviso ao clicar no horário
+function avisoHorario() {
+    alert("⏰ Atenção!\n\nPor favor, escolha um horário com pelo menos 1 hora de antecedência.\n\nEsse é o tempo médio para preparo, entrega ou retirada do pedido. 🤎🍰");
+}
+  
 // ==========================================
 // 🚀 CONFIGURAÇÃO DO BANNER (ALTERE AQUI)
 // ==========================================
@@ -458,23 +465,43 @@ function validarDataHora() {
 
 function verificarLojaAberta() {
     const agora = new Date();
-    const diaSemana = agora.getDay();
+    const diaSemana = agora.getDay(); // 0 = domingo, 6 = sábado
     const horaAtual = agora.getHours();
-    const feriados = ["01/01", "17/02", "03/04", "21/04", "01/05", "04/06", "07/09", "12/10", "02/11", "15/11", "25/12"];
-    const hojeFormatado = agora.toLocaleDateString('pt-BR', {day: '2-digit', month: '2-digit'});
+
+    const feriados = [
+        "01/01", "17/02", "03/04", "21/04",
+        "01/05", "04/06", "07/09",
+        "12/10", "02/11", "15/11", "25/12"
+    ];
+
+    const hojeFormatado = agora.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit'
+    });
+
     const ehFeriado = feriados.includes(hojeFormatado);
+
     let aberta = false;
+
+    // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-        if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-    // Segunda a sexta: das 05h às 12h
-    if (horaAtual >= 5 && horaAtual < 12) aberta = true;
-} else {
-    // Finais de semana e feriados: das 05h às 17h
-    if (horaAtual >= 5 && horaAtual < 17) aberta = true;
-}
+
+        if (horaAtual >= 5 && horaAtual < 12) {
+            aberta = true;
+        }
+
+    } else {
+        // Sábado, domingo e feriados
+
+        if (horaAtual >= 5 && horaAtual < 17) {
+            aberta = true;
+        }
     }
+
     return aberta;
-}
+
+
+    }
 
 function toggleVisibilidadeCarrinho() {
     const box = document.getElementById("carrinhoBox");
