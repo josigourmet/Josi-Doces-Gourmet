@@ -319,12 +319,12 @@
         <label>🚚 Entrega e Região</label>
         <select id="bairro" onchange="alternarEndereco(); salvarDados(); verificarPgto();">
             <option value="retirada">Vou retirar no local (R$ 0,00)</option>
-            <option value="4">Centro (R$ 4,00)</option>
-            <option value="6">Acesso Dona Leopoldina / Parque (R$ 6,00)</option>
+            <option value="5">Centro (R$ 5,00)</option>
+            <option value="7">Acesso Dona Leopoldina / Parque (R$ 7,00)</option>
             <option value="7">Cidade Nova (R$ 7,00)</option>
             <option value="0">Cruzeiro (R$ 0,00)</option>
             <option value="8">Gressler (R$ 8,00)</option>
-            <option value="20">Interior / Outros (R$ 20,00)</option>
+            <option value="30">Interior / Outros (R$ 30,00)</option>
             <option value="0">Coronel Brito (R$ 0,00)</option>
             <option value="8">Santa Tecla (R$ 8,00)</option>
         </select>
@@ -427,7 +427,6 @@ function fecharBannerPromo() { document.getElementById("modalPromo").style.displ
 
 let promoAtiva = false;
 let carrinho = [];
-let pedidos = JSON.parse(localStorage.getItem("pedidosJosi")) || [];
 let pixGerado = false;
 const CHAVE_PIX = "00431179026"; 
 const NOME_RECEBEDOR = "JOSI DOCES";
@@ -487,14 +486,14 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 02 && horaAtual < 12) {
+        if (horaAtual >= 5 && horaAtual < 12) {
             aberta = true;
         }
 
     } else {
         // Sábado, domingo e feriados
 
-        if (horaAtual >= 02 && horaAtual < 17) {
+        if (horaAtual >= 5 && horaAtual < 17) {
             aberta = true;
         }
     }
@@ -764,14 +763,6 @@ function limparCarrinhoCompleto() {
 }
 
 function finalizarZap() {
-  const pedidoId = Date.now();
-
-const statusPedido = "Pedido Recebido";
-
-const tipoEntrega =
-document.getElementById("bairro").value === "retirada"
-? "Retirada"
-: "Entrega";
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
 
@@ -842,120 +833,10 @@ document.getElementById("bairro").value === "retirada"
 
     msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
 
-    msg += `❤️ Obrigado pela preferência!`; 
-    const novoPedido = {
-
- id: pedidoId,
-
- cliente: nome,
-
- telefone: tel,
-
- itens: carrinho,
-
- total: total,
-
- status: statusPedido,
-
- entrega: tipoEntrega,
-
- data: new Date().toLocaleString("pt-BR")
-
-};
-
-pedidos.push(novoPedido);
-
-localStorage.setItem(
- "pedidosJosi",
- JSON.stringify(pedidos)
- );supabase.from("pedidos").insert([
-{
-    cliente: nome,
-    telefone: tel,
-    itens: JSON.stringify(carrinho),
-    total: total,
-    pagamento: pag,
-    endereco: endereco,
-    bairro: bairroNome,
-    data_entrega: data,
-    horario: hora,
-    status: "Recebido"
-}
-]);
+    msg += `❤️ Obrigado pela preferência!`;
 
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
-
-    // LIMPAR CARRINHO APÓS ENVIO
-    carrinho = [];
-    promoAtiva = false;
-
-    salvarDados();
-    resetPagamentoFluxo();
-    verificarPgto();
-}
-
-// ==========================================
-// SUPABASE
-// ==========================================
-</script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
-<script>
-const SUPABASE_URL =
-"https://puuedxyflsgekvffxqsn.supabase.co";
-
-const SUPABASE_ANON_KEY =
-"sb_publishable_jFRPq5cT_G2Wy08BZ7523A_a3aBrcP_";
-
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
-</script>
-
-<script>
-// ==========================================
-// AJUSTE DO HORÁRIO DA LOJA
-// ==========================================
-function verificarLojaAberta() {
-    const agora = new Date();
-    const diaSemana = agora.getDay();
-    const horaAtual = agora.getHours();
-
-    const feriados = [
-        "01/01", "17/02", "03/04", "21/04",
-        "01/05", "04/06", "07/09",
-        "12/10", "02/11", "15/11", "25/12"
-    ];
-
-    const hojeFormatado = agora.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit'
-    });
-
-    const ehFeriado = feriados.includes(hojeFormatado);
-
-    let aberta = false;
-
-    // Segunda a sexta
-    if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-
-        if (horaAtual >= 2 && horaAtual < 12) {
-            aberta = true;
-        }
-
-    } else {
-
-        // Sábado, domingo e feriados
-        if (horaAtual >= 2 && horaAtual < 17) {
-            aberta = true;
-        }
-    }
-
-    return aberta;
 }
 </script>
-
 </body>
 </html>
