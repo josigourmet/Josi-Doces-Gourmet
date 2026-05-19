@@ -868,9 +868,37 @@ pedidos.push(novoPedido);
 localStorage.setItem(
  "pedidosJosi",
  JSON.stringify(pedidos)
-);
+ );supabase.from("pedidos").insert([
+{
+    cliente: nome,
+    telefone: tel,
+    itens: JSON.stringify(carrinho),
+    total: total,
+    pagamento: pag,
+    endereco: endereco,
+    bairro: bairroNome,
+    data_entrega: data,
+    horario: hora,
+    status: "Recebido"
+}
+]);
 
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
+
+    // LIMPAR CARRINHO APÓS ENVIO
+    carrinho = [];
+    promoAtiva = false;
+
+    salvarDados();
+    resetPagamentoFluxo();
+    verificarPgto();
+}
+
+// ==========================================
+// SUPABASE
+// ==========================================
+</script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
 <script>
@@ -885,5 +913,49 @@ const supabase = window.supabase.createClient(
   SUPABASE_ANON_KEY
 );
 </script>
+
+<script>
+// ==========================================
+// AJUSTE DO HORÁRIO DA LOJA
+// ==========================================
+function verificarLojaAberta() {
+    const agora = new Date();
+    const diaSemana = agora.getDay();
+    const horaAtual = agora.getHours();
+
+    const feriados = [
+        "01/01", "17/02", "03/04", "21/04",
+        "01/05", "04/06", "07/09",
+        "12/10", "02/11", "15/11", "25/12"
+    ];
+
+    const hojeFormatado = agora.toLocaleDateString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit'
+    });
+
+    const ehFeriado = feriados.includes(hojeFormatado);
+
+    let aberta = false;
+
+    // Segunda a sexta
+    if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
+
+        if (horaAtual >= 8 && horaAtual < 12) {
+            aberta = true;
+        }
+
+    } else {
+
+        // Sábado, domingo e feriados
+        if (horaAtual >= 8 && horaAtual < 17) {
+            aberta = true;
+        }
+    }
+
+    return aberta;
+}
+</script>
+
 </body>
 </html>
