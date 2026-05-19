@@ -206,8 +206,8 @@
         <h2>⚠️ Horários de Funcionamento</h2>
         <p>Confira nossos horários para pedidos e agendamentos:</p>
         <ul style="text-align: left; font-size: 14px; color: #555;">
-            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos das 05h às 12h.</li>
-            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos das 05h às 17h.</li>
+            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos das 08h às 12h.</li>
+            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos das 08h às 17h.</li>
             <li>⏰ <b>Atenção:</b> Pedidos fora desses horários ficam bloqueados automaticamente.</li>
         </ul>
         <a href="https://wa.me/5551985803243?text=Olá Josi! Tenho uma dúvida sobre agendamentos." target="_blank" class="btn-duvida">💬 Dúvidas no WhatsApp</a>
@@ -319,14 +319,14 @@
         <label>🚚 Entrega e Região</label>
         <select id="bairro" onchange="alternarEndereco(); salvarDados(); verificarPgto();">
             <option value="retirada">Vou retirar no local (R$ 0,00)</option>
-            <option value="5">Centro (R$ 5,00)</option>
-            <option value="10">Acesso Dona Leopoldina / Parque (R$ 10,00)</option>
-            <option value="10">Cidade Nova (R$ 10,00)</option>
-            <option value="5">Cruzeiro (R$ 5,00)</option>
-            <option value="10">Gressler (R$ 10,00)</option>
-            <option value="30">Interior / Outros (R$ 30,00)</option>
+            <option value="4">Centro (R$ 4,00)</option>
+            <option value="6">Acesso Dona Leopoldina / Parque (R$ 6,00)</option>
+            <option value="7">Cidade Nova (R$ 7,00)</option>
+            <option value="0">Cruzeiro (R$ 0,00)</option>
+            <option value="8">Gressler (R$ 8,00)</option>
+            <option value="20">Interior / Outros (R$ 20,00)</option>
             <option value="0">Coronel Brito (R$ 0,00)</option>
-            <option value="10">Santa Tecla (R$ 10,00)</option>
+            <option value="8">Santa Tecla (R$ 8,00)</option>
         </select>
 
         <div id="blocoEndereco">
@@ -427,6 +427,7 @@ function fecharBannerPromo() { document.getElementById("modalPromo").style.displ
 
 let promoAtiva = false;
 let carrinho = [];
+let pedidos = JSON.parse(localStorage.getItem("pedidosJosi")) || [];
 let pixGerado = false;
 const CHAVE_PIX = "00431179026"; 
 const NOME_RECEBEDOR = "JOSI DOCES";
@@ -486,14 +487,14 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 5 && horaAtual < 12) {
+        if (horaAtual >= 08 && horaAtual < 12) {
             aberta = true;
         }
 
     } else {
         // Sábado, domingo e feriados
 
-        if (horaAtual >= 5 && horaAtual < 17) {
+        if (horaAtual >= 19 && horaAtual < 17) {
             aberta = true;
         }
     }
@@ -763,6 +764,14 @@ function limparCarrinhoCompleto() {
 }
 
 function finalizarZap() {
+  const pedidoId = Date.now();
+
+const statusPedido = "Pedido Recebido";
+
+const tipoEntrega =
+document.getElementById("bairro").value === "retirada"
+? "Retirada"
+: "Entrega";
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
 
@@ -833,10 +842,48 @@ function finalizarZap() {
 
     msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
 
-    msg += `❤️ Obrigado pela preferência!`;
+    msg += `❤️ Obrigado pela preferência!`; 
+    const novoPedido = {
+
+ id: pedidoId,
+
+ cliente: nome,
+
+ telefone: tel,
+
+ itens: carrinho,
+
+ total: total,
+
+ status: statusPedido,
+
+ entrega: tipoEntrega,
+
+ data: new Date().toLocaleString("pt-BR")
+
+};
+
+pedidos.push(novoPedido);
+
+localStorage.setItem(
+ "pedidosJosi",
+ JSON.stringify(pedidos)
+);
 
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
-}
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<script>
+const SUPABASE_URL =
+"https://puuedxyflsgekvffxqsn.supabase.co";
+
+const SUPABASE_ANON_KEY =
+"sb_publishable_jFRPq5cT_G2Wy08BZ7523A_a3aBrcP_";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
 </script>
 </body>
 </html>
