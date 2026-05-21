@@ -486,14 +486,14 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 5 && horaAtual < 12) {
+        if (horaAtual >= 3 && horaAtual < 12) {
             aberta = true;
         }
 
     } else {
         // Sábado, domingo e feriados
 
-        if (horaAtual >= 5 && horaAtual < 17) {
+        if (horaAtual >= 3 && horaAtual < 17) {
             aberta = true;
         }
     }
@@ -762,9 +762,13 @@ function limparCarrinhoCompleto() {
     }
 }
 
+
 function finalizarZap() {
+
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
+
+    const telefoneCliente = tel.replace(/\D/g, "");
 
     const bairroSel = document.getElementById("bairro");
     const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
@@ -778,6 +782,10 @@ function finalizarZap() {
 
     const valorBairro = document.getElementById("bairro").value;
 
+    const numeroLoja = "5551985803243";
+
+    const codigoPedido = Math.floor(Math.random() * 90000) + 10000;
+
     let frete = (promoAtiva || valorBairro === "retirada")
         ? 0
         : parseFloat(valorBairro);
@@ -790,53 +798,89 @@ function finalizarZap() {
 
     let total = subtotal + frete;
 
-    let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
+    // ==========================================
+    // 📩 MENSAGEM PARA A LOJA
+    // ==========================================
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `👤 *CLIENTE*\n`;
-    msg += `🙍 Nome: ${nome}\n`;
-    msg += `☎️ WhatsApp: ${tel}\n\n`;
+    let msgLoja = `🤎🍬 *NOVO PEDIDO - JOSI DOCES GOURMET* 🍬🤎\n\n`;
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `🛒 *ITENS DO PEDIDO*\n`;
+    msgLoja += `🧾 *Pedido Nº:* #${codigoPedido}\n\n`;
+
+    msgLoja += `━━━━━━━━━━━━━━━\n`;
+    msgLoja += `👤 *CLIENTE*\n`;
+    msgLoja += `🙍 Nome: ${nome}\n`;
+    msgLoja += `☎️ WhatsApp: ${tel}\n\n`;
+
+    msgLoja += `━━━━━━━━━━━━━━━\n`;
+    msgLoja += `🛒 *ITENS DO PEDIDO*\n`;
 
     carrinho.forEach(i => {
-        msg += `🍰 ${i.qtd}x ${i.nome}\n`;
-        msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
+        msgLoja += `🍰 ${i.qtd}x ${i.nome}\n`;
+        msgLoja += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
     });
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `📦 *RESUMO DO PEDIDO*\n`;
-    msg += `🧁 Itens: ${totalItens}\n`;
-    msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
-    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    msgLoja += `━━━━━━━━━━━━━━━\n`;
+    msgLoja += `📦 *RESUMO*\n`;
+    msgLoja += `🧁 Itens: ${totalItens}\n`;
+    msgLoja += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    msgLoja += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
+    msgLoja += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `🚚 *ENTREGA / RETIRADA*\n`;
-    msg += `📍 Local: ${bairroNome}\n`;
+    msgLoja += `━━━━━━━━━━━━━━━\n`;
+    msgLoja += `🚚 *ENTREGA / RETIRADA*\n`;
+    msgLoja += `📍 ${bairroNome}\n`;
 
     if (endereco) {
-        msg += `🏠 Endereço: ${endereco}\n`;
+        msgLoja += `🏠 ${endereco}\n`;
     }
 
-    msg += `\n`;
+    msgLoja += `\n`;
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `⏰ *AGENDAMENTO*\n`;
-    msg += `📅 Data: ${data}\n`;
-    msg += `🕒 Horário: ${hora}\n\n`;
+    msgLoja += `━━━━━━━━━━━━━━━\n`;
+    msgLoja += `📅 *AGENDAMENTO*\n`;
+    msgLoja += `🗓️ ${data}\n`;
+    msgLoja += `🕒 ${hora}\n\n`;
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `💳 *PAGAMENTO*\n`;
-    msg += `💰 Forma: ${pag}\n\n`;
+    msgLoja += `━━━━━━━━━━━━━━━\n`;
+    msgLoja += `💳 *PAGAMENTO*\n`;
+    msgLoja += `💰 ${pag}\n\n`;
 
-    msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
+    msgLoja += `⏳ Tempo médio: *40 a 60 minutos*.\n`;
 
-    msg += `❤️ Obrigado pela preferência!`;
+    // ==========================================
+    // 📲 ABRE WHATSAPP DA LOJA
+    // ==========================================
 
-    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
+    window.open(`https://wa.me/${numeroLoja}?text=${encodeURIComponent(msgLoja)}`);
+
+    // ==========================================
+    // 🤖 MENSAGEM AUTOMÁTICA PARA O CLIENTE
+    // ==========================================
+
+    setTimeout(() => {
+
+        let msgCliente = `🤎 Olá *${nome}*!\n\n`;
+
+        msgCliente += `Seu pedido foi recebido com sucesso na *Josi Doces Gourmet* 🍰✨\n\n`;
+
+        msgCliente += `🧾 *Pedido Nº:* #${codigoPedido}\n\n`;
+
+        msgCliente += `👩‍🍳 Status do pedido:\n`;
+        msgCliente += `🟡 *SEU PEDIDO ESTÁ SENDO PREPARADO*\n\n`;
+
+        msgCliente += `⏳ Tempo estimado:\n`;
+        msgCliente += `🚀 Aproximadamente 40 a 60 minutos.\n\n`;
+
+        msgCliente += `📦 Assim que estiver pronto entraremos em contato.\n\n`;
+
+        msgCliente += `❤️ Obrigado pela preferência!`;
+
+        window.open(`https://wa.me/55${telefoneCliente}?text=${encodeURIComponent(msgCliente)}`);
+
+    }, 2500);
+
 }
+
 </script>
 </body>
 </html>
