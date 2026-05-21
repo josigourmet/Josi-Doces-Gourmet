@@ -216,7 +216,7 @@
 </div>
 
 <header>
-    <div class="logo-container">
+    <div class="logo-container" onclick="abrirAdminSecreto()">
         <div class="logo-content">
             <span class="name-josi">Josi</span>
             <span class="name-doces">Doces</span>
@@ -375,6 +375,207 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
 </div>
 
 <script>
+  // ======================================
+// 🔒 ADMIN OCULTO
+// ======================================
+
+let cliquesLogo = 0;
+
+function abrirAdminSecreto() {
+
+    cliquesLogo++;
+
+    if (cliquesLogo >= 10) {
+
+        const senha = prompt("Digite a senha do admin:");
+
+        if (senha === "josi123") {
+
+            document.getElementById("painelAdmin").style.display = "block";
+
+            carregarPedidosAdmin();
+
+        } else {
+
+            alert("Senha incorreta");
+
+        }
+
+        cliquesLogo = 0;
+    }
+
+    setTimeout(() => {
+        cliquesLogo = 0;
+    }, 3000);
+}
+
+function fecharAdmin() {
+    document.getElementById("painelAdmin").style.display = "none";
+}
+
+// ======================================
+// 📦 BANCO DE PEDIDOS
+// ======================================
+
+let pedidosAdmin = JSON.parse(localStorage.getItem("pedidosAdmin")) || [];
+
+// ======================================
+// 💾 SALVAR PEDIDO
+// ======================================
+
+function salvarPedidoAdmin(pedido) {
+
+    pedidosAdmin.push({
+        ...pedido,
+        status: "preparacao",
+        id: Date.now()
+    });
+
+    localStorage.setItem(
+        "pedidosAdmin",
+        JSON.stringify(pedidosAdmin)
+    );
+}
+
+// ======================================
+// 📲 INTERCEPTA FINALIZAÇÃO
+// ======================================
+
+const finalizarOriginal = finalizarZap;
+
+finalizarZap = function () {
+
+    const pedido = {
+        cliente: document.getElementById("nome").value,
+        telefone: document.getElementById("telefone").value,
+        itens: carrinho,
+        total: atualizar(),
+        endereco: document.getElementById("endereco").value,
+        data: document.getElementById("dataAgendamento").value,
+        hora: document.getElementById("horaAgendamento").value
+    };
+
+    salvarPedidoAdmin(pedido);
+
+    finalizarOriginal();
+};
+
+// ======================================
+// 📋 CARREGAR PEDIDOS
+// ======================================
+
+function carregarPedidosAdmin() {
+
+    const preparacao = document.getElementById("listaPreparacao");
+    const entrega = document.getElementById("listaEntrega");
+    const entregues = document.getElementById("listaEntregues");
+
+    preparacao.innerHTML = "";
+    entrega.innerHTML = "";
+    entregues.innerHTML = "";
+
+    pedidosAdmin.forEach(pedido => {
+
+        const div = document.createElement("div");
+
+        div.style = `
+        background:white;
+        padding:15px;
+        border-radius:10px;
+        margin-bottom:10px;
+        border:1px solid #ccc;
+        `;
+
+        div.innerHTML = `
+            <b>Cliente:</b> ${pedido.cliente}<br>
+            <b>Total:</b> R$ ${pedido.total.toFixed(2)}<br>
+            <b>Entrega:</b> ${pedido.endereco || "Retirada"}<br><br>
+
+            <button onclick="mudarStatus(${pedido.id}, 'entrega')">
+                🚚 Saiu para entrega
+            </button>
+
+            <button onclick="mudarStatus(${pedido.id}, 'entregue')">
+                ✅ Entregue
+            </button>
+
+            <button onclick="enviarMensagemCliente('${pedido.telefone}', '${pedido.cliente}', '${pedido.status}')">
+                📲 Avisar Cliente
+            </button>
+        `;
+
+        if (pedido.status === "preparacao") {
+            preparacao.appendChild(div);
+        }
+
+        if (pedido.status === "entrega") {
+            entrega.appendChild(div);
+        }
+
+        if (pedido.status === "entregue") {
+            entregues.appendChild(div);
+        }
+    });
+}
+
+// ======================================
+// 🔄 ALTERAR STATUS
+// ======================================
+
+function mudarStatus(id, novoStatus) {
+
+    pedidosAdmin = pedidosAdmin.map(p => {
+
+        if (p.id === id) {
+            p.status = novoStatus;
+        }
+
+        return p;
+    });
+
+    localStorage.setItem(
+        "pedidosAdmin",
+        JSON.stringify(pedidosAdmin)
+    );
+
+    carregarPedidosAdmin();
+}
+
+// ======================================
+// 📲 WHATSAPP CLIENTE
+// ======================================
+
+function enviarMensagemCliente(tel, nome, status) {
+
+    let mensagem = "";
+
+    if (status === "preparacao") {
+
+        mensagem =
+        `🍰 Olá ${nome}! Seu pedido está em preparação.`;
+
+    }
+
+    if (status === "entrega") {
+
+        mensagem =
+        `🚚 Olá ${nome}! Seu pedido saiu para entrega.`;
+
+    }
+
+    if (status === "entregue") {
+
+        mensagem =
+        `✅ Olá ${nome}! Seu pedido foi entregue. Obrigado pela preferência!`;
+
+    }
+
+    const numero = tel.replace(/\D/g, "");
+
+    window.open(
+        `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`
+    );
+}
   // Aviso ao clicar no horário
 function avisoHorario() {
     alert("⏰ Atenção!\n\nPor favor, escolha um horário com pelo menos 1 hora de antecedência.\n\nEsse é o tempo médio para preparo, entrega ou retirada do pedido. 🤎🍰");
@@ -486,7 +687,7 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 3 && horaAtual < 12) {
+        if (horaAtual >= 3 && horaAtual < 15) {
             aberta = true;
         }
 
@@ -882,5 +1083,56 @@ function finalizarZap() {
 }
 
 </script>
+<!-- =========================
+🔒 PAINEL ADMIN SECRETO
+========================= -->
+
+<div id="painelAdmin" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#fdf5e6;
+z-index:99999;
+overflow:auto;
+padding:20px;
+box-sizing:border-box;
+">
+
+    <h2 style="text-align:center;color:#5d4037;">
+        🔒 Painel Admin - Josi Doces
+    </h2>
+
+    <div style="text-align:center;margin-bottom:20px;">
+        <button onclick="fecharAdmin()" style="
+        background:#e74c3c;
+        color:white;
+        border:none;
+        padding:10px 20px;
+        border-radius:10px;
+        cursor:pointer;
+        ">
+            Fechar Painel
+        </button>
+    </div>
+
+    <div class="card">
+        <h3>🟡 Pedidos em Preparação</h3>
+        <div id="listaPreparacao"></div>
+    </div>
+
+    <div class="card">
+        <h3>🚚 Saiu para Entrega</h3>
+        <div id="listaEntrega"></div>
+    </div>
+
+    <div class="card">
+        <h3>✅ Entregues</h3>
+        <div id="listaEntregues"></div>
+    </div>
+
+</div>
 </body>
 </html>
