@@ -423,18 +423,16 @@ let pedidosAdmin = JSON.parse(localStorage.getItem("pedidosAdmin")) || [];
 // 💾 SALVAR PEDIDO
 // ======================================
 
-function salvarPedidoAdmin(pedido) {
+async function salvarPedidoAdmin(pedido) {
 
-    pedidosAdmin.push({
-        ...pedido,
-        status: "preparacao",
-        id: Date.now()
-    });
+    const { data, error } = await supabase
+      .from('pedidos')
+      .insert([pedido]);
 
-    localStorage.setItem(
-        "pedidosAdmin",
-        JSON.stringify(pedidosAdmin)
-    );
+    if(error){
+        console.log(error);
+        alert("Erro ao salvar pedido");
+    }
 }
 
 // ======================================
@@ -464,7 +462,17 @@ finalizarZap = function () {
 // 📋 CARREGAR PEDIDOS
 // ======================================
 
-function carregarPedidosAdmin() {
+async function carregarPedidosAdmin() {
+
+    const { data: pedidos, error } = await supabase
+      .from('pedidos')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if(error){
+        console.log(error);
+        return;
+    }
 
     const preparacao = document.getElementById("listaPreparacao");
     const entrega = document.getElementById("listaEntrega");
@@ -474,7 +482,7 @@ function carregarPedidosAdmin() {
     entrega.innerHTML = "";
     entregues.innerHTML = "";
 
-    pedidosAdmin.forEach(pedido => {
+    pedidos.forEach(pedido => {
 
         const div = document.createElement("div");
 
@@ -488,7 +496,7 @@ function carregarPedidosAdmin() {
 
         div.innerHTML = `
             <b>Cliente:</b> ${pedido.cliente}<br>
-            <b>Total:</b> R$ ${pedido.total.toFixed(2)}<br>
+            <b>Total:</b> R$ ${pedido.total}<br>
             <b>Entrega:</b> ${pedido.endereco || "Retirada"}<br><br>
 
             <button onclick="mudarStatus(${pedido.id}, 'entrega')">
@@ -497,10 +505,6 @@ function carregarPedidosAdmin() {
 
             <button onclick="mudarStatus(${pedido.id}, 'entregue')">
                 ✅ Entregue
-            </button>
-
-            <button onclick="enviarMensagemCliente('${pedido.telefone}', '${pedido.cliente}', '${pedido.status}')">
-                📲 Avisar Cliente
             </button>
         `;
 
@@ -522,21 +526,12 @@ function carregarPedidosAdmin() {
 // 🔄 ALTERAR STATUS
 // ======================================
 
-function mudarStatus(id, novoStatus) {
+async function mudarStatus(id, novoStatus) {
 
-    pedidosAdmin = pedidosAdmin.map(p => {
-
-        if (p.id === id) {
-            p.status = novoStatus;
-        }
-
-        return p;
-    });
-
-    localStorage.setItem(
-        "pedidosAdmin",
-        JSON.stringify(pedidosAdmin)
-    );
+    await supabase
+      .from('pedidos')
+      .update({ status: novoStatus })
+      .eq('id', id);
 
     carregarPedidosAdmin();
 }
@@ -687,7 +682,7 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 3 && horaAtual < 23) {
+        if (horaAtual >= 3 && horaAtual < 15) {
             aberta = true;
         }
 
@@ -1132,24 +1127,20 @@ box-sizing:border-box;
         <h3>✅ Entregues</h3>
         <div id="listaEntregues"></div>
     </div>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSy..."
-    authDomain: "josigourmet-af3ff.firebaseapp.com",
-    databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
-    projectId: "josigourmet-af3ff",
-    storageBucket: "josigourmet-af3ff.appspot.com",
-    messagingSenderId: "373768013260",
-    appId: "1:373768013260:web:..."
-    measurementId: "G-7QVB1T3S74"
-  };
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
+<script>
 
+const SUPABASE_URL = "COLE_SUA_URL_AQUI";
+
+const SUPABASE_KEY = "COLE_SUA_KEY_AQUI";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
 </script>
 </body>
