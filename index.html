@@ -1132,7 +1132,25 @@ box-sizing:border-box;
         <h3>✅ Entregues</h3>
         <div id="listaEntregues"></div>
     </div>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
 
-</div>
+  const firebaseConfig = {
+    apiKey: "AIzaSy..."
+    authDomain: "josigourmet-af3ff.firebaseapp.com",
+    databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
+    projectId: "josigourmet-af3ff",
+    storageBucket: "josigourmet-af3ff.appspot.com",
+    messagingSenderId: "373768013260",
+    appId: "1:373768013260:web:..."
+    measurementId: "G-7QVB1T3S74"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+
+
+</script>
 </body>
 </html>
