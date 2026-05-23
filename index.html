@@ -171,7 +171,6 @@
         .erro-tel { color: red; font-size: 11px; font-weight: bold; display: none; margin-top: 5px; }
         @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
     </style>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body onload="saudacaoInicial(); carregarBannerDinamico(); carregarDados();">
 
@@ -374,15 +373,6 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
         <button id="btnWhatsapp" onclick="finalizarZap()" class="btn-finalizar" disabled>⚠️ Preencha os dados no formulário</button>
     </div>
 </div>
-<script>
-const SUPABASE_URL = "https://bcuucekcoyletzazyunb.supabase.co";
-const SUPABASE_KEY = "sb_publishable_X2L8OP4ydkU_1fn9rBOJeA_FI6mHPeD";
-
-const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
-</script>
 
 <script>
   // Aviso ao clicar no horário
@@ -496,14 +486,14 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 4 && horaAtual < 12) {
+        if (horaAtual >= 5 && horaAtual < 12) {
             aberta = true;
         }
 
     } else {
         // Sábado, domingo e feriados
 
-        if (horaAtual >= 4 && horaAtual < 17) {
+        if (horaAtual >= 5 && horaAtual < 17) {
             aberta = true;
         }
     }
@@ -772,18 +762,7 @@ function limparCarrinhoCompleto() {
     }
 }
 
-async function finalizarZap() {
-
-    // ABRE A ABA IMEDIATAMENTE
-    const zap = window.open('', '_blank');
-
-    const pedidoSalvo = await salvarPedidoSupabase();
-
-    if (!pedidoSalvo) {
-        zap.close();
-        return;
-    }
-
+function finalizarZap() {
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
 
@@ -813,71 +792,51 @@ async function finalizarZap() {
 
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
 
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `👤 *CLIENTE*\n`;
+    msg += `🙍 Nome: ${nome}\n`;
+    msg += `☎️ WhatsApp: ${tel}\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `🛒 *ITENS DO PEDIDO*\n`;
+
     carrinho.forEach(i => {
         msg += `🍰 ${i.qtd}x ${i.nome}\n`;
+        msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
     });
 
-    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `📦 *RESUMO DO PEDIDO*\n`;
+    msg += `🧁 Itens: ${totalItens}\n`;
+    msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
+    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
 
-    // REDIRECIONA A ABA JÁ ABERTA
-    zap.location.href =
-      `https://api.whatsapp.com/send?phone=5551985803243&text=${encodeURIComponent(msg)}`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `🚚 *ENTREGA / RETIRADA*\n`;
+    msg += `📍 Local: ${bairroNome}\n`;
 
-}
-async function salvarPedidoSupabase() {
-
-    const nome = document.getElementById("nome").value;
-    const telefone = document.getElementById("telefone").value;
-
-    const bairroSel = document.getElementById("bairro");
-    const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
-
-    const endereco = document.getElementById("endereco").value;
-
-    const data = document.getElementById("dataAgendamento").value;
-    const hora = document.getElementById("horaAgendamento").value;
-
-    const pag = document.getElementById("pagamento").value;
-
-    const valorBairro = document.getElementById("bairro").value;
-
-    let frete = (promoAtiva || valorBairro === "retirada")
-        ? 0
-        : parseFloat(valorBairro);
-
-    let subtotal = carrinho.reduce((acc, item) =>
-        acc + (item.preco * item.qtd), 0);
-
-    let total = subtotal + frete;
-
-    const { data: pedido, error } = await supabase
-        .from('pedidos')
-        .insert([
-            {
-                nome: nome,
-                telefone: telefone,
-                endereco: endereco,
-                bairro: bairroNome,
-                itens: carrinho,
-                subtotal: subtotal,
-                frete: frete,
-                total: total,
-                pagamento: pag,
-                data_entrega: data,
-                hora_entrega: hora,
-                status: 'Recebido'
-            }
-        ])
-        .select();
-
-    if(error){
-        console.log(error);
-        alert("Erro ao salvar pedido");
-        return null;
+    if (endereco) {
+        msg += `🏠 Endereço: ${endereco}\n`;
     }
 
-    
+    msg += `\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `⏰ *AGENDAMENTO*\n`;
+    msg += `📅 Data: ${data}\n`;
+    msg += `🕒 Horário: ${hora}\n\n`;
+
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `💳 *PAGAMENTO*\n`;
+    msg += `💰 Forma: ${pag}\n\n`;
+
+    msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
+
+    msg += `❤️ Obrigado pela preferência!`;
+
+    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
 </script>
 </body>
-        </html>
+</html>
