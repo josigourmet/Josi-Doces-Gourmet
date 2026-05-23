@@ -216,7 +216,7 @@
 </div>
 
 <header>
-    <div class="logo-container" onclick="abrirAdminSecreto()">
+    <div class="logo-container">
         <div class="logo-content">
             <span class="name-josi">Josi</span>
             <span class="name-doces">Doces</span>
@@ -370,220 +370,11 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
             <textarea id="brcode" readonly style="font-size: 10px; height: 50px; width: 100%;"></textarea>
             <button onclick="copiarPix()" style="background:#444; padding: 8px; font-size: 12px; width:100%;">Copiar Código Pix</button>
         </div>
-        <button id="btnWhatsapp" onclick="finalizarComSalvamento()" class="btn-finalizar" disabled>
-⚠️ Preencha os dados no formulário
-</button>
+        <button id="btnWhatsapp" onclick="finalizarZap()" class="btn-finalizar" disabled>⚠️ Preencha os dados no formulário</button>
     </div>
 </div>
 
 <script>
-  // ======================================
-// 🔒 ADMIN OCULTO
-// ======================================
-
-let cliquesLogo = 0;
-
-function abrirAdminSecreto() {
-
-    cliquesLogo++;
-
-    if (cliquesLogo >= 10) {
-
-        const senha = prompt("Digite a senha do admin:");
-
-        if (senha === "josi123") {
-
-            document.getElementById("painelAdmin").style.display = "block";
-
-            carregarPedidosAdmin();
-
-        } else {
-
-            alert("Senha incorreta");
-
-        }
-
-        cliquesLogo = 0;
-    }
-
-    setTimeout(() => {
-        cliquesLogo = 0;
-    }, 3000);
-}
-
-function fecharAdmin() {
-    document.getElementById("painelAdmin").style.display = "none";
-}
-
-// ======================================
-// 📦 BANCO DE PEDIDOS
-// ======================================
-
-let pedidosAdmin = JSON.parse(localStorage.getItem("pedidosAdmin")) || [];
-
-// ======================================
-// 💾 SALVAR PEDIDO
-// ======================================
-
-async function salvarPedidoAdmin(pedido) {
-
-    const { data, error } = await supabase
-      .from('pedidos')
-      .insert([pedido]);
-
-    if(error){
-        console.log(error);
-        alert("Erro ao salvar pedido");
-    }
-}
-
-// ======================================
-// 📲 INTERCEPTA FINALIZAÇÃO
-// ======================================
-
-// ======================================
-// 📲 INTERCEPTA FINALIZAÇÃO
-// ======================================
-
-async function finalizarComSalvamento() {
-
-    const pedido = {
-        cliente: document.getElementById("nome").value,
-        telefone: document.getElementById("telefone").value,
-        itens: carrinho,
-        total: atualizar(),
-        endereco: document.getElementById("endereco").value,
-        data: document.getElementById("dataAgendamento").value,
-        hora: document.getElementById("horaAgendamento").value,
-        status: "preparacao"
-    };
-
-    const { error } = await supabase
-      .from('pedidos')
-      .insert([pedido]);
-
-    if(error){
-        console.log(error);
-        alert("Erro ao salvar pedido");
-        return;
-    }
-
-    finalizarZap();
-}
-
-// ======================================
-// 📋 CARREGAR PEDIDOS
-// ======================================
-
-async function carregarPedidosAdmin() {
-
-    const { data: pedidos, error } = await supabase
-      .from('pedidos')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if(error){
-        console.log(error);
-        return;
-    }
-
-    const preparacao = document.getElementById("listaPreparacao");
-    const entrega = document.getElementById("listaEntrega");
-    const entregues = document.getElementById("listaEntregues");
-
-    preparacao.innerHTML = "";
-    entrega.innerHTML = "";
-    entregues.innerHTML = "";
-
-    pedidos.forEach(pedido => {
-
-        const div = document.createElement("div");
-
-        div.style = `
-        background:white;
-        padding:15px;
-        border-radius:10px;
-        margin-bottom:10px;
-        border:1px solid #ccc;
-        `;
-
-        div.innerHTML = `
-            <b>Cliente:</b> ${pedido.cliente}<br>
-            <b>Total:</b> R$ ${pedido.total}<br>
-            <b>Entrega:</b> ${pedido.endereco || "Retirada"}<br><br>
-
-            <button onclick="mudarStatus(${pedido.id}, 'entrega')">
-                🚚 Saiu para entrega
-            </button>
-
-            <button onclick="mudarStatus(${pedido.id}, 'entregue')">
-                ✅ Entregue
-            </button>
-        `;
-
-        if (pedido.status === "preparacao") {
-            preparacao.appendChild(div);
-        }
-
-        if (pedido.status === "entrega") {
-            entrega.appendChild(div);
-        }
-
-        if (pedido.status === "entregue") {
-            entregues.appendChild(div);
-        }
-    });
-}
-
-// ======================================
-// 🔄 ALTERAR STATUS
-// ======================================
-
-async function mudarStatus(id, novoStatus) {
-
-    await supabase
-      .from('pedidos')
-      .update({ status: novoStatus })
-      .eq('id', id);
-
-    carregarPedidosAdmin();
-}
-
-// ======================================
-// 📲 WHATSAPP CLIENTE
-// ======================================
-
-function enviarMensagemCliente(tel, nome, status) {
-
-    let mensagem = "";
-
-    if (status === "preparacao") {
-
-        mensagem =
-        `🍰 Olá ${nome}! Seu pedido está em preparação.`;
-
-    }
-
-    if (status === "entrega") {
-
-        mensagem =
-        `🚚 Olá ${nome}! Seu pedido saiu para entrega.`;
-
-    }
-
-    if (status === "entregue") {
-
-        mensagem =
-        `✅ Olá ${nome}! Seu pedido foi entregue. Obrigado pela preferência!`;
-
-    }
-
-    const numero = tel.replace(/\D/g, "");
-
-    window.open(
-        `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`
-    );
-}
   // Aviso ao clicar no horário
 function avisoHorario() {
     alert("⏰ Atenção!\n\nPor favor, escolha um horário com pelo menos 1 hora de antecedência.\n\nEsse é o tempo médio para preparo, entrega ou retirada do pedido. 🤎🍰");
@@ -695,14 +486,14 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 1 && horaAtual <12) {
+        if (horaAtual >= 5 && horaAtual < 12) {
             aberta = true;
         }
 
     } else {
         // Sábado, domingo e feriados
 
-        if (horaAtual >= 1 && horaAtual < 17) {
+        if (horaAtual >= 5 && horaAtual < 17) {
             aberta = true;
         }
     }
@@ -971,13 +762,9 @@ function limparCarrinhoCompleto() {
     }
 }
 
-
 function finalizarZap() {
-
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
-
-    const telefoneCliente = tel.replace(/\D/g, "");
 
     const bairroSel = document.getElementById("bairro");
     const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
@@ -991,10 +778,6 @@ function finalizarZap() {
 
     const valorBairro = document.getElementById("bairro").value;
 
-    const numeroLoja = "5551985803243";
-
-    const codigoPedido = Math.floor(Math.random() * 90000) + 10000;
-
     let frete = (promoAtiva || valorBairro === "retirada")
         ? 0
         : parseFloat(valorBairro);
@@ -1007,153 +790,52 @@ function finalizarZap() {
 
     let total = subtotal + frete;
 
-    // ==========================================
-    // 📩 MENSAGEM PARA A LOJA
-    // ==========================================
+    let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
 
-    let msgLoja = `🤎🍬 *NOVO PEDIDO - JOSI DOCES GOURMET* 🍬🤎\n\n`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `👤 *CLIENTE*\n`;
+    msg += `🙍 Nome: ${nome}\n`;
+    msg += `☎️ WhatsApp: ${tel}\n\n`;
 
-    msgLoja += `🧾 *Pedido Nº:* #${codigoPedido}\n\n`;
-
-    msgLoja += `━━━━━━━━━━━━━━━\n`;
-    msgLoja += `👤 *CLIENTE*\n`;
-    msgLoja += `🙍 Nome: ${nome}\n`;
-    msgLoja += `☎️ WhatsApp: ${tel}\n\n`;
-
-    msgLoja += `━━━━━━━━━━━━━━━\n`;
-    msgLoja += `🛒 *ITENS DO PEDIDO*\n`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `🛒 *ITENS DO PEDIDO*\n`;
 
     carrinho.forEach(i => {
-        msgLoja += `🍰 ${i.qtd}x ${i.nome}\n`;
-        msgLoja += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
+        msg += `🍰 ${i.qtd}x ${i.nome}\n`;
+        msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
     });
 
-    msgLoja += `━━━━━━━━━━━━━━━\n`;
-    msgLoja += `📦 *RESUMO*\n`;
-    msgLoja += `🧁 Itens: ${totalItens}\n`;
-    msgLoja += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    msgLoja += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
-    msgLoja += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `📦 *RESUMO DO PEDIDO*\n`;
+    msg += `🧁 Itens: ${totalItens}\n`;
+    msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
+    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
 
-    msgLoja += `━━━━━━━━━━━━━━━\n`;
-    msgLoja += `🚚 *ENTREGA / RETIRADA*\n`;
-    msgLoja += `📍 ${bairroNome}\n`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `🚚 *ENTREGA / RETIRADA*\n`;
+    msg += `📍 Local: ${bairroNome}\n`;
 
     if (endereco) {
-        msgLoja += `🏠 ${endereco}\n`;
+        msg += `🏠 Endereço: ${endereco}\n`;
     }
 
-    msgLoja += `\n`;
+    msg += `\n`;
 
-    msgLoja += `━━━━━━━━━━━━━━━\n`;
-    msgLoja += `📅 *AGENDAMENTO*\n`;
-    msgLoja += `🗓️ ${data}\n`;
-    msgLoja += `🕒 ${hora}\n\n`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `⏰ *AGENDAMENTO*\n`;
+    msg += `📅 Data: ${data}\n`;
+    msg += `🕒 Horário: ${hora}\n\n`;
 
-    msgLoja += `━━━━━━━━━━━━━━━\n`;
-    msgLoja += `💳 *PAGAMENTO*\n`;
-    msgLoja += `💰 ${pag}\n\n`;
+    msg += `━━━━━━━━━━━━━━━\n`;
+    msg += `💳 *PAGAMENTO*\n`;
+    msg += `💰 Forma: ${pag}\n\n`;
 
-    msgLoja += `⏳ Tempo médio: *40 a 60 minutos*.\n`;
+    msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
 
-    // ==========================================
-    // 📲 ABRE WHATSAPP DA LOJA
-    // ==========================================
+    msg += `❤️ Obrigado pela preferência!`;
 
-    window.open(`https://wa.me/${numeroLoja}?text=${encodeURIComponent(msgLoja)}`);
-
-    // ==========================================
-    // 🤖 MENSAGEM AUTOMÁTICA PARA O CLIENTE
-    // ==========================================
-
-    setTimeout(() => {
-
-        let msgCliente = `🤎 Olá *${nome}*!\n\n`;
-
-        msgCliente += `Seu pedido foi recebido com sucesso na *Josi Doces Gourmet* 🍰✨\n\n`;
-
-        msgCliente += `🧾 *Pedido Nº:* #${codigoPedido}\n\n`;
-
-        msgCliente += `👩‍🍳 Status do pedido:\n`;
-        msgCliente += `🟡 *SEU PEDIDO ESTÁ SENDO PREPARADO*\n\n`;
-
-        msgCliente += `⏳ Tempo estimado:\n`;
-        msgCliente += `🚀 Aproximadamente 40 a 60 minutos.\n\n`;
-
-        msgCliente += `📦 Assim que estiver pronto entraremos em contato.\n\n`;
-
-        msgCliente += `❤️ Obrigado pela preferência!`;
-
-        window.open(`https://wa.me/55${telefoneCliente}?text=${encodeURIComponent(msgCliente)}`);
-
-    }, 2500);
-
-}
-
-</script>
-<!-- =========================
-🔒 PAINEL ADMIN SECRETO
-========================= -->
-
-<div id="painelAdmin" style="
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#fdf5e6;
-z-index:99999;
-overflow:auto;
-padding:20px;
-box-sizing:border-box;
-">
-
-    <h2 style="text-align:center;color:#5d4037;">
-        🔒 Painel Admin - Josi Doces
-    </h2>
-
-    <div style="text-align:center;margin-bottom:20px;">
-        <button onclick="fecharAdmin()" style="
-        background:#e74c3c;
-        color:white;
-        border:none;
-        padding:10px 20px;
-        border-radius:10px;
-        cursor:pointer;
-        ">
-            Fechar Painel
-        </button>
-    </div>
-
-    <div class="card">
-        <h3>🟡 Pedidos em Preparação</h3>
-        <div id="listaPreparacao"></div>
-    </div>
-
-    <div class="card">
-        <h3>🚚 Saiu para Entrega</h3>
-        <div id="listaEntrega"></div>
-    </div>
-
-    <div class="card">
-        <h3>✅ Entregues</h3>
-        <div id="listaEntregues"></div>
-    </div>
-
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script>
-const SUPABASE_URL = "https://puuedxyflsgekvffxqsn.supabase.co"
-
-const SUPABASE_KEY = "sb_publishable_jFRPq5cT_G2Wy08BZ7523A_a3aBrcP_..."
-
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_KEY
-);
-
+    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
 </script>
 </body>
