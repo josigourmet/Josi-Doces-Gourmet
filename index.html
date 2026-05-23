@@ -375,7 +375,7 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
     </div>
 </div>
 <script>
-const SUPABASE_URL = "bcuucekcoyletzazyunb";
+const SUPABASE_URL = "https://bcuucekcoyletzazyunb.supabase.co";
 const SUPABASE_KEY = "sb_publishable_X2L8OP4ydkU_1fn9rBOJeA_FI6mHPeD";
 
 const supabase = window.supabase.createClient(
@@ -773,9 +773,17 @@ function limparCarrinhoCompleto() {
 }
 
 async function finalizarZap() {
-  const pedidoSalvo = await salvarPedidoSupabase();
 
-if(!pedidoSalvo) return;
+    // ABRE A ABA IMEDIATAMENTE
+    const zap = window.open('', '_blank');
+
+    const pedidoSalvo = await salvarPedidoSupabase();
+
+    if (!pedidoSalvo) {
+        zap.close();
+        return;
+    }
+
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
 
@@ -805,50 +813,16 @@ if(!pedidoSalvo) return;
 
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `👤 *CLIENTE*\n`;
-    msg += `🙍 Nome: ${nome}\n`;
-    msg += `☎️ WhatsApp: ${tel}\n\n`;
-
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `🛒 *ITENS DO PEDIDO*\n`;
-
     carrinho.forEach(i => {
         msg += `🍰 ${i.qtd}x ${i.nome}\n`;
-        msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
     });
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `📦 *RESUMO DO PEDIDO*\n`;
-    msg += `🧁 Itens: ${totalItens}\n`;
-    msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
-    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}`;
 
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `🚚 *ENTREGA / RETIRADA*\n`;
-    msg += `📍 Local: ${bairroNome}\n`;
+    // REDIRECIONA A ABA JÁ ABERTA
+    zap.location.href =
+      `https://api.whatsapp.com/send?phone=5551985803243&text=${encodeURIComponent(msg)}`;
 
-    if (endereco) {
-        msg += `🏠 Endereço: ${endereco}\n`;
-    }
-
-    msg += `\n`;
-
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `⏰ *AGENDAMENTO*\n`;
-    msg += `📅 Data: ${data}\n`;
-    msg += `🕒 Horário: ${hora}\n\n`;
-
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `💳 *PAGAMENTO*\n`;
-    msg += `💰 Forma: ${pag}\n\n`;
-
-    msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
-
-    msg += `❤️ Obrigado pela preferência!`;
-
-    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
 async function salvarPedidoSupabase() {
 
@@ -902,8 +876,8 @@ async function salvarPedidoSupabase() {
         return null;
     }
 
-    return pedido[0];
+    
 }
 </script>
 </body>
-</html>
+        </html>
