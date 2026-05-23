@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Painel Pedidos</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+<style>
+body{
+    font-family: Arial;
+    padding:20px;
+    background:#f5f5f5;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    margin-bottom:15px;
+    border-radius:10px;
+}
+
+button{
+    padding:10px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    margin:5px;
+}
+
+.recebido{ background:#3498db; color:white; }
+.preparo{ background:#f39c12; color:white; }
+.entrega{ background:#27ae60; color:white; }
+.finalizado{ background:#2c3e50; color:white; }
+
+</style>
+</head>
+
+<body>
+
+<h1>Pedidos Josi Doces 🍰</h1>
+
+<div id="listaPedidos"></div>
+
+<script>
+
+const SUPABASE_URL = "bcuucekcoyletzazyunb";
+const SUPABASE_KEY = "sb_publishable_X2L8OP4ydkU_1fn9rBOJeA_FI6mHPeD";
+
+const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+);
+
+async function carregarPedidos(){
+
+    const { data, error } = await supabase
+        .from('pedidos')
+        .select('*')
+        .order('id', { ascending:false });
+
+    let html = '';
+
+    data.forEach(pedido => {
+
+        html += `
+        <div class="card">
+
+            <h3>${pedido.nome}</h3>
+
+            <p><b>Telefone:</b> ${pedido.telefone}</p>
+
+            <p><b>Status:</b> ${pedido.status}</p>
+
+            <p><b>Total:</b> R$ ${pedido.total}</p>
+
+            <button class="recebido"
+            onclick="alterarStatus(
+                ${pedido.id},
+                'Recebido',
+                '${pedido.telefone}'
+            )">
+            Recebido
+            </button>
+
+            <button class="preparo"
+            onclick="alterarStatus(
+                ${pedido.id},
+                'Em preparação',
+                '${pedido.telefone}'
+            )">
+            Em preparação
+            </button>
+
+            <button class="entrega"
+            onclick="alterarStatus(
+                ${pedido.id},
+                'Saiu para entrega',
+                '${pedido.telefone}'
+            )">
+            Saiu entrega
+            </button>
+
+            <button class="finalizado"
+            onclick="alterarStatus(
+                ${pedido.id},
+                'Entregue',
+                '${pedido.telefone}'
+            )">
+            Entregue
+            </button>
+
+        </div>
+        `;
+    });
+
+    document.getElementById('listaPedidos').innerHTML = html;
+}
+
+async function alterarStatus(id, status, telefone){
+
+    await supabase
+        .from('pedidos')
+        .update({
+            status: status
+        })
+        .eq('id', id);
+
+    let mensagem = '';
+
+    if(status === 'Recebido'){
+        mensagem =
+        '🤎 Recebemos seu pedido na Josi Doces Gourmet!';
+    }
+
+    if(status === 'Em preparação'){
+        mensagem =
+        '👩‍🍳 Seu pedido está em preparação!';
+    }
+
+    if(status === 'Saiu para entrega'){
+        mensagem =
+        '🚚 Seu pedido saiu para entrega!';
+    }
+
+    if(status === 'Entregue'){
+        mensagem =
+        '✅ Seu pedido foi entregue!';
+    }
+
+    window.open(
+    `https://wa.me/55${telefone.replace(/\D/g,'')}?text=${encodeURIComponent(mensagem)}`
+    );
+
+    carregarPedidos();
+}
+
+carregarPedidos();
+
+</script>
+
+</body>
+</html>
