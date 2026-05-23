@@ -370,7 +370,9 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
             <textarea id="brcode" readonly style="font-size: 10px; height: 50px; width: 100%;"></textarea>
             <button onclick="copiarPix()" style="background:#444; padding: 8px; font-size: 12px; width:100%;">Copiar Código Pix</button>
         </div>
-        <button id="btnWhatsapp" onclick="finalizarZap()" class="btn-finalizar" disabled>⚠️ Preencha os dados no formulário</button>
+        <button id="btnWhatsapp" onclick="finalizarComSalvamento()" class="btn-finalizar" disabled>
+⚠️ Preencha os dados no formulário
+</button>
     </div>
 </div>
 
@@ -439,9 +441,7 @@ async function salvarPedidoAdmin(pedido) {
 // 📲 INTERCEPTA FINALIZAÇÃO
 // ======================================
 
-const finalizarOriginal = finalizarZap;
-
-finalizarZap = function () {
+async function finalizarComSalvamento() {
 
     const pedido = {
         cliente: document.getElementById("nome").value,
@@ -450,13 +450,22 @@ finalizarZap = function () {
         total: atualizar(),
         endereco: document.getElementById("endereco").value,
         data: document.getElementById("dataAgendamento").value,
-        hora: document.getElementById("horaAgendamento").value
+        hora: document.getElementById("horaAgendamento").value,
+        status: "preparacao"
     };
 
-    salvarPedidoAdmin(pedido);
+    const { error } = await supabase
+      .from('pedidos')
+      .insert([pedido]);
 
-    finalizarOriginal();
-};
+    if(error){
+        console.log(error);
+        alert("Erro ao salvar pedido");
+        return;
+    }
+
+    finalizarZap();
+}
 
 // ======================================
 // 📋 CARREGAR PEDIDOS
@@ -1140,6 +1149,31 @@ const supabase = window.supabase.createClient(
   SUPABASE_URL,
   SUPABASE_KEY
 );
+async function finalizarComSalvamento() {
+
+    const pedido = {
+        cliente: document.getElementById("nome").value,
+        telefone: document.getElementById("telefone").value,
+        itens: carrinho,
+        total: atualizar(),
+        endereco: document.getElementById("endereco").value,
+        data: document.getElementById("dataAgendamento").value,
+        hora: document.getElementById("horaAgendamento").value,
+        status: "preparacao"
+    };
+
+    const { error } = await supabase
+      .from('pedidos')
+      .insert([pedido]);
+
+    if(error){
+        console.log(error);
+        alert("Erro ao salvar pedido");
+        return;
+    }
+
+    finalizarZap();
+}
 </script>
 </body>
 </html>
