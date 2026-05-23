@@ -441,18 +441,7 @@ async function salvarPedidoAdmin(pedido) {
 // 📲 INTERCEPTA FINALIZAÇÃO
 // ======================================
 
-async function finalizarComSalvamento() {
-
-    const pedido = {
-        cliente: document.getElementById("nome").value,
-        telefone: document.getElementById("telefone").value,
-        itens: carrinho,
-        total: atualizar(),
-        endereco: document.getElementById("endereco").value,
-        data: document.getElementById("dataAgendamento").value,
-        hora: document.getElementById("horaAgendamento").value,
-        status: "preparacao"
-    };
+async 
 
     const { error } = await supabase
       .from('pedidos')
