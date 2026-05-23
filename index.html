@@ -691,14 +691,14 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 1 && horaAtualwik<12) {
+        if (horaAtual >= 1 && horaAtualwik <12) {
             aberta = true;
         }
 
     } else {
         // Sábado, domingo e feriados
 
-        if (horaAtual >= 3 && horaAtual < 17) {
+        if (horaAtual >= 1 && horaAtual < 17) {
             aberta = true;
         }
     }
