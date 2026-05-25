@@ -486,14 +486,14 @@ function verificarLojaAberta() {
     // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
 
-        if (horaAtual >= 5 && horaAtual < 12) {
+        if (horaAtual >= 00 && horaAtual < 12) {
             aberta = true;
         }
 
     } else {
         // Sábado, domingo e feriados
 
-        if (horaAtual >= 5 && horaAtual < 17) {
+        if (horaAtual >= 00 && horaAtual < 17) {
             aberta = true;
         }
     }
@@ -763,6 +763,7 @@ function limparCarrinhoCompleto() {
 }
 
 function finalizarZap() {
+
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
 
@@ -789,6 +790,31 @@ function finalizarZap() {
         acc + item.qtd, 0);
 
     let total = subtotal + frete;
+
+    // =========================================
+    // SALVAR NO FIREBASE
+    // =========================================
+
+    salvarPedidoFirebase({
+        cliente: nome,
+        telefone: tel,
+        endereco: endereco,
+        bairro: bairroNome,
+        data: data,
+        hora: hora,
+        pagamento: pag,
+        itens: carrinho,
+        subtotal: subtotal,
+        frete: frete,
+        total: total,
+        quantidadeItens: totalItens,
+        criadoEm: new Date().toISOString(),
+        status: "novo"
+    });
+
+    // =========================================
+    // MENSAGEM WHATSAPP
+    // =========================================
 
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
 
@@ -837,6 +863,56 @@ function finalizarZap() {
 
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
+</script>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  push,
+  set
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
+  authDomain: "josigourmet-af3ff.firebaseapp.com",
+  databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
+  projectId: "josigourmet-af3ff",
+  storageBucket: "josigourmet-af3ff.firebasestorage.app",
+  messagingSenderId: "373768013260",
+  appId: "1:373768013260:web:bd5fa8dcf6053414d7c969",
+  measurementId: "G-XR4249E0QG"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getDatabase(app);
+
+console.log("Firebase conectado!");
+
+window.salvarPedidoFirebase = async function(pedido) {
+
+  try {
+
+    const pedidosRef = ref(db, "pedidos");
+
+    const novoPedido = push(pedidosRef);
+
+    await set(novoPedido, pedido);
+
+    console.log("Pedido salvo com sucesso!");
+
+  } catch (erro) {
+
+    console.error("Erro ao salvar pedido:", erro);
+
+  }
+
+};
+
 </script>
 </body>
 </html>
