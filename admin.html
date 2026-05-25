@@ -1,8 +1,10 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Admin - Josi Doces Gourmet</title>
@@ -11,140 +13,121 @@
 
 body{
     margin:0;
-    background:#f5f5f5;
-    font-family:Arial,sans-serif;
-}
-
-header{
-    background:#5d4037;
-    color:white;
     padding:20px;
+    background:#fdf5e6;
+    font-family:Arial;
+}
+
+h1{
     text-align:center;
-    font-size:24px;
-    font-weight:bold;
-    position:sticky;
-    top:0;
-    z-index:999;
+    color:#5d4037;
+    margin-bottom:30px;
 }
 
-.topo{
-    display:flex;
-    justify-content:center;
-    gap:15px;
-    padding:15px;
-    flex-wrap:wrap;
-}
-
-.card-topo{
+.card{
     background:white;
-    padding:15px;
-    border-radius:15px;
-    min-width:180px;
-    text-align:center;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08);
-}
-
-.card-topo h3{
-    margin:0;
-    font-size:14px;
-    color:#777;
-}
-
-.card-topo span{
-    font-size:28px;
-    font-weight:bold;
-    color:#25D366;
-}
-
-.container{
-    padding:15px;
-    max-width:1200px;
-    margin:auto;
-}
-
-.pedido{
-    background:white;
-    border-radius:18px;
+    border-radius:20px;
     padding:20px;
     margin-bottom:20px;
-    box-shadow:0 5px 18px rgba(0,0,0,0.08);
-    border-left:8px solid #ff9800;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
-.pedido.preparo{
-    border-left-color:#ff9800;
-}
-
-.pedido.entregue{
-    border-left-color:#25D366;
-    opacity:0.9;
-}
-
-.pedido h2{
-    margin-top:0;
+.nome{
+    font-size:22px;
+    font-weight:bold;
     color:#5d4037;
 }
 
-.linha{
-    margin:8px 0;
-    font-size:15px;
+.info{
+    margin-top:8px;
+    color:#444;
+    line-height:1.6;
 }
 
 .itens{
     background:#fafafa;
     padding:15px;
-    border-radius:15px;
+    border-radius:10px;
+    margin-top:15px;
+}
+
+.item{
+    margin-bottom:8px;
+}
+
+.total{
+    font-size:22px;
+    color:#5d4037;
+    font-weight:bold;
     margin-top:15px;
 }
 
 .status{
-    margin-top:12px;
+    margin-top:15px;
+    padding:10px;
+    border-radius:10px;
+    color:white;
     font-weight:bold;
-    font-size:18px;
+    text-align:center;
 }
 
-.btns{
-    display:flex;
-    gap:10px;
+.novo{
+    background:#f39c12;
+}
+
+.preparando{
+    background:#e67e22;
+}
+
+.saiu{
+    background:#3498db;
+}
+
+.entregue{
+    background:#27ae60;
+}
+
+select{
+    width:100%;
+    padding:12px;
+    border-radius:10px;
     margin-top:15px;
-    flex-wrap:wrap;
+    border:1px solid #ddd;
+    font-size:16px;
 }
 
 button{
+    width:100%;
     border:none;
     padding:14px;
-    border-radius:12px;
+    border-radius:10px;
+    margin-top:10px;
     cursor:pointer;
+    font-size:16px;
     font-weight:bold;
-    flex:1;
-    font-size:15px;
 }
 
-.btn-preparo{
-    background:#ff9800;
-    color:white;
-}
-
-.btn-saiu{
-    background:#2196f3;
-    color:white;
-}
-
-.btn-entregue{
+.btn-zap{
     background:#25D366;
     color:white;
 }
 
-.btn-excluir{
-    background:#e74c3c;
+.topo{
+    background:#5d4037;
     color:white;
+    padding:15px;
+    border-radius:15px;
+    margin-bottom:20px;
+    text-align:center;
+    font-size:18px;
+    font-weight:bold;
 }
 
 .vazio{
     text-align:center;
-    margin-top:50px;
     color:#777;
-    font-size:22px;
+    margin-top:50px;
+    font-size:18px;
 }
 
 </style>
@@ -153,321 +136,280 @@ button{
 
 <body>
 
-<header>
-🍬 ADMIN - JOSI DOCES GOURMET
-</header>
+<script>
+
+const senha = prompt("Digite a senha do admin:");
+
+if(senha !== "123456"){
+
+    alert("Acesso negado");
+
+    location.href = "/";
+
+}
+
+</script>
 
 <div class="topo">
-
-<div class="card-topo">
-<h3>Pedidos</h3>
-<span id="totalPedidos">0</span>
+🍬 Painel Administrativo - Josi Doces Gourmet
 </div>
 
-<div class="card-topo">
-<h3>Total Vendido</h3>
-<span id="totalVendido">R$ 0</span>
-</div>
+<h1>Pedidos em Tempo Real</h1>
 
-</div>
-
-<div class="container" id="listaPedidos">
-
-<div class="vazio">
-Carregando pedidos...
-</div>
-
-</div>
-
-<audio id="somNovo">
-<source src="https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3" type="audio/mpeg">
-</audio>
+<div id="pedidos"></div>
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
-getDatabase,
-ref,
-onValue,
-update,
-remove
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    getDatabase,
+    ref,
+    onValue,
+    update
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-
-apiKey: "SUA_API_KEY",
-
-authDomain: "SEU_AUTH_DOMAIN",
-
-databaseURL: "SUA_DATABASE_URL",
-
-projectId: "SEU_PROJECT_ID",
-
-storageBucket: "SEU_BUCKET",
-
-messagingSenderId: "SEU_SENDER_ID",
-
-appId: "SEU_APP_ID"
-
+  apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
+  authDomain: "josigourmet-af3ff.firebaseapp.com",
+  databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
+  projectId: "josigourmet-af3ff",
+  storageBucket: "josigourmet-af3ff.firebasestorage.app",
+  messagingSenderId: "373768013260",
+  appId: "1:373768013260:web:bd5fa8dcf6053414d7c969",
+  measurementId: "G-XR4249E0QG"
 };
 
 const app = initializeApp(firebaseConfig);
 
 const db = getDatabase(app);
 
-const listaPedidos =
-document.getElementById("listaPedidos");
+const pedidosRef = ref(db, "pedidos");
 
-const totalPedidos =
-document.getElementById("totalPedidos");
+onValue(pedidosRef, (snapshot)=>{
 
-const totalVendido =
-document.getElementById("totalVendido");
+    const dados = snapshot.val();
 
-const pedidosRef =
-ref(db,"pedidos");
+    const container = document.getElementById("pedidos");
 
-let totalAnterior = 0;
+    container.innerHTML = "";
 
-onValue(pedidosRef,(snapshot)=>{
+    if(!dados){
 
-const dados = snapshot.val();
+        container.innerHTML = `
+            <div class="vazio">
+                Nenhum pedido encontrado 🍰
+            </div>
+        `;
 
-listaPedidos.innerHTML = "";
+        return;
+    }
 
-if(!dados){
+    Object.entries(dados).reverse().forEach(([id, pedido])=>{
 
-listaPedidos.innerHTML = `
-<div class="vazio">
-Nenhum pedido encontrado
-</div>
-`;
+        let classe = "novo";
 
-return;
+        if(pedido.status === "preparando"){
+            classe = "preparando";
+        }
+
+        if(pedido.status === "saiu"){
+            classe = "saiu";
+        }
+
+        if(pedido.status === "entregue"){
+            classe = "entregue";
+        }
+
+        const card = document.createElement("div");
+
+        card.className = "card";
+
+        card.innerHTML = `
+
+            <div class="nome">
+                ${pedido.cliente}
+            </div>
+
+            <div class="info">
+                📞 ${pedido.telefone}
+            </div>
+
+            <div class="info">
+                📍 ${pedido.endereco || "Retirada no local"}
+            </div>
+
+            <div class="info">
+                🚚 ${pedido.bairro}
+            </div>
+
+            <div class="info">
+                💳 ${pedido.pagamento}
+            </div>
+
+            <div class="info">
+                📅 ${pedido.data}
+            </div>
+
+            <div class="info">
+                🕒 ${pedido.hora}
+            </div>
+
+            <div class="itens">
+
+                <strong>🛒 Itens do Pedido</strong>
+
+                <hr>
+
+                ${pedido.itens.map(item => `
+                    <div class="item">
+                        ${item.qtd}x ${item.nome}
+                    </div>
+                `).join("")}
+
+            </div>
+
+            <div class="total">
+                Total: R$ ${pedido.total.toFixed(2)}
+            </div>
+
+            <div class="status ${classe}">
+                ${textoStatus(pedido.status)}
+            </div>
+
+            <select onchange="alterarStatus(
+                '${id}',
+                this.value
+            )">
+
+                <option value="novo"
+                    ${pedido.status=="novo"?"selected":""}>
+                    🟡 Pedido Recebido
+                </option>
+
+                <option value="preparando"
+                    ${pedido.status=="preparando"?"selected":""}>
+                    🟠 Pedido em Preparação
+                </option>
+
+                <option value="saiu"
+                    ${pedido.status=="saiu"?"selected":""}>
+                    🔵 Saiu para Entrega
+                </option>
+
+                <option value="entregue"
+                    ${pedido.status=="entregue"?"selected":""}>
+                    🟢 Pedido Entregue
+                </option>
+
+            </select>
+
+            <button
+                class="btn-zap"
+                onclick="enviarWhatsapp(
+                    '${pedido.telefone}',
+                    '${pedido.cliente}',
+                    '${pedido.status}'
+                )"
+            >
+                💬 Enviar WhatsApp
+            </button>
+
+        `;
+
+        container.appendChild(card);
+
+    });
+
+});
+
+window.textoStatus = function(status){
+
+    if(status === "novo"){
+        return "🟡 Pedido Recebido";
+    }
+
+    if(status === "preparando"){
+        return "🟠 Pedido em Preparação";
+    }
+
+    if(status === "saiu"){
+        return "🔵 Saiu para Entrega";
+    }
+
+    if(status === "entregue"){
+        return "🟢 Pedido Entregue";
+    }
+
+    return status;
 
 }
 
-const pedidos =
-Object.entries(dados).reverse();
+window.alterarStatus = async function(id, status){
 
-if(pedidos.length > totalAnterior){
+    const pedidoRef = ref(db, `pedidos/${id}`);
 
-document.getElementById("somNovo").play();
-
-}
-
-totalAnterior = pedidos.length;
-
-let total = 0;
-let qtd = 0;
-
-pedidos.forEach(([id,pedido])=>{
-
-qtd++;
-
-total += Number(pedido.total || 0);
-
-const div =
-document.createElement("div");
-
-div.className = "pedido";
-
-if(pedido.status === "preparo"){
-
-div.classList.add("preparo");
+    await update(pedidoRef, {
+        status: status
+    });
 
 }
 
-if(pedido.status === "entregue"){
+window.enviarWhatsapp = function(
+    telefone,
+    cliente,
+    status
+){
 
-div.classList.add("entregue");
+    let mensagem = "";
 
-}
+    if(status === "novo"){
 
-let itensHTML = "";
+        mensagem =
+`🍬 Olá ${cliente}!
 
-if(pedido.itens){
+Seu pedido foi recebido com sucesso 🤎
 
-pedido.itens.forEach(item=>{
+Já vamos iniciar o preparo.`;
 
-itensHTML += `
-<div>
-🍰 ${item.qtd}x ${item.nome}
-</div>
-`;
+    }
 
-});
+    if(status === "preparando"){
 
-}
+        mensagem =
+`👩‍🍳 Olá ${cliente}!
 
-let statusTexto = "🆕 NOVO PEDIDO";
-let statusCor = "#555";
+Seu pedido está em preparação 🤎🍰`;
 
-if(pedido.status === "preparo"){
+    }
 
-statusTexto = "👨‍🍳 EM PREPARO";
-statusCor = "#ff9800";
+    if(status === "saiu"){
 
-}
+        mensagem =
+`🚚 Olá ${cliente}!
 
-if(pedido.status === "saiu"){
+Seu pedido saiu para entrega 🤎`;
 
-statusTexto = "🚚 SAIU PARA ENTREGA";
-statusCor = "#2196f3";
+    }
 
-}
+    if(status === "entregue"){
 
-if(pedido.status === "entregue"){
+        mensagem =
+`✅ Olá ${cliente}!
 
-statusTexto = "✅ ENTREGUE";
-statusCor = "#25D366";
+Seu pedido foi entregue.
 
-}
+Muito obrigado pela preferência 🤎🍬`;
 
-const telefone =
-String(pedido.telefone).replace(/\D/g,'');
+    }
 
-div.innerHTML = `
+    const numero = telefone.replace(/\D/g,'');
 
-<h2>
-Pedido #${id.slice(-5)}
-</h2>
-
-<div class="linha">
-👤 <b>${pedido.nome}</b>
-</div>
-
-<div class="linha">
-☎️ ${pedido.telefone}
-</div>
-
-<div class="linha">
-📍 ${pedido.endereco || "Retirada"}
-</div>
-
-<div class="linha">
-💳 ${pedido.pagamento || "Não informado"}
-</div>
-
-<div class="linha">
-💰 <b>R$ ${Number(pedido.total).toFixed(2)}</b>
-</div>
-
-<div class="status"
-style="color:${statusCor}">
-${statusTexto}
-</div>
-
-<div class="itens">
-${itensHTML}
-</div>
-
-<div class="btns">
-
-<button class="btn-preparo">
-👨‍🍳 Preparo
-</button>
-
-<button class="btn-saiu">
-🚚 Saiu
-</button>
-
-<button class="btn-entregue">
-✅ Entregue
-</button>
-
-<button class="btn-excluir">
-🗑️ Excluir
-</button>
-
-</div>
-
-`;
-
-const btnPreparo =
-div.querySelector(".btn-preparo");
-
-const btnSaiu =
-div.querySelector(".btn-saiu");
-
-const btnEntregue =
-div.querySelector(".btn-entregue");
-
-const btnExcluir =
-div.querySelector(".btn-excluir");
-
-btnPreparo.addEventListener("click",()=>{
-
-update(ref(db,"pedidos/"+id),{
-status:"preparo"
-});
-
-const msg =
-`Olá ${pedido.nome}, seu pedido está em preparo 🍰`;
-
-window.open(
-`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`,
-"_blank"
-);
-
-});
-
-btnSaiu.addEventListener("click",()=>{
-
-update(ref(db,"pedidos/"+id),{
-status:"saiu"
-});
-
-const msg =
-`🚚 Olá ${pedido.nome}, seu pedido saiu para entrega!`;
-
-window.open(
-`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`,
-"_blank"
-);
-
-});
-
-btnEntregue.addEventListener("click",()=>{
-
-update(ref(db,"pedidos/"+id),{
-status:"entregue"
-});
-
-const msg =
-`✅ Olá ${pedido.nome}, seu pedido foi entregue. Obrigado pela preferência 🍬`;
-
-window.open(
-`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`,
-"_blank"
-);
-
-});
-
-btnExcluir.addEventListener("click",()=>{
-
-if(confirm("Excluir pedido?")){
-
-remove(ref(db,"pedidos/"+id));
+    window.open(
+        `https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`
+    );
 
 }
-
-});
-
-listaPedidos.appendChild(div);
-
-});
-
-totalPedidos.innerText = qtd;
-
-totalVendido.innerText =
-"R$ " + total.toFixed(2);
-
-});
 
 </script>
 
