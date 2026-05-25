@@ -124,16 +124,16 @@ h1{
     background:#3498db;
 }
 
+.pronto{
+    background:#9b59b6;
+}
+
 .entregue{
     background:#27ae60;
 }
 
 .rejeitado{
     background:#e74c3c;
-}
-
-.pronto{
-    background:#9b59b6;
 }
 
 select{
@@ -201,6 +201,12 @@ if(senha !== "123456"){
 
 <div id="pedidos"></div>
 
+<audio id="somNovoPedido">
+
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=notification-2-269292.mp3">
+
+</audio>
+
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -239,6 +245,8 @@ const db = getDatabase(app);
 
 const pedidosRef = ref(db, "pedidos");
 
+let primeiraCarga = true;
+
 onValue(pedidosRef, (snapshot)=>{
 
     const dados = snapshot.val();
@@ -259,7 +267,27 @@ onValue(pedidosRef, (snapshot)=>{
 
     }
 
-    Object.entries(dados).reverse().forEach(([id, pedido])=>{
+    const pedidosArray = Object.entries(dados);
+
+    if(!primeiraCarga){
+
+        const possuiNovo = pedidosArray.some(
+            ([id,pedido]) => pedido.status === "novo"
+        );
+
+        if(possuiNovo){
+
+            document
+                .getElementById("somNovoPedido")
+                .play();
+
+        }
+
+    }
+
+    primeiraCarga = false;
+
+    pedidosArray.reverse().forEach(([id, pedido])=>{
 
         let classe = "novo";
 
@@ -271,16 +299,16 @@ onValue(pedidosRef, (snapshot)=>{
             classe = "saiu";
         }
 
+        if(pedido.status === "pronto"){
+            classe = "pronto";
+        }
+
         if(pedido.status === "entregue"){
             classe = "entregue";
         }
 
         if(pedido.status === "rejeitado"){
             classe = "rejeitado";
-        }
-
-        if(pedido.status === "pronto"){
-            classe = "pronto";
         }
 
         const card = document.createElement("div");
@@ -299,6 +327,15 @@ onValue(pedidosRef, (snapshot)=>{
             ` : ""}
 
             <div class="nome">
+                🧾 Pedido #${pedido.numeroPedido || "000"}
+            </div>
+
+            <div style="
+                margin-top:8px;
+                font-size:22px;
+                font-weight:bold;
+                color:#5d4037;
+            ">
                 ${pedido.cliente}
             </div>
 
@@ -390,7 +427,8 @@ onValue(pedidosRef, (snapshot)=>{
                 onclick="enviarWhatsapp(
                     '${pedido.telefone}',
                     '${pedido.cliente}',
-                    '${pedido.status}'
+                    '${pedido.status}',
+                    '${pedido.numeroPedido || "000"}'
                 )"
             >
                 💬 Enviar WhatsApp
@@ -470,7 +508,8 @@ window.excluirPedido = async function(id){
 window.enviarWhatsapp = function(
     telefone,
     cliente,
-    status
+    status,
+    numeroPedido
 ){
 
     let mensagem = "";
@@ -479,6 +518,8 @@ window.enviarWhatsapp = function(
 
         mensagem =
 `🍬 Olá ${cliente}!
+
+🧾 Pedido Nº: ${numeroPedido}
 
 Seu pedido foi recebido com sucesso 🤎
 
@@ -491,6 +532,8 @@ Já vamos iniciar o preparo.`;
         mensagem =
 `👩‍🍳 Olá ${cliente}!
 
+🧾 Pedido Nº: ${numeroPedido}
+
 Seu pedido está em preparação 🤎🍰`;
 
     }
@@ -500,6 +543,8 @@ Seu pedido está em preparação 🤎🍰`;
         mensagem =
 `🚚 Olá ${cliente}!
 
+🧾 Pedido Nº: ${numeroPedido}
+
 Seu pedido saiu para entrega 🤎`;
 
     }
@@ -508,6 +553,8 @@ Seu pedido saiu para entrega 🤎`;
 
         mensagem =
 `🟣 Olá ${cliente}!
+
+🧾 Pedido Nº: ${numeroPedido}
 
 Seu pedido está pronto para retirada 🤎🍰
 
@@ -520,6 +567,8 @@ Já pode vir buscar.`;
         mensagem =
 `✅ Olá ${cliente}!
 
+🧾 Pedido Nº: ${numeroPedido}
+
 Seu pedido foi entregue.
 
 Muito obrigado pela preferência 🤎🍬`;
@@ -530,6 +579,8 @@ Muito obrigado pela preferência 🤎🍬`;
 
         mensagem =
 `❌ Olá ${cliente}!
+
+🧾 Pedido Nº: ${numeroPedido}
 
 Infelizmente não conseguiremos aceitar seu pedido neste momento.
 
