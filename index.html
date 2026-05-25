@@ -764,52 +764,41 @@ function limparCarrinhoCompleto() {
 
 function finalizarZap() {
 
-    const nome = document.getElementById("nome").value;
-    const tel = document.getElementById("telefone").value;
+    const numeroPedido = Date.now();
 
-    const bairroSel = document.getElementById("bairro");
-    const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
+salvarPedidoFirebase({
 
-    const endereco = document.getElementById("endereco").value;
+    numeroPedido: numeroPedido,
 
-    const data = document.getElementById("dataAgendamento").value;
-    const hora = document.getElementById("horaAgendamento").value;
+    cliente: nome,
 
-    const pag = document.getElementById("pagamento").value;
+    telefone: tel,
 
-    const valorBairro = document.getElementById("bairro").value;
+    endereco: endereco,
 
-    let frete = (promoAtiva || valorBairro === "retirada")
-        ? 0
-        : parseFloat(valorBairro);
+    bairro: bairroNome,
 
-    let subtotal = carrinho.reduce((acc, item) =>
-        acc + (item.preco * item.qtd), 0);
+    data: data,
 
-    let totalItens = carrinho.reduce((acc, item) =>
-        acc + item.qtd, 0);
+    hora: hora,
 
-    let total = subtotal + frete;
+    pagamento: pag,
 
-    // =========================================
-    // SALVAR NO FIREBASE
-    // =========================================
+    itens: carrinho,
 
-    salvarPedidoFirebase({
-        cliente: nome,
-        telefone: tel,
-        endereco: endereco,
-        bairro: bairroNome,
-        data: data,
-        hora: hora,
-        pagamento: pag,
-        itens: carrinho,
-        subtotal: subtotal,
-        frete: frete,
-        total: total,
-        quantidadeItens: totalItens,
-        criadoEm: new Date().toISOString(),
-        status: "novo"
+    subtotal: subtotal,
+
+    frete: frete,
+
+    total: total,
+
+    quantidadeItens: totalItens,
+
+    criadoEm: new Date().toISOString(),
+
+    status: "novo"
+
+});
     });
 
     // =========================================
