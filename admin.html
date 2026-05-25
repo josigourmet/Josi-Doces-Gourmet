@@ -1,84 +1,121 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Painel Admin</title>
+<title>Meus Pedidos</title>
 
 <style>
+
 body{
-font-family:Arial;
-background:#f5f5f5;
-padding:20px;
+    margin:0;
+    background:#f5f5f5;
+    font-family:Arial;
+    padding:20px;
+}
+
+.box{
+    background:white;
+    padding:25px;
+    border-radius:20px;
+    max-width:500px;
+    margin:auto;
+    box-shadow:0 5px 20px rgba(0,0,0,0.1);
 }
 
 h1{
-text-align:center;
-}
-
-.pedido{
-background:#fff;
-padding:15px;
-margin-bottom:15px;
-border-radius:10px;
-box-shadow:0 2px 5px rgba(0,0,0,0.1);
-}
-
-button{
-padding:10px;
-border:none;
-border-radius:8px;
-margin:5px;
-color:white;
-font-weight:bold;
-cursor:pointer;
-}
-
-.preparo{
-background:orange;
-}
-
-.entrega{
-background:#3498db;
-}
-
-.finalizado{
-background:green;
+    text-align:center;
+    color:#5d4037;
 }
 
 .status{
-font-weight:bold;
-margin-top:10px;
+    margin-top:20px;
+    padding:20px;
+    border-radius:15px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    background:#fafafa;
 }
+
+.info{
+    margin-top:15px;
+    line-height:30px;
+}
+
 </style>
 </head>
 
 <body>
 
-<h1>🍰 Painel Admin</h1>
+<div class="box">
 
-<div id="pedidos"></div>
+<h1>🍬 Acompanhar Pedido</h1>
+
+<input
+type="text"
+id="pedidoId"
+placeholder="Digite o ID do pedido"
+style="
+width:100%;
+padding:15px;
+border-radius:10px;
+border:1px solid #ccc;
+font-size:18px;
+">
+
+<button
+onclick="buscarPedido()"
+style="
+width:100%;
+margin-top:15px;
+padding:15px;
+border:none;
+background:#25D366;
+color:white;
+font-size:18px;
+border-radius:12px;
+font-weight:bold;
+cursor:pointer;
+">
+Buscar Pedido
+</button>
+
+<div class="status" id="status">
+Aguardando pedido...
+</div>
+
+<div class="info" id="info"></div>
+
+</div>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getDatabase,
 ref,
-onValue,
-update
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+onValue
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
 
-apiKey: "SUA_API_KEY",
-authDomain: "SEU_AUTH_DOMAIN",
-databaseURL: "SEU_DATABASE_URL",
-projectId: "SEU_PROJECT_ID",
-storageBucket: "SEU_STORAGE_BUCKET",
-messagingSenderId: "SEU_SENDER_ID",
+apiKey: "SUA_API",
+
+authDomain: "SEU_AUTH",
+
+databaseURL: "SUA_DATABASE_URL",
+
+projectId: "SEU_PROJECT",
+
+storageBucket: "SEU_BUCKET",
+
+messagingSenderId: "SEU_ID",
+
 appId: "SEU_APP_ID"
 
 };
@@ -87,86 +124,57 @@ const app = initializeApp(firebaseConfig);
 
 const db = getDatabase(app);
 
-const pedidosRef = ref(db, "pedidos");
+window.buscarPedido = function(){
 
-const pedidosDiv = document.getElementById("pedidos");
+    const id =
+    document.getElementById("pedidoId").value;
 
-onValue(pedidosRef, (snapshot) => {
+    const pedidoRef =
+    ref(db, "pedidos/" + id);
 
-pedidosDiv.innerHTML = "";
+    onValue(pedidoRef, (snapshot)=>{
 
-snapshot.forEach((childSnapshot) => {
+        const pedido = snapshot.val();
 
-const pedido = childSnapshot.val();
+        if(!pedido){
 
-const pedidoId = childSnapshot.key;
+            document.getElementById("status").innerHTML =
+            "❌ Pedido não encontrado";
 
-const div = document.createElement("div");
+            return;
 
-div.className = "pedido";
+        }
 
-div.innerHTML = `
+        document.getElementById("info").innerHTML = `
 
-<h3>${pedido.cliente}</h3>
+        👤 ${pedido.nome}<br>
+        ☎️ ${pedido.telefone}<br>
+        💰 R$ ${Number(pedido.total).toFixed(2)}
 
-<p><b>Telefone:</b> ${pedido.telefone}</p>
+        `;
 
-<p><b>Endereço:</b> ${pedido.endereco}</p>
+        if(pedido.status === "novo"){
 
-<p><b>Total:</b> R$ ${pedido.total}</p>
+            document.getElementById("status").innerHTML =
+            "🆕 Pedido recebido";
 
-<p class="status">Status: ${pedido.status}</p>
+        }
 
-<button class="preparo"
-onclick="atualizarStatus('${pedidoId}','Em preparação','${pedido.telefone}')">
-👩‍🍳 Em preparação
-</button>
+        if(pedido.status === "preparo"){
 
-<button class="entrega"
-onclick="atualizarStatus('${pedidoId}','Saiu para entrega','${pedido.telefone}')">
-🚚 Saiu para entrega
-</button>
+            document.getElementById("status").innerHTML =
+            "👨‍🍳 Pedido em preparo";
 
-<button class="finalizado"
-onclick="atualizarStatus('${pedidoId}','Entregue','${pedido.telefone}')">
-✅ Entregue
-</button>
+        }
 
-`;
+        if(pedido.status === "entregue"){
 
-pedidosDiv.appendChild(div);
+            document.getElementById("status").innerHTML =
+            "✅ Pedido entregue";
 
-});
+        }
 
-});
-
-window.atualizarStatus = function(id,status,telefone){
-
-update(ref(db,"pedidos/" + id),{
-status: status
-});
-
-let msg = "";
-
-if(status === "Em preparação"){
-
-msg = "🍰 Josi Doces Gourmet\n\nSeu pedido está em preparação 👩‍🍳";
-
-}
-
-if(status === "Saiu para entrega"){
-
-msg = "🚚 Seu pedido saiu para entrega!";
-
-}
-
-if(status === "Entregue"){
-
-msg = "✅ Pedido entregue!\n\nObrigado pela preferência ❤️";
-
-}
-
-window.open(`https://wa.me/55${telefone}?text=${encodeURIComponent(msg)}`);
+    });
 
 }
 
