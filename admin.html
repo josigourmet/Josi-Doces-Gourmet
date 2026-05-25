@@ -1,180 +1,367 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Meus Pedidos</title>
+<title>Admin - Josi Doces Gourmet</title>
 
 <style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial;
+}
 
 body{
-    margin:0;
-    background:#f5f5f5;
-    font-family:Arial;
-    padding:20px;
+background:#f4f4f4;
+padding:15px;
 }
 
-.box{
-    background:white;
-    padding:25px;
-    border-radius:20px;
-    max-width:500px;
-    margin:auto;
-    box-shadow:0 5px 20px rgba(0,0,0,0.1);
+.header{
+background:#5d4037;
+color:white;
+padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+text-align:center;
 }
 
-h1{
-    text-align:center;
-    color:#5d4037;
+.stats{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:10px;
+margin-bottom:20px;
 }
 
-.status{
-    margin-top:20px;
-    padding:20px;
-    border-radius:15px;
-    text-align:center;
-    font-size:22px;
-    font-weight:bold;
-    background:#fafafa;
+.stat{
+background:white;
+padding:15px;
+border-radius:12px;
+text-align:center;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
-.info{
-    margin-top:15px;
-    line-height:30px;
+.colunas{
+display:grid;
+grid-template-columns:1fr;
+gap:20px;
 }
 
+.coluna{
+background:#fff;
+padding:15px;
+border-radius:15px;
+box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+.coluna h2{
+margin-bottom:15px;
+color:#5d4037;
+}
+
+.pedido{
+background:#fafafa;
+padding:15px;
+border-radius:12px;
+margin-bottom:15px;
+border-left:6px solid #5d4037;
+}
+
+.pedido h3{
+margin-bottom:8px;
+}
+
+.item{
+font-size:14px;
+margin-bottom:4px;
+}
+
+.botoes{
+display:flex;
+flex-wrap:wrap;
+gap:8px;
+margin-top:15px;
+}
+
+button{
+border:none;
+padding:10px 12px;
+border-radius:10px;
+font-weight:bold;
+color:white;
+cursor:pointer;
+}
+
+.preparo{background:#ff9800;}
+.entrega{background:#2196f3;}
+.finalizado{background:#4caf50;}
+.cancelado{background:#f44336;}
+.whats{background:#25D366;}
+
+.login{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#f4f4f4;
+display:flex;
+align-items:center;
+justify-content:center;
+z-index:9999;
+}
+
+.login-box{
+background:white;
+padding:30px;
+border-radius:20px;
+width:90%;
+max-width:350px;
+box-shadow:0 5px 20px rgba(0,0,0,0.2);
+}
+
+.login-box h2{
+margin-bottom:20px;
+text-align:center;
+}
+
+.login-box input{
+width:100%;
+padding:12px;
+margin-bottom:12px;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+.login-box button{
+width:100%;
+background:#5d4037;
+}
+
+@media(min-width:900px){
+.colunas{
+grid-template-columns:1fr 1fr 1fr;
+}
+}
 </style>
 </head>
 
 <body>
 
-<div class="box">
-
-<h1>🍬 Acompanhar Pedido</h1>
-
-<input
-type="text"
-id="pedidoId"
-placeholder="Digite o ID do pedido"
-style="
-width:100%;
-padding:15px;
-border-radius:10px;
-border:1px solid #ccc;
-font-size:18px;
-">
-
-<button
-onclick="buscarPedido()"
-style="
-width:100%;
-margin-top:15px;
-padding:15px;
-border:none;
-background:#25D366;
-color:white;
-font-size:18px;
-border-radius:12px;
-font-weight:bold;
-cursor:pointer;
-">
-Buscar Pedido
-</button>
-
-<div class="status" id="status">
-Aguardando pedido...
+<div id="loginTela" class="login">
+<div class="login-box">
+<h2>🔐 Painel Admin</h2>
+<input type="text" id="usuario" placeholder="Usuário">
+<input type="password" id="senha" placeholder="Senha">
+<button onclick="fazerLogin()">Entrar</button>
+</div>
 </div>
 
-<div class="info" id="info"></div>
+<div class="header">
+<h1>🍰 Josi Doces Gourmet</h1>
+<p>Painel Administrativo</p>
+</div>
+
+<div class="stats">
+<div class="stat">
+<h3>Total Hoje</h3>
+<p id="totalHoje">R$ 0,00</p>
+</div>
+
+<div class="stat">
+<h3>Pedidos</h3>
+<p id="qtdPedidos">0</p>
+</div>
+</div>
+
+<div class="colunas">
+
+<div class="coluna">
+<h2>🆕 Novos Pedidos</h2>
+<div id="novosPedidos"></div>
+</div>
+
+<div class="coluna">
+<h2>👩‍🍳 Em Preparo</h2>
+<div id="preparoPedidos"></div>
+</div>
+
+<div class="coluna">
+<h2>🚚 Entrega</h2>
+<div id="entregaPedidos"></div>
+</div>
 
 </div>
+
+<audio id="somNovoPedido">
+<source src="https://www.soundjay.com/buttons/sounds/button-3.mp3" type="audio/mpeg">
+</audio>
 
 <script type="module">
 
-import { initializeApp }
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getDatabase,
 ref,
-onValue
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+onValue,
+update
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-
-apiKey: "SUA_API",
-
-authDomain: "SEU_AUTH",
-
-databaseURL: "SUA_DATABASE_URL",
-
-projectId: "SEU_PROJECT",
-
-storageBucket: "SEU_BUCKET",
-
-messagingSenderId: "SEU_ID",
-
-appId: "SEU_APP_ID"
-
+apiKey: "COLE SUA API KEY",
+authDomain: "COLE SEU AUTH DOMAIN",
+databaseURL: "COLE SUA DATABASE URL",
+projectId: "COLE SEU PROJECT ID",
+storageBucket: "COLE SEU STORAGE BUCKET",
+messagingSenderId: "COLE SEU SENDER ID",
+appId: "COLE SEU APP ID"
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getDatabase(app);
 
-window.buscarPedido = function(){
+const pedidosRef = ref(db, "pedidos");
 
-    const id =
-    document.getElementById("pedidoId").value;
+const novos = document.getElementById("novosPedidos");
+const preparo = document.getElementById("preparoPedidos");
+const entrega = document.getElementById("entregaPedidos");
 
-    const pedidoRef =
-    ref(db, "pedidos/" + id);
+let ultimoTotal = 0;
 
-    onValue(pedidoRef, (snapshot)=>{
+onValue(pedidosRef, (snapshot)=>{
 
-        const pedido = snapshot.val();
+novos.innerHTML = "";
+preparo.innerHTML = "";
+entrega.innerHTML = "";
 
-        if(!pedido){
+let totalHoje = 0;
+let qtd = 0;
 
-            document.getElementById("status").innerHTML =
-            "❌ Pedido não encontrado";
+snapshot.forEach((child)=>{
 
-            return;
+const pedido = child.val();
+const id = child.key;
 
-        }
+qtd++;
 
-        document.getElementById("info").innerHTML = `
+if(pedido.total){
 
-        👤 ${pedido.nome}<br>
-        ☎️ ${pedido.telefone}<br>
-        💰 R$ ${Number(pedido.total).toFixed(2)}
+const valor = parseFloat(
+String(pedido.total).replace("R$","").replace(",",".")
+);
 
-        `;
+if(!isNaN(valor)) totalHoje += valor;
+}
 
-        if(pedido.status === "novo"){
+const div = document.createElement("div");
 
-            document.getElementById("status").innerHTML =
-            "🆕 Pedido recebido";
+div.className = "pedido";
 
-        }
+div.innerHTML = `
+<h3>${pedido.cliente || 'Cliente'}</h3>
 
-        if(pedido.status === "preparo"){
+<div class="item">📞 ${pedido.telefone || ''}</div>
+<div class="item">📍 ${pedido.endereco || ''}</div>
+<div class="item">💳 ${pedido.pagamento || ''}</div>
+<div class="item">⏰ ${pedido.hora || ''}</div>
+<div class="item">📅 ${pedido.data || ''}</div>
+<div class="item">💰 Total: R$ ${pedido.total || '0,00'}</div>
 
-            document.getElementById("status").innerHTML =
-            "👨‍🍳 Pedido em preparo";
+<hr style="margin:10px 0;">
 
-        }
+<div>
+${pedido.itens ? pedido.itens.map(i => `• ${i.nome} (${i.qtd})`).join('<br>') : ''}
+</div>
 
-        if(pedido.status === "entregue"){
+<div class="botoes">
+<button class="preparo" onclick="mudarStatus('${id}','preparo','${pedido.telefone}')">👩‍🍳 Preparo</button>
 
-            document.getElementById("status").innerHTML =
-            "✅ Pedido entregue";
+<button class="entrega" onclick="mudarStatus('${id}','entrega','${pedido.telefone}')">🚚 Entrega</button>
 
-        }
+<button class="finalizado" onclick="mudarStatus('${id}','finalizado','${pedido.telefone}')">✅ Finalizado</button>
 
-    });
+<button class="cancelado" onclick="mudarStatus('${id}','cancelado','${pedido.telefone}')">❌ Cancelar</button>
+
+<button class="whats" onclick="abrirWhats('${pedido.telefone}')">💬 Whats</button>
+</div>
+`;
+
+if(pedido.status === 'preparo'){
+preparo.appendChild(div);
+}
+else if(pedido.status === 'entrega'){
+entrega.appendChild(div);
+}
+else if(pedido.status === 'finalizado' || pedido.status === 'cancelado'){
+}
+else{
+novos.appendChild(div);
+}
+
+});
+
+if(qtd > ultimoTotal){
+document.getElementById('somNovoPedido').play();
+}
+
+ultimoTotal = qtd;
+
+document.getElementById("qtdPedidos").innerText = qtd;
+
+document.getElementById("totalHoje").innerText =
+"R$ " + totalHoje.toFixed(2).replace('.',',');
+
+});
+
+window.mudarStatus = function(id,status,telefone){
+
+update(ref(db,'pedidos/' + id),{
+status: status
+});
+
+const numero = String(telefone || '').replace(/\D/g,'');
+
+let mensagem = '';
+
+if(status === 'preparo'){
+mensagem = '🍰 Seu pedido está em preparação!';
+}
+
+if(status === 'entrega'){
+mensagem = '🚚 Seu pedido saiu para entrega!';
+}
+
+if(status === 'finalizado'){
+mensagem = '✅ Pedido entregue! Obrigado pela preferência ❤️';
+}
+
+if(numero && mensagem){
+window.open(`https://wa.me/55${numero}?text=${encodeURIComponent(mensagem)}`);
+}
+
+}
+
+window.abrirWhats = function(telefone){
+
+const numero = String(telefone || '').replace(/\D/g,'');
+
+window.open(`https://wa.me/55${numero}`);
+
+}
+
+window.fazerLogin = function(){
+
+const u = document.getElementById('usuario').value;
+const s = document.getElementById('senha').value;
+
+if(u === 'admin' && s === '123456'){
+document.getElementById('loginTela').style.display = 'none';
+}
+else{
+alert('Login inválido');
+}
 
 }
 
