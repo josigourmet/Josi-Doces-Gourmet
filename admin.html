@@ -132,6 +132,10 @@ h1{
     background:#e74c3c;
 }
 
+.pronto{
+    background:#9b59b6;
+}
+
 select{
     width:100%;
     padding:14px;
@@ -154,6 +158,11 @@ button{
 
 .btn-zap{
     background:#25D366;
+    color:white;
+}
+
+.btn-excluir{
+    background:#e74c3c;
     color:white;
 }
 
@@ -200,7 +209,8 @@ import {
     getDatabase,
     ref,
     onValue,
-    update
+    update,
+    remove
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -267,6 +277,10 @@ onValue(pedidosRef, (snapshot)=>{
 
         if(pedido.status === "rejeitado"){
             classe = "rejeitado";
+        }
+
+        if(pedido.status === "pronto"){
+            classe = "pronto";
         }
 
         const card = document.createElement("div");
@@ -354,6 +368,11 @@ onValue(pedidosRef, (snapshot)=>{
                     🔵 Saiu para Entrega
                 </option>
 
+                <option value="pronto"
+                    ${pedido.status=="pronto"?"selected":""}>
+                    🟣 Pedido Pronto para Retirada
+                </option>
+
                 <option value="entregue"
                     ${pedido.status=="entregue"?"selected":""}>
                     🟢 Pedido Entregue
@@ -375,6 +394,13 @@ onValue(pedidosRef, (snapshot)=>{
                 )"
             >
                 💬 Enviar WhatsApp
+            </button>
+
+            <button
+                class="btn-excluir"
+                onclick="excluirPedido('${id}')"
+            >
+                🗑️ Excluir Pedido
             </button>
 
         `;
@@ -399,6 +425,10 @@ window.textoStatus = function(status){
         return "🔵 Saiu para Entrega";
     }
 
+    if(status === "pronto"){
+        return "🟣 Pedido Pronto para Retirada";
+    }
+
     if(status === "entregue"){
         return "🟢 Pedido Entregue";
     }
@@ -418,6 +448,22 @@ window.alterarStatus = async function(id, status){
     await update(pedidoRef, {
         status: status
     });
+
+}
+
+window.excluirPedido = async function(id){
+
+    const confirmar = confirm(
+        "Deseja realmente excluir este pedido?"
+    );
+
+    if(!confirmar){
+        return;
+    }
+
+    const pedidoRef = ref(db, `pedidos/${id}`);
+
+    await remove(pedidoRef);
 
 }
 
@@ -455,6 +501,17 @@ Seu pedido está em preparação 🤎🍰`;
 `🚚 Olá ${cliente}!
 
 Seu pedido saiu para entrega 🤎`;
+
+    }
+
+    if(status === "pronto"){
+
+        mensagem =
+`🟣 Olá ${cliente}!
+
+Seu pedido está pronto para retirada 🤎🍰
+
+Já pode vir buscar.`;
 
     }
 
