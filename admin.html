@@ -2,160 +2,434 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>Painel Pedidos</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Josi Doces Gourmet</title>
 
 <style>
+
 body{
-    font-family: Arial;
-    padding:20px;
+    margin:0;
     background:#f5f5f5;
+    font-family:Arial,sans-serif;
 }
 
-.card{
+header{
+    background:#5d4037;
+    color:white;
+    padding:20px;
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    position:sticky;
+    top:0;
+    z-index:999;
+}
+
+.topo{
+    display:flex;
+    justify-content:center;
+    gap:15px;
+    padding:15px;
+    flex-wrap:wrap;
+}
+
+.card-topo{
     background:white;
     padding:15px;
-    margin-bottom:15px;
-    border-radius:10px;
+    border-radius:15px;
+    min-width:170px;
+    text-align:center;
+    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+}
+
+.card-topo h3{
+    margin:0;
+    font-size:14px;
+    color:#666;
+}
+
+.card-topo span{
+    font-size:24px;
+    font-weight:bold;
+    color:#25D366;
+}
+
+.container{
+    padding:15px;
+}
+
+.pedido{
+    background:white;
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:18px;
+    box-shadow:0 5px 15px rgba(0,0,0,0.08);
+    border-left:8px solid #ff9800;
+}
+
+.pedido.preparo{
+    border-left-color:#ff9800;
+}
+
+.pedido.entregue{
+    border-left-color:#25D366;
+    opacity:0.85;
+}
+
+.pedido h2{
+    margin-top:0;
+    color:#5d4037;
+}
+
+.linha{
+    margin:7px 0;
+    font-size:15px;
+}
+
+.itens{
+    background:#fafafa;
+    padding:12px;
+    border-radius:12px;
+    margin-top:12px;
+}
+
+.btns{
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+    flex-wrap:wrap;
 }
 
 button{
-    padding:10px;
     border:none;
-    border-radius:8px;
+    padding:12px;
+    border-radius:12px;
     cursor:pointer;
-    margin:5px;
+    font-weight:bold;
+    flex:1;
 }
 
-.recebido{ background:#3498db; color:white; }
-.preparo{ background:#f39c12; color:white; }
-.entrega{ background:#27ae60; color:white; }
-.finalizado{ background:#2c3e50; color:white; }
+.btn-preparo{
+    background:#ff9800;
+    color:white;
+}
+
+.btn-entregue{
+    background:#25D366;
+    color:white;
+}
+
+.btn-excluir{
+    background:#e74c3c;
+    color:white;
+}
+
+.status{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.vazio{
+    text-align:center;
+    margin-top:50px;
+    color:#777;
+    font-size:20px;
+}
 
 </style>
 </head>
 
 <body>
 
-<h1>Pedidos Josi Doces 🍰</h1>
+<header>
+🍬 ADMIN - JOSI DOCES GOURMET
+</header>
 
-<div id="listaPedidos"></div>
+<div class="topo">
 
-<script>
+    <div class="card-topo">
+        <h3>Pedidos</h3>
+        <span id="totalPedidos">0</span>
+    </div>
 
-const SUPABASE_URL = "bcuucekcoyletzazyunb";
-const SUPABASE_KEY = "sb_publishable_X2L8OP4ydkU_1fn9rBOJeA_FI6mHPeD";
+    <div class="card-topo">
+        <h3>Total Vendido</h3>
+        <span id="totalVendido">R$ 0</span>
+    </div>
 
-const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-);
+</div>
 
-async function carregarPedidos(){
+<div class="container" id="listaPedidos">
 
-    const { data, error } = await supabase
-        .from('pedidos')
-        .select('*')
-        .order('id', { ascending:false });
+<div class="vazio">
+Carregando pedidos...
+</div>
 
-    let html = '';
+</div>
 
-    data.forEach(pedido => {
+<audio id="somNovo">
+<source src="https://notificationsounds.com/storage/sounds/file-sounds-1150-pristine.mp3" type="audio/mpeg">
+</audio>
 
-        html += `
-        <div class="card">
+<script type="module">
 
-            <h3>${pedido.nome}</h3>
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-            <p><b>Telefone:</b> ${pedido.telefone}</p>
+import {
+    getDatabase,
+    ref,
+    onValue,
+    update,
+    remove
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-            <p><b>Status:</b> ${pedido.status}</p>
+const firebaseConfig = {
 
-            <p><b>Total:</b> R$ ${pedido.total}</p>
+    apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
 
-            <button class="recebido"
-            onclick="alterarStatus(
-                ${pedido.id},
-                'Recebido',
-                '${pedido.telefone}'
-            )">
-            Recebido
-            </button>
+    authDomain: "josigourmet-af3ff.firebaseapp.com",
 
-            <button class="preparo"
-            onclick="alterarStatus(
-                ${pedido.id},
-                'Em preparação',
-                '${pedido.telefone}'
-            )">
-            Em preparação
-            </button>
+    databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
 
-            <button class="entrega"
-            onclick="alterarStatus(
-                ${pedido.id},
-                'Saiu para entrega',
-                '${pedido.telefone}'
-            )">
-            Saiu entrega
-            </button>
+    projectId: "josigourmet-af3ff",
 
-            <button class="finalizado"
-            onclick="alterarStatus(
-                ${pedido.id},
-                'Entregue',
-                '${pedido.telefone}'
-            )">
-            Entregue
+    storageBucket: "josigourmet-af3ff.firebasestorage.app",
+
+    messagingSenderId: "373768013260",
+
+    appId: "1:373768013260:web:bd5fa8dcf6053414d7c969"
+};
+
+const app = initializeApp(firebaseConfig);
+
+const db = getDatabase(app);
+
+const listaPedidos =
+document.getElementById("listaPedidos");
+
+const totalPedidos =
+document.getElementById("totalPedidos");
+
+const totalVendido =
+document.getElementById("totalVendido");
+
+let primeiraCarga = true;
+
+const pedidosRef = ref(db, "pedidos");
+
+onValue(pedidosRef, (snapshot)=>{
+
+    const dados = snapshot.val();
+
+    listaPedidos.innerHTML = "";
+
+    if(!dados){
+
+        listaPedidos.innerHTML = `
+        <div class="vazio">
+        Nenhum pedido encontrado.
+        </div>
+        `;
+
+        return;
+    }
+
+    let total = 0;
+
+    let qtd = 0;
+
+    const pedidos = Object.entries(dados).reverse();
+
+    pedidos.forEach(([id, pedido])=>{
+
+        qtd++;
+
+        total += Number(pedido.total || 0);
+
+        if(!primeiraCarga){
+
+            document.getElementById("somNovo").play();
+
+        }
+
+        const div = document.createElement("div");
+
+        div.className = "pedido";
+
+        if(pedido.status === "preparo"){
+
+            div.classList.add("preparo");
+
+        }
+
+        if(pedido.status === "entregue"){
+
+            div.classList.add("entregue");
+
+        }
+
+        let itensHTML = "";
+
+        if(pedido.itens){
+
+            pedido.itens.forEach(item=>{
+
+                itensHTML += `
+                <div>
+                🍰 ${item.qtd}x ${item.nome}
+                </div>
+                `;
+
+            });
+
+        }
+
+        let statusTexto = "🆕 NOVO PEDIDO";
+        let statusCor = "#555";
+
+        if(pedido.status === "preparo"){
+
+            statusTexto = "👨‍🍳 EM PREPARO";
+            statusCor = "#ff9800";
+
+        }
+
+        if(pedido.status === "entregue"){
+
+            statusTexto = "✅ ENTREGUE";
+            statusCor = "#25D366";
+
+        }
+
+        div.innerHTML = `
+
+        <h2>
+        Pedido #${id.slice(-5)}
+        </h2>
+
+        <div class="linha">
+        👤 <b>${pedido.nome}</b>
+        </div>
+
+        <div class="linha">
+        ☎️ ${pedido.telefone}
+        </div>
+
+        <div class="linha">
+        📍 ${pedido.endereco || "Retirada"}
+        </div>
+
+        <div class="linha">
+        📅 ${pedido.data} às ${pedido.hora}
+        </div>
+
+        <div class="linha">
+        💳 ${pedido.pagamento}
+        </div>
+
+        <div class="linha">
+        💰 <b>R$ ${Number(pedido.total).toFixed(2)}</b>
+        </div>
+
+        <div class="status"
+        style="color:${statusCor}">
+        ${statusTexto}
+        </div>
+
+        <div class="itens">
+        ${itensHTML}
+        </div>
+
+        <div class="btns">
+
+            ${
+                pedido.status !== "preparo"
+                ? `
+                <button
+                class="btn-preparo"
+                onclick="marcarPreparo('${id}')">
+
+                👨‍🍳 Em Preparo
+
+                </button>
+                `
+                : ""
+            }
+
+            ${
+                pedido.status !== "entregue"
+                ? `
+                <button
+                class="btn-entregue"
+                onclick="marcarEntregue('${id}')">
+
+                🚚 Entregue
+
+                </button>
+                `
+                : ""
+            }
+
+            <button
+            class="btn-excluir"
+            onclick="excluirPedido('${id}')">
+
+            🗑️ Excluir
+
             </button>
 
         </div>
+
         `;
+
+        listaPedidos.appendChild(div);
+
     });
 
-    document.getElementById('listaPedidos').innerHTML = html;
-}
+    totalPedidos.innerText = qtd;
 
-async function alterarStatus(id, status, telefone){
+    totalVendido.innerText =
+    "R$ " + total.toFixed(2);
 
-    await supabase
-        .from('pedidos')
-        .update({
-            status: status
-        })
-        .eq('id', id);
+    primeiraCarga = false;
 
-    let mensagem = '';
+});
 
-    if(status === 'Recebido'){
-        mensagem =
-        '🤎 Recebemos seu pedido na Josi Doces Gourmet!';
-    }
+window.marcarPreparo = function(id){
 
-    if(status === 'Em preparação'){
-        mensagem =
-        '👩‍🍳 Seu pedido está em preparação!';
-    }
-
-    if(status === 'Saiu para entrega'){
-        mensagem =
-        '🚚 Seu pedido saiu para entrega!';
-    }
-
-    if(status === 'Entregue'){
-        mensagem =
-        '✅ Seu pedido foi entregue!';
-    }
-
-    window.open(
-    `https://wa.me/55${telefone.replace(/\D/g,'')}?text=${encodeURIComponent(mensagem)}`
+    update(
+        ref(db, "pedidos/" + id),
+        {
+            status:"preparo"
+        }
     );
 
-    carregarPedidos();
 }
 
-carregarPedidos();
+window.marcarEntregue = function(id){
+
+    update(
+        ref(db, "pedidos/" + id),
+        {
+            status:"entregue"
+        }
+    );
+
+}
+
+window.excluirPedido = function(id){
+
+    if(confirm("Excluir pedido?")){
+
+        remove(
+            ref(db, "pedidos/" + id)
+        );
+
+    }
+
+}
 
 </script>
 
