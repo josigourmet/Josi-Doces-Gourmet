@@ -18,37 +18,78 @@ body{
     font-family:Arial;
 }
 
+.topo{
+    background:#5d4037;
+    color:white;
+    padding:18px;
+    border-radius:15px;
+    text-align:center;
+    font-size:22px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
 h1{
     text-align:center;
     color:#5d4037;
-    margin-bottom:30px;
 }
 
 .card{
     background:white;
     border-radius:20px;
     padding:20px;
-    margin-bottom:20px;
+    margin-bottom:25px;
     box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
+.novo-pedido{
+    border:4px solid #ff0000;
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+
+    0%{
+        transform:scale(1);
+    }
+
+    50%{
+        transform:scale(1.01);
+    }
+
+    100%{
+        transform:scale(1);
+    }
+
+}
+
+.alerta{
+    background:#ff0000;
+    color:white;
+    padding:10px;
+    border-radius:10px;
+    text-align:center;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
 .nome{
-    font-size:22px;
+    font-size:24px;
     font-weight:bold;
     color:#5d4037;
 }
 
 .info{
     margin-top:8px;
-    color:#444;
     line-height:1.6;
+    color:#444;
 }
 
 .itens{
+    margin-top:15px;
     background:#fafafa;
     padding:15px;
     border-radius:10px;
-    margin-top:15px;
 }
 
 .item{
@@ -56,19 +97,19 @@ h1{
 }
 
 .total{
-    font-size:22px;
-    color:#5d4037;
+    font-size:24px;
     font-weight:bold;
+    color:#5d4037;
     margin-top:15px;
 }
 
 .status{
     margin-top:15px;
-    padding:10px;
+    padding:12px;
     border-radius:10px;
+    text-align:center;
     color:white;
     font-weight:bold;
-    text-align:center;
 }
 
 .novo{
@@ -87,9 +128,13 @@ h1{
     background:#27ae60;
 }
 
+.rejeitado{
+    background:#e74c3c;
+}
+
 select{
     width:100%;
-    padding:12px;
+    padding:14px;
     border-radius:10px;
     margin-top:15px;
     border:1px solid #ddd;
@@ -112,22 +157,11 @@ button{
     color:white;
 }
 
-.topo{
-    background:#5d4037;
-    color:white;
-    padding:15px;
-    border-radius:15px;
-    margin-bottom:20px;
-    text-align:center;
-    font-size:18px;
-    font-weight:bold;
-}
-
 .vazio{
     text-align:center;
     color:#777;
     margin-top:50px;
-    font-size:18px;
+    font-size:20px;
 }
 
 </style>
@@ -170,14 +204,23 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
+
   apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
+
   authDomain: "josigourmet-af3ff.firebaseapp.com",
+
   databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
+
   projectId: "josigourmet-af3ff",
+
   storageBucket: "josigourmet-af3ff.firebasestorage.app",
+
   messagingSenderId: "373768013260",
+
   appId: "1:373768013260:web:bd5fa8dcf6053414d7c969",
+
   measurementId: "G-XR4249E0QG"
+
 };
 
 const app = initializeApp(firebaseConfig);
@@ -203,6 +246,7 @@ onValue(pedidosRef, (snapshot)=>{
         `;
 
         return;
+
     }
 
     Object.entries(dados).reverse().forEach(([id, pedido])=>{
@@ -221,11 +265,24 @@ onValue(pedidosRef, (snapshot)=>{
             classe = "entregue";
         }
 
+        if(pedido.status === "rejeitado"){
+            classe = "rejeitado";
+        }
+
         const card = document.createElement("div");
 
-        card.className = "card";
+        card.className =
+            pedido.status === "novo"
+            ? "card novo-pedido"
+            : "card";
 
         card.innerHTML = `
+
+            ${pedido.status === "novo" ? `
+                <div class="alerta">
+                    🚨 NOVO PEDIDO AGUARDANDO RESPOSTA
+                </div>
+            ` : ""}
 
             <div class="nome">
                 ${pedido.cliente}
@@ -302,6 +359,11 @@ onValue(pedidosRef, (snapshot)=>{
                     🟢 Pedido Entregue
                 </option>
 
+                <option value="rejeitado"
+                    ${pedido.status=="rejeitado"?"selected":""}>
+                    ❌ Pedido Rejeitado
+                </option>
+
             </select>
 
             <button
@@ -339,6 +401,10 @@ window.textoStatus = function(status){
 
     if(status === "entregue"){
         return "🟢 Pedido Entregue";
+    }
+
+    if(status === "rejeitado"){
+        return "❌ Pedido Rejeitado";
     }
 
     return status;
@@ -400,6 +466,17 @@ Seu pedido saiu para entrega 🤎`;
 Seu pedido foi entregue.
 
 Muito obrigado pela preferência 🤎🍬`;
+
+    }
+
+    if(status === "rejeitado"){
+
+        mensagem =
+`❌ Olá ${cliente}!
+
+Infelizmente não conseguiremos aceitar seu pedido neste momento.
+
+Pedimos desculpas 🤎`;
 
     }
 
