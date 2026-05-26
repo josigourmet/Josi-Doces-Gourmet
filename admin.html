@@ -201,8 +201,10 @@ if(senha !== "123456"){
 
 <div id="pedidos"></div>
 
-<audio id="somNovoPedido" preload="auto">
-    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=notification-2-269292.mp3">
+<audio id="somNovoPedido">
+
+<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=notification-2-269292.mp3">
+
 </audio>
 
 <script type="module">
@@ -219,19 +221,21 @@ import {
 
 const firebaseConfig = {
 
-  apiKey: "SUA_API_KEY",
+  apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
 
-  authDomain: "SEU_AUTH_DOMAIN",
+  authDomain: "josigourmet-af3ff.firebaseapp.com",
 
-  databaseURL: "SEU_DATABASE_URL",
+  databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
 
-  projectId: "SEU_PROJECT_ID",
+  projectId: "josigourmet-af3ff",
 
-  storageBucket: "SEU_STORAGE_BUCKET",
+  storageBucket: "josigourmet-af3ff.firebasestorage.app",
 
-  messagingSenderId: "SEU_MESSAGING_ID",
+  messagingSenderId: "373768013260",
 
-  appId: "SEU_APP_ID"
+  appId: "1:373768013260:web:bd5fa8dcf6053414d7c969",
+
+  measurementId: "G-XR4249E0QG"
 
 };
 
@@ -242,8 +246,6 @@ const db = getDatabase(app);
 const pedidosRef = ref(db, "pedidos");
 
 let primeiraCarga = true;
-
-let pedidosExistentes = [];
 
 onValue(pedidosRef, (snapshot)=>{
 
@@ -261,46 +263,27 @@ onValue(pedidosRef, (snapshot)=>{
             </div>
         `;
 
-        pedidosExistentes = [];
-
         return;
 
     }
 
     const pedidosArray = Object.entries(dados);
 
-    // Detecta novos pedidos
-    const idsAtuais = pedidosArray.map(([id]) => id);
-
     if(!primeiraCarga){
 
-        const novosPedidos = idsAtuais.filter(
-            id => !pedidosExistentes.includes(id)
+        const possuiNovo = pedidosArray.some(
+            ([id,pedido]) => pedido.status === "novo"
         );
 
-        if(novosPedidos.length > 0){
+        if(possuiNovo){
 
-            const audio =
-                document.getElementById("somNovoPedido");
-
-            audio.currentTime = 0;
-
-            audio.play().catch(err=>{
-                console.log("Som bloqueado", err);
-            });
-
-            // Vibração celular
-            if(navigator.vibrate){
-
-                navigator.vibrate([300,100,300]);
-
-            }
+            document
+                .getElementById("somNovoPedido")
+                .play();
 
         }
 
     }
-
-    pedidosExistentes = idsAtuais;
 
     primeiraCarga = false;
 
