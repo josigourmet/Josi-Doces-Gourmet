@@ -246,6 +246,28 @@ const db = getDatabase(app);
 const pedidosRef = ref(db, "pedidos");
 
 let primeiraCarga = true;
+let ultimoPedido = null;
+onValue(ref(db, "pedidos"), (snapshot) => {
+
+    const dados = snapshot.val();
+
+    if (!dados) return;
+
+    const pedidosArray = Object.entries(dados);
+
+    const pedidoMaisRecente = pedidosArray[pedidosArray.length - 1][0];
+
+    if (ultimoPedido && ultimoPedido !== pedidoMaisRecente) {
+
+        document.getElementById("somNovoPedido").play();
+
+        alert("🔔 Novo pedido recebido!");
+
+    }
+
+    ultimoPedido = pedidoMaisRecente;
+
+});
 
 onValue(pedidosRef, (snapshot)=>{
 
@@ -599,6 +621,8 @@ Pedimos desculpas 🤎`;
 }
 
 </script>
-
+<audio id="somNovoPedido" preload="auto">
+  <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
+</audio>
 </body>
 </html>
