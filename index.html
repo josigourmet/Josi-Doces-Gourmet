@@ -760,9 +760,11 @@ function limparCarrinhoCompleto() {
         salvarDados(); resetPagamentoFluxo(); verificarPgto();
         toggleVisibilidadeCarrinho();
     }
-}
+    }
+    </script>
+<script>
 
-function finalizarZap() {
+async function finalizarZap() {
 
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
@@ -792,74 +794,129 @@ function finalizarZap() {
     let total = subtotal + frete;
 
     // =========================================
-    // SALVAR NO FIREBASE
+    // GERA DATA/HORA DO PEDIDO
+    // =========================================
+
+    const agora = new Date();
+
+    const criadoEm = agora.toLocaleString('pt-BR');
+
+    const timestamp = Date.now();
+
+    // =========================================
+    // GERA NÚMERO PEDIDO
     // =========================================
 
     const numeroPedido = Math.floor(Math.random() * 9000) + 1000;
-    
 
-salvarPedidoFirebase({
-    numeroPedido: numeroPedido,
-    cliente: nome,
-    telefone: tel,
-    endereco: endereco,
-    bairro: bairroNome,
-    data: data,
-    hora: hora,
-    pagamento: pag,
-    itens: carrinho,
-    subtotal: subtotal,
-    frete: frete,
-    total: total,
-    quantidadeItens: totalItens,
-    criadoEm: new Date().toISOString(),
-    status: "novo"
-});
+    // =========================================
+    // SALVAR FIREBASE
+    // =========================================
+
+    await salvarPedidoFirebase({
+
+        numeroPedido: numeroPedido,
+
+        cliente: nome,
+
+        telefone: tel,
+
+        endereco: endereco,
+
+        bairro: bairroNome,
+
+        data: data,
+
+        hora: hora,
+
+        pagamento: pag,
+
+        itens: carrinho,
+
+        subtotal: subtotal,
+
+        frete: frete,
+
+        total: total,
+
+        quantidadeItens: totalItens,
+
+        criadoEm: criadoEm,
+
+        timestamp: timestamp,
+
+        status: "novo"
+
+    });
 
     // =========================================
     // MENSAGEM WHATSAPP
     // =========================================
 
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
-    msg += `🧾 Pedido Nº: #${numeroPedido}\n\n`;
+
+    msg += `🧾 Pedido Nº: #${numeroPedido}\n`;
+
+    msg += `🕒 Pedido realizado em: ${criadoEm}\n\n`;
 
     msg += `━━━━━━━━━━━━━━━\n`;
+
     msg += `👤 *CLIENTE*\n`;
+
     msg += `🙍 Nome: ${nome}\n`;
+
     msg += `☎️ WhatsApp: ${tel}\n\n`;
 
     msg += `━━━━━━━━━━━━━━━\n`;
+
     msg += `🛒 *ITENS DO PEDIDO*\n`;
 
     carrinho.forEach(i => {
+
         msg += `🍰 ${i.qtd}x ${i.nome}\n`;
+
         msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
+
     });
 
     msg += `━━━━━━━━━━━━━━━\n`;
+
     msg += `📦 *RESUMO DO PEDIDO*\n`;
+
     msg += `🧁 Itens: ${totalItens}\n`;
+
     msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+
     msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
+
     msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
 
     msg += `━━━━━━━━━━━━━━━\n`;
+
     msg += `🚚 *ENTREGA / RETIRADA*\n`;
+
     msg += `📍 Local: ${bairroNome}\n`;
 
     if (endereco) {
+
         msg += `🏠 Endereço: ${endereco}\n`;
+
     }
 
     msg += `\n`;
 
     msg += `━━━━━━━━━━━━━━━\n`;
+
     msg += `⏰ *AGENDAMENTO*\n`;
+
     msg += `📅 Data: ${data}\n`;
+
     msg += `🕒 Horário: ${hora}\n\n`;
 
     msg += `━━━━━━━━━━━━━━━\n`;
+
     msg += `💳 *PAGAMENTO*\n`;
+
     msg += `💰 Forma: ${pag}\n\n`;
 
     msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
@@ -867,7 +924,9 @@ salvarPedidoFirebase({
     msg += `❤️ Obrigado pela preferência!`;
 
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
+
 }
+
 </script>
 
 <script type="module">
