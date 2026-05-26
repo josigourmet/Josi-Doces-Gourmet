@@ -201,10 +201,8 @@ if(senha !== "123456"){
 
 <div id="pedidos"></div>
 
-<audio id="somNovoPedido">
-
-<source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=notification-2-269292.mp3">
-
+<audio id="somNovoPedido" preload="auto">
+    <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_c8c8a73467.mp3?filename=notification-2-269292.mp3">
 </audio>
 
 <script type="module">
@@ -221,21 +219,19 @@ import {
 
 const firebaseConfig = {
 
-  apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
+  apiKey: "SUA_API_KEY",
 
-  authDomain: "josigourmet-af3ff.firebaseapp.com",
+  authDomain: "SEU_AUTH_DOMAIN",
 
-  databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
+  databaseURL: "SEU_DATABASE_URL",
 
-  projectId: "josigourmet-af3ff",
+  projectId: "SEU_PROJECT_ID",
 
-  storageBucket: "josigourmet-af3ff.firebasestorage.app",
+  storageBucket: "SEU_STORAGE_BUCKET",
 
-  messagingSenderId: "373768013260",
+  messagingSenderId: "SEU_MESSAGING_ID",
 
-  appId: "1:373768013260:web:bd5fa8dcf6053414d7c969",
-
-  measurementId: "G-XR4249E0QG"
+  appId: "SEU_APP_ID"
 
 };
 
@@ -246,6 +242,8 @@ const db = getDatabase(app);
 const pedidosRef = ref(db, "pedidos");
 
 let primeiraCarga = true;
+
+let pedidosExistentes = [];
 
 onValue(pedidosRef, (snapshot)=>{
 
@@ -263,27 +261,46 @@ onValue(pedidosRef, (snapshot)=>{
             </div>
         `;
 
+        pedidosExistentes = [];
+
         return;
 
     }
 
     const pedidosArray = Object.entries(dados);
 
+    // Detecta novos pedidos
+    const idsAtuais = pedidosArray.map(([id]) => id);
+
     if(!primeiraCarga){
 
-        const possuiNovo = pedidosArray.some(
-            ([id,pedido]) => pedido.status === "novo"
+        const novosPedidos = idsAtuais.filter(
+            id => !pedidosExistentes.includes(id)
         );
 
-        if(possuiNovo){
+        if(novosPedidos.length > 0){
 
-            document
-                .getElementById("somNovoPedido")
-                .play();
+            const audio =
+                document.getElementById("somNovoPedido");
+
+            audio.currentTime = 0;
+
+            audio.play().catch(err=>{
+                console.log("Som bloqueado", err);
+            });
+
+            // Vibração celular
+            if(navigator.vibrate){
+
+                navigator.vibrate([300,100,300]);
+
+            }
 
         }
 
     }
+
+    pedidosExistentes = idsAtuais;
 
     primeiraCarga = false;
 
@@ -356,11 +373,13 @@ onValue(pedidosRef, (snapshot)=>{
             </div>
 
             <div class="info">
-                📅 ${pedido.data}
-            </div>
-
-            <div class="info">
-                🕒 ${pedido.hora}
+                🕒 Pedido feito às:
+                ${
+                    pedido.timestamp
+                    ? new Date(pedido.timestamp)
+                        .toLocaleString('pt-BR')
+                    : "Horário não disponível"
+                }
             </div>
 
             <div class="itens">
