@@ -10,6 +10,49 @@
         /* Cores: Marrom e Creme */
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; background: #fdf5e6; color: #4b3621; scroll-behavior: smooth; }
         
+        /* 🔥 ESTILO DA BARRA DE AVISO DO CUPOM */
+        .barra-cupom {
+            background: linear-gradient(90deg, #e67e22, #d35400);
+            color: white;
+            text-align: center;
+            padding: 8px 10px;
+            font-size: 13px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            z-index: 1005;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+            letter-spacing: 0.5px;
+            animation: pulseBarra 2s infinite;
+        }
+        @keyframes pulseBarra {
+            0% { opacity: 0.95; }
+            50% { opacity: 1; }
+            100% { opacity: 0.95; }
+        }
+
+        /* 🔥 Alerta dinâmico dentro do carrinho */
+        .alerta-progresso-cupom {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px dashed #ffeeba;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            font-weight: 500;
+        }
+        .alerta-sucesso-cupom {
+            background: #d4edda;
+            color: #155724;
+            border: 1px dashed #c3e6cb;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 12px;
+            font-weight: bold;
+        }
+
         header { 
             background: linear-gradient(135deg, #5d4037, #8d6e63); 
             color: #fff; text-align: center; padding: 40px 20px;
@@ -40,7 +83,7 @@
         .insta-header:hover { transform: scale(1.05); background: #fdf5e6; }
 
         .insta-float {
-            position: fixed; top: 20px; right: 20px; z-index: 1002;
+            position: fixed; top: 50px; right: 20px; z-index: 1002;
             background: white; padding: 10px; border-radius: 50%;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 45px; height: 45px;
             display: flex; align-items: center; justify-content: center; transition: 0.3s;
@@ -121,7 +164,7 @@
         .btn-promo-close { background: #fdf5e6; color: #5d4037; font-size: 13px; padding: 8px; border-radius: 10px; border: 1px solid #d7ccc8; cursor: pointer; width: 100%; }
 
         .reabrir-promo {
-            position: fixed; top: 80px; left: 10px; z-index: 998;
+            position: fixed; top: 110px; left: 10px; z-index: 998;
             background: #e67e22; color: white; padding: 8px 12px;
             border-radius: 20px; font-size: 12px; font-weight: bold;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer;
@@ -173,6 +216,10 @@
     </style>
 </head>
 <body onload="saudacaoInicial(); carregarBannerDinamico(); carregarDados();">
+
+<div class="barra-cupom" id="barraCupom">
+    🎉 PROMOÇÃO: Ganhe 5% de DESCONTO AUTOMÁTICO em compras acima de R$ 50,00! 🍰
+</div>
 
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
@@ -237,7 +284,6 @@
         <a href="https://wa.me/5551985803243?text=Olá Josi! Gostaria de um orçamento para evento." target="_blank" class="btn-evento">Solicitar Orçamento</a>
     </div>
 
-    <!-- PRODUTOS -->
     <div class="card"><h3>Torta de Bolacha (1kg)</h3><p class="price">R$ 55,00</p>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha (1Kg)')">-</button>
@@ -359,6 +405,9 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
 <div id="carrinhoBox">
     <div style="text-align: right;"><span onclick="toggleVisibilidadeCarrinho()" style="cursor:pointer; font-weight:bold; color:#5d4037">FECHAR [X]</span></div>
     <h3 style="margin-top:0; color:#5d4037;">🛒 Seu Pedido</h3>
+    
+    <div id="alertaCupomDinamico"></div>
+
     <div id="itensCarrinhoLista"></div>
     <button class="btn-limpar" onclick="limparCarrinhoCompleto()">🗑️ Esvaziar Carrinho</button>
     <div id="resumo"><b>Total: R$ 0,00</b></div>
@@ -387,8 +436,8 @@ const CONFIG_PROMO = {
     ativa: true,
     imagemUrl: "https://i.postimg.cc/T3BNcdCq/1777779837866.png",
     nomeProduto: "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite",
-    preco: 25.00,
-    textoBotao: "🚀 APROVEITAR COMBO: BOLO COM PUDIM + TORTA DE BOLACHA COM DOCE DE LEITE + FRETE GRÁTIS POR (R$ 25,00)",
+    preco: 22.90,
+    textoBotao: "🚀 APROVEITAR COMBO: BOLO COM PUDIM + TORTA DE BOLACHA COM DOCE DE LEITE + FRETE GRÁTIS POR (R$ 22,90)",
     textoBotaoFlutuante: "🔥 PROMOÇÃO"
 };
 
@@ -397,7 +446,7 @@ function saudacaoInicial() {
     const agora = new Date();
     const hora = agora.getHours();
     let saudacao;
-    if (hora >= 5 && hora < 12) saudacao = "☀️ Bom dia!";
+    if (hora >= 4 && hora < 12) saudacao = "☀️ Bom dia!";
     else if (hora >= 12 && hora < 18) saudacao = "🍰 Boa tarde!";
     else saudacao = "🌙 Boa noite!";
     
@@ -434,7 +483,7 @@ const CIDADE_RECEBEDOR = "VENANCIO AIRES";
 
 function configurarLimitesData() {
     const hoje = new Date();
-    const ano = hoje.getFullYear();
+    const ano = today = hoje.getFullYear();
     const mes = String(hoje.getMonth() + 1).padStart(2, '0');
     const dia = String(hoje.getDate()).padStart(2, '0');
     const dataMinima = `${ano}-${mes}-${dia}`;
@@ -465,7 +514,7 @@ function validarDataHora() {
 
 function verificarLojaAberta() {
     const agora = new Date();
-    const diaSemana = agora.getDay(); // 0 = domingo, 6 = sábado
+    const diaSemana = agora.getDay(); 
     const horaAtual = agora.getHours();
 
     const feriados = [
@@ -483,25 +532,17 @@ function verificarLojaAberta() {
 
     let aberta = false;
 
-    // Segunda a sexta
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-
         if (horaAtual >= 00 && horaAtual < 23) {
             aberta = true;
         }
-
     } else {
-        // Sábado, domingo e feriados
-
         if (horaAtual >= 00 && horaAtual < 17) {
             aberta = true;
         }
     }
-
     return aberta;
-
-
-    }
+}
 
 function toggleVisibilidadeCarrinho() {
     const box = document.getElementById("carrinhoBox");
@@ -576,7 +617,26 @@ function atualizar() {
     const valorBairro = document.getElementById("bairro").value;
     let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
-    const total = subtotal + frete;
+    
+    // 🔥 LÓGICA DO CUPOM DE 5% PARA COMPRAS ACIMA DE 50 REAIS
+    let desconto = 0;
+    const divAlertaCupom = document.getElementById("alertaCupomDinamico");
+
+    if (subtotal > 50) {
+        desconto = subtotal * 0.05;
+        if(divAlertaCupom) {
+            divAlertaCupom.innerHTML = `<div class="alerta-sucesso-cupom">🎉 Parabéns! Você atingiu mais de R$ 50,00 e ganhou 5% de desconto!</div>`;
+        }
+    } else if (subtotal > 0 && subtotal <= 50) {
+        let quantoFalta = (50 - subtotal).toFixed(2).replace('.', ',');
+        if(divAlertaCupom) {
+            divAlertaCupom.innerHTML = `<div class="alerta-progresso-cupom">🛒 Adicione mais <b>R$ ${quantoFalta}</b> para ganhar <b>5% de DESCONTO</b> no seu pedido!</div>`;
+        }
+    } else {
+        if(divAlertaCupom) divAlertaCupom.innerHTML = "";
+    }
+    
+    const total = subtotal - desconto + frete;
     const qtdTotal = carrinho.reduce((acc, item) => acc + (item.nome !== 'FRETE GRÁTIS (Ativado)' ? item.qtd : 0), 0);
     
     document.getElementById("cartBadge").innerText = qtdTotal;
@@ -597,18 +657,22 @@ function atualizar() {
     });
     const tipoEntrega = (valorBairro === "retirada") ? "Retirada no local" : "Entrega";
 
-document.getElementById("resumo").innerHTML = `
-    <div style="font-size:14px; text-align:left; line-height:1.6;">
-        <div>🧁 <b>Itens:</b> ${qtdTotal}</div>
-        <div>💰 <b>Subtotal:</b> R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
-        <div>🚚 <b>Frete:</b> R$ ${frete.toFixed(2).replace('.', ',')}</div>
-        <div>📍 <b>Forma:</b> ${tipoEntrega}</div>
-        <hr style="margin:8px 0;">
-        <div style="font-size:20px; color:#5d4037;">
-            <b>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</b>
+    // Mostra o desconto visualmente no carrinho se ele existir
+    let descontoHtml = desconto > 0 ? `<div style="color: #27ae60;">🏷️ <b>Desconto (5%):</b> -R$ ${desconto.toFixed(2).replace('.', ',')}</div>` : '';
+
+    document.getElementById("resumo").innerHTML = `
+        <div style="font-size:14px; text-align:left; line-height:1.6;">
+            <div>🧁 <b>Itens:</b> ${qtdTotal}</div>
+            <div>💰 <b>Subtotal:</b> R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
+            ${descontoHtml}
+            <div>🚚 <b>Frete:</b> R$ ${frete.toFixed(2).replace('.', ',')}</div>
+            <div>📍 <b>Forma:</b> ${tipoEntrega}</div>
+            <hr style="margin:8px 0;">
+            <div style="font-size:20px; color:#5d4037;">
+                <b>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</b>
+            </div>
         </div>
-    </div>
-`;
+    `;
     
     const aberta = verificarLojaAberta();
     document.getElementById("secaoDadosPedido").style.display = (carrinho.length > 0 && aberta) ? "block" : "none";
@@ -678,9 +742,7 @@ function verificarPgto() {
 }
 
 function gerarPixReal() {
-
     const valor = atualizar().toFixed(2);
-
     const chavePix = CHAVE_PIX.replace(/\D/g, "");
     const nome = NOME_RECEBEDOR.substring(0, 25).toUpperCase();
     const cidade = CIDADE_RECEBEDOR.substring(0, 15).toUpperCase();
@@ -696,16 +758,13 @@ function gerarPixReal() {
 
         for (let i = 0; i < payload.length; i++) {
             resultado ^= (payload.charCodeAt(i) << 8);
-
             for (let j = 0; j < 8; j++) {
                 if ((resultado <<= 1) & 0x10000) {
                     resultado ^= polinomio;
                 }
-
                 resultado &= 0xFFFF;
             }
         }
-
         return resultado.toString(16).toUpperCase().padStart(4, '0');
     }
 
@@ -720,18 +779,15 @@ function gerarPixReal() {
         format("54", valor) +
         format("58", "BR") +
         format("59", nome) +
-        format("60", cidade) +
+        format("60", city = cidade) +
         format("62",
             format("05", "***")
         ) +
         "6304";
 
     const crc = crc16(payloadSemCRC);
-
     const pixCopiaECola = payloadSemCRC + crc;
-
     const qrcodeContainer = document.getElementById("qrcode");
-
     qrcodeContainer.innerHTML = "";
 
     new QRCode(qrcodeContainer, {
@@ -741,13 +797,9 @@ function gerarPixReal() {
     });
 
     document.getElementById("brcode").value = pixCopiaECola;
-
     document.getElementById("pixDisplay").style.display = "block";
-
     pixGerado = true;
-
     verificarPgto();
-
 }
 
 function copiarPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
@@ -760,179 +812,109 @@ function limparCarrinhoCompleto() {
         salvarDados(); resetPagamentoFluxo(); verificarPgto();
         toggleVisibilidadeCarrinho();
     }
-    }
-    </script>
+}
+</script>
+
 <script>
-
 async function finalizarZap() {
-
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
-
     const bairroSel = document.getElementById("bairro");
     const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
-
     const endereco = document.getElementById("endereco").value;
-
     const data = document.getElementById("dataAgendamento").value;
     const hora = document.getElementById("horaAgendamento").value;
-
     const pag = document.getElementById("pagamento").value;
-
     const valorBairro = document.getElementById("bairro").value;
 
-    let frete = (promoAtiva || valorBairro === "retirada")
-        ? 0
-        : parseFloat(valorBairro);
+    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+    let totalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
 
-    let subtotal = carrinho.reduce((acc, item) =>
-        acc + (item.preco * item.qtd), 0);
+    // 🔥 CÁLCULO DO DESCONTO PARA O WHATSAPP E FIREBASE
+    let desconto = 0;
+    if (subtotal > 50) {
+        desconto = subtotal * 0.05;
+    }
 
-    let totalItens = carrinho.reduce((acc, item) =>
-        acc + item.qtd, 0);
-
-    let total = subtotal + frete;
-
-    // =========================================
-    // GERA DATA/HORA DO PEDIDO
-    // =========================================
-
+    let total = subtotal - desconto + frete;
     const agora = new Date();
-
     const criadoEm = agora.toLocaleString('pt-BR');
-
     const timestamp = Date.now();
-
-    // =========================================
-    // GERA NÚMERO PEDIDO
-    // =========================================
-
     const numeroPedido = Math.floor(Math.random() * 9000) + 1000;
 
-    // =========================================
-    // SALVAR FIREBASE
-    // =========================================
-
+    // Salva no Firebase incluindo o desconto
     await salvarPedidoFirebase({
-
         numeroPedido: numeroPedido,
-
         cliente: nome,
-
         telefone: tel,
-
         endereco: endereco,
-
         bairro: bairroNome,
-
         data: data,
-
         hora: hora,
-
         pagamento: pag,
-
         itens: carrinho,
-
         subtotal: subtotal,
-
+        desconto: desconto,
         frete: frete,
-
         total: total,
-
         quantidadeItens: totalItens,
-
         criadoEm: criadoEm,
-
         timestamp: timestamp,
-
         status: "novo"
-
     });
 
-    // =========================================
-    // MENSAGEM WHATSAPP
-    // =========================================
-
+    // Texto personalizado do WhatsApp
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
-
     msg += `🧾 Pedido Nº: #${numeroPedido}\n`;
-
     msg += `🕒 Pedido realizado em: ${criadoEm}\n\n`;
-
     msg += `━━━━━━━━━━━━━━━\n`;
-
     msg += `👤 *CLIENTE*\n`;
-
     msg += `🙍 Nome: ${nome}\n`;
-
     msg += `☎️ WhatsApp: ${tel}\n\n`;
-
     msg += `━━━━━━━━━━━━━━━\n`;
-
     msg += `🛒 *ITENS DO PEDIDO*\n`;
 
     carrinho.forEach(i => {
-
         msg += `🍰 ${i.qtd}x ${i.nome}\n`;
-
         msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
-
     });
 
     msg += `━━━━━━━━━━━━━━━\n`;
-
     msg += `📦 *RESUMO DO PEDIDO*\n`;
-
     msg += `🧁 Itens: ${totalItens}\n`;
-
     msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-
+    
+    if (desconto > 0) {
+        msg += `🏷️ Desconto (5%): -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
+    }
+    
     msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
-
     msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
-
     msg += `━━━━━━━━━━━━━━━\n`;
-
     msg += `🚚 *ENTREGA / RETIRADA*\n`;
-
     msg += `📍 Local: ${bairroNome}\n`;
 
     if (endereco) {
-
         msg += `🏠 Endereço: ${endereco}\n`;
-
     }
 
-    msg += `\n`;
-
-    msg += `━━━━━━━━━━━━━━━\n`;
-
+    msg += `\n━━━━━━━━━━━━━━━\n`;
     msg += `⏰ *AGENDAMENTO*\n`;
-
     msg += `📅 Data: ${data}\n`;
-
     msg += `🕒 Horário: ${hora}\n\n`;
-
     msg += `━━━━━━━━━━━━━━━\n`;
-
     msg += `💳 *PAGAMENTO*\n`;
-
     msg += `💰 Forma: ${pag}\n\n`;
-
     msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
-
     msg += `❤️ Obrigado pela preferência!`;
-
+  
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
-
 }
-
 </script>
 
 <script type="module">
-
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-
 import {
   getDatabase,
   ref,
@@ -952,31 +934,19 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-
 const db = getDatabase(app);
-
 console.log("Firebase conectado!");
 
 window.salvarPedidoFirebase = async function(pedido) {
-
   try {
-
     const pedidosRef = ref(db, "pedidos");
-
     const novoPedido = push(pedidosRef);
-
     await set(novoPedido, pedido);
-
     console.log("Pedido salvo com sucesso!");
-
   } catch (erro) {
-
     console.error("Erro ao salvar pedido:", erro);
-
   }
-
 };
-
 </script>
 </body>
 </html>
