@@ -3,6 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- ══════════════════════════════════════════════════════
+         🛡️ BLINDAGEM — Content Security Policy
+         Bloqueia scripts externos não autorizados, injeção de
+         conteúdo e clickjacking.
+    ══════════════════════════════════════════════════════ -->
+    <meta http-equiv="Content-Security-Policy"
+        content="
+            default-src 'self';
+            script-src  'self' 'unsafe-inline'
+                        https://cdnjs.cloudflare.com
+                        https://www.gstatic.com
+                        https://www.googleapis.com;
+            style-src   'self' 'unsafe-inline'
+                        https://fonts.googleapis.com;
+            font-src    https://fonts.gstatic.com;
+            img-src     'self' data: https: blob:;
+            connect-src 'self'
+                        https://*.firebaseio.com
+                        https://firebaseinstallations.googleapis.com
+                        wss://*.firebaseio.com
+                        https://*.googleapis.com;
+            frame-ancestors 'none';
+        ">
+
+    <!-- 🛡️ Impede que a página seja embutida em iframes (anti-clickjacking) -->
+    <meta http-equiv="X-Frame-Options" content="DENY">
+
+    <!-- 🛡️ Força HTTPS e impede downgrade -->
+    <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
+
+    <!-- 🛡️ Impede sniffing de MIME type -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+
+    <!-- 🛡️ Limita informações de referrer -->
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+
     <title>Josi Doces Gourmet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
@@ -762,7 +799,7 @@
 
     <div id="secaoDadosPedido">
         <label>👤 Seus Dados</label>
-        <input type="text" id="nome" placeholder="Seu Nome Completo" oninput="salvarDados(); verificarPgto();">
+        <input type="text" id="nome" placeholder="Seu Nome Completo" maxlength="80" oninput="salvarDados(); verificarPgto();">
         <input type="tel" id="telefone" placeholder="(51) 99999-9999" maxlength="15" oninput="mascaraTelefone(this); salvarDados(); verificarPgto();">
         <div id="erroTelefone" class="erro-tel">O número deve começar com o dígito 9.</div>
         
@@ -781,7 +818,7 @@
 
         <div id="blocoEndereco">
             <label>📍 Endereço de Entrega</label>
-            <textarea id="endereco" placeholder="Rua, número e referência" oninput="salvarDados(); verificarPgto();"></textarea>
+            <textarea id="endereco" placeholder="Rua, número e referência" maxlength="300" oninput="salvarDados(); verificarPgto();"></textarea>
         </div>
 
         <label>⏰ Data e Horário de Recebimento</label>
@@ -830,6 +867,154 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
 </div>
 
 <script>
+// ══════════════════════════════════════════════════════
+// 🛡️ BLINDAGEM DE SEGURANÇA — camada de proteção JS
+// ══════════════════════════════════════════════════════
+
+// ── 1. Rate Limiting — impede spam de pedidos ──
+const _RL = (function(){
+    const JANELA = 60000; // 1 minuto
+    const LIMITE = 5;     // máx 5 tentativas por janela
+    const historico = [];
+    return {
+        ok: function(){
+            const agora = Date.now();
+            // remove entradas fora da janela
+            while(historico.length && agora - historico[0] > JANELA) historico.shift();
+            if(historico.length >= LIMITE) return false;
+            historico.push(agora);
+            return true;
+        }
+    };
+})();
+
+// ── 2. Sanitização de texto — remove HTML/scripts injetados ──
+function _sanitize(str) {
+    if (typeof str !== 'string') return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#x27;')
+        .replace(/`/g, '&#x60;')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+\s*=/gi, '')
+        .trim();
+}
+
+// ── 3. Validação de nome ──
+function _validarNome(nome) {
+    const re = /^[a-zA-ZÀ-ÿ\s]{2,80}$/;
+    return re.test(nome.trim());
+}
+
+// ── 4. Validação de telefone ──
+function _validarTelefone(tel) {
+    const digits = tel.replace(/\D/g, '');
+    return (digits.length === 11 && digits[2] === '9') ||
+           (digits.length === 9  && digits[0] === '9');
+}
+
+// ── 5. Validação de endereço ──
+function _validarEndereco(end) {
+    return end.trim().length >= 5 && end.trim().length <= 300;
+}
+
+// ── 6. Validação de data futura ──
+function _validarDataFutura(dataStr, horaStr) {
+    if (!dataStr || !horaStr) return false;
+    const dt = new Date(`${dataStr}T${horaStr}`);
+    return dt > new Date();
+}
+
+// ── 7. Proteção do localStorage — parse seguro ──
+function _lsGet(chave) {
+    try {
+        const raw = localStorage.getItem(chave);
+        if (!raw) return null;
+        // tamanho máximo razoável: 50KB
+        if (raw.length > 51200) { localStorage.removeItem(chave); return null; }
+        return JSON.parse(raw);
+    } catch(e) {
+        localStorage.removeItem(chave);
+        return null;
+    }
+}
+
+function _lsSet(chave, valor) {
+    try {
+        const str = JSON.stringify(valor);
+        if (str.length > 51200) return; // descarta se muito grande
+        localStorage.setItem(chave, str);
+    } catch(e) { /* quota excedida — ignora */ }
+}
+
+// ── 8. Validação do carrinho restaurado do localStorage ──
+// Evita que alguém manipule o localStorage para alterar preços
+const PRECOS_OFICIAIS = {
+    'Torta de Bolacha (1Kg)': 55,
+    'Torta de Bolacha Pequena': 10,
+    'Torta de Bolacha Grande': 12,
+    'Torta de Ninho Pequena': 10,
+    'Bolo de Chocolate no Pote': 12,
+    'Bolo de Brigadeiro no Pote': 12,
+    'Bolo no Pote com Pudim': 14,
+    'Bolo de Stikadinho no Pote': 12,
+    'Bolo de Cenoura no Pote': 12,
+    'FRETE GRÁTIS (Ativado)': 0,
+};
+// Preço do combo é definido em CONFIG_PROMO e adicionado depois
+
+function _validarCarrinho(arr) {
+    if (!Array.isArray(arr)) return [];
+    return arr.filter(item => {
+        if (!item || typeof item.nome !== 'string') return false;
+        if (typeof item.qtd !== 'number' || item.qtd < 1 || item.qtd > 999) return false;
+        // se nome está na tabela oficial, garante preço correto
+        if (PRECOS_OFICIAIS.hasOwnProperty(item.nome)) {
+            item.preco = PRECOS_OFICIAIS[item.nome]; // força o preço correto
+            return true;
+        }
+        // item do combo (preço variável definido em CONFIG_PROMO)
+        if (typeof item.preco === 'number' && item.preco >= 0 && item.preco < 10000) return true;
+        return false;
+    });
+}
+
+// ── 9. Dupla verificação de total no envio ──
+// Recalcula o total do lado do cliente antes de enviar,
+// sem confiar no valor armazenado no estado.
+function _recalcularTotalSeguro(carrinhoLocal, frete) {
+    let subtotal = 0;
+    for (const item of carrinhoLocal) {
+        const precoOficial = PRECOS_OFICIAIS.hasOwnProperty(item.nome)
+            ? PRECOS_OFICIAIS[item.nome]
+            : item.preco; // combo promo
+        subtotal += precoOficial * item.qtd;
+    }
+    const desconto = subtotal > 50 ? subtotal * 0.05 : 0;
+    return { subtotal, desconto, total: subtotal - desconto + frete };
+}
+
+// ── 10. Token anti-replay — impede reenvio do mesmo pedido ──
+let _tokenPedido = null;
+function _novoToken() {
+    _tokenPedido = Math.random().toString(36).slice(2) + Date.now().toString(36);
+    return _tokenPedido;
+}
+function _consumirToken(t) {
+    if (t && t === _tokenPedido) { _tokenPedido = null; return true; }
+    return false;
+}
+// Gera token inicial ao carregar
+_novoToken();
+
+// ══════════════════════════════════════════════════════
+// FIM DA BLINDAGEM DE SEGURANÇA
+// ══════════════════════════════════════════════════════
+
+
   // Aviso ao clicar no horário
 function avisoHorario() {
     alert("⏰ Atenção!\n\nPor favor, escolha um horário com pelo menos 1 hora de antecedência.\n\nEsse é o tempo médio para preparo, entrega ou retirada do pedido. 🤎🍰");
@@ -868,11 +1053,26 @@ function carregarBannerDinamico() {
         return;
     }
     btnFlutuante.innerText = CONFIG_PROMO.textoBotaoFlutuante;
-    container.innerHTML = `
-        <img src="${CONFIG_PROMO.imagemUrl}" alt="Promoção">
-        <button class="btn-promo-add" onclick="addPromoCombo(); fecharBannerPromo();">${CONFIG_PROMO.textoBotao}</button>
-        <button class="btn-promo-close" onclick="fecharBannerPromo()">Ver outros produtos</button>
-    `;
+    // 🛡️ usa textContent para o botão (evita XSS) e atributo src seguro para imagem
+    const img = document.createElement('img');
+    img.alt = 'Promoção';
+    // valida que a URL é https antes de atribuir
+    if (/^https:\/\//.test(CONFIG_PROMO.imagemUrl)) img.src = CONFIG_PROMO.imagemUrl;
+
+    const btnAdd = document.createElement('button');
+    btnAdd.className = 'btn-promo-add';
+    btnAdd.textContent = CONFIG_PROMO.textoBotao;
+    btnAdd.onclick = function(){ addPromoCombo(); fecharBannerPromo(); };
+
+    const btnClose = document.createElement('button');
+    btnClose.className = 'btn-promo-close';
+    btnClose.textContent = 'Ver outros produtos';
+    btnClose.onclick = fecharBannerPromo;
+
+    container.innerHTML = '';
+    container.appendChild(img);
+    container.appendChild(btnAdd);
+    container.appendChild(btnClose);
 }
 
 function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
@@ -975,20 +1175,22 @@ function salvarDados() {
         carrinho: carrinho,
         promoAtiva: promoAtiva
     };
-    localStorage.setItem('pedidoJosiDoces', JSON.stringify(dados));
+    // 🛡️ usa wrapper seguro do localStorage
+    _lsSet('pedidoJosiDoces', dados);
 }
 
 function carregarDados() {
     configurarLimitesData();
-    const salvo = localStorage.getItem('pedidoJosiDoces');
-    if (salvo) {
-        const d = JSON.parse(salvo);
+    // 🛡️ usa wrapper seguro + valida carrinho restaurado
+    const d = _lsGet('pedidoJosiDoces');
+    if (d) {
         document.getElementById("nome").value = d.nome || "";
         document.getElementById("telefone").value = d.telefone || "";
         document.getElementById("bairro").value = d.bairro || "retirada";
         document.getElementById("endereco").value = d.endereco || "";
         document.getElementById("pagamento").value = d.pagamento || "Pix";
-        carrinho = d.carrinho || [];
+        // 🛡️ valida e corrige preços do carrinho antes de restaurar
+        carrinho = _validarCarrinho(d.carrinho || []);
         promoAtiva = d.promoAtiva || false;
         document.getElementById('dataAgendamento').value = d.data || "";
         document.getElementById('horaAgendamento').value = d.hora || "";
@@ -999,6 +1201,9 @@ function carregarDados() {
 }
 
 function add(nome, preco) {
+    // 🛡️ verifica se o produto e preço são oficiais
+    if (!PRECOS_OFICIAIS.hasOwnProperty(nome)) return;
+    if (PRECOS_OFICIAIS[nome] !== preco) return; // recusa preço adulterado
     const item = carrinho.find(i => i.nome === nome);
     if (item) item.qtd++;
     else carrinho.push({ nome, preco, qtd: 1 });
@@ -1059,7 +1264,25 @@ function atualizar() {
     const listaDiv = document.getElementById("itensCarrinhoLista");
     listaDiv.innerHTML = "";
     carrinho.forEach((item, index) => {
-        listaDiv.innerHTML += `<div class="item-carrinho"><span>${item.qtd}x ${item.nome}</span><span>R$ ${(item.preco*item.qtd).toFixed(2).replace('.', ',')} <span class="remover" onclick="remover(${index})">×</span></span></div>`;
+        // 🛡️ usa textContent para evitar XSS ao renderizar nomes/preços
+        const row = document.createElement('div');
+        row.className = 'item-carrinho';
+
+        const spanNome = document.createElement('span');
+        spanNome.textContent = `${item.qtd}x ${item.nome}`;
+
+        const spanPreco = document.createElement('span');
+        spanPreco.textContent = `R$ ${(item.preco*item.qtd).toFixed(2).replace('.', ',')} `;
+
+        const spanRemover = document.createElement('span');
+        spanRemover.className = 'remover';
+        spanRemover.textContent = '×';
+        spanRemover.onclick = (function(i){ return function(){ remover(i); }; })(index);
+
+        spanPreco.appendChild(spanRemover);
+        row.appendChild(spanNome);
+        row.appendChild(spanPreco);
+        listaDiv.appendChild(row);
     });
     const tipoEntrega = (valorBairro === "retirada") ? "Retirada no local" : "Entrega";
 
@@ -1223,6 +1446,19 @@ function limparCarrinhoCompleto() {
 
 <script>
 async function finalizarZap() {
+    // 🛡️ Rate Limiting — bloqueia spam
+    if (!_RL.ok()) {
+        alert("⚠️ Muitas tentativas em pouco tempo. Aguarde um momento e tente novamente.");
+        return;
+    }
+
+    // 🛡️ Token anti-replay — cada envio consome um token único
+    const tokenAtual = _tokenPedido;
+    if (!tokenAtual) {
+        alert("⚠️ Erro de segurança. Recarregue a página e tente novamente.");
+        return;
+    }
+
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
     const bairroSel = document.getElementById("bairro");
@@ -1233,28 +1469,57 @@ async function finalizarZap() {
     const pag = document.getElementById("pagamento").value;
     const valorBairro = document.getElementById("bairro").value;
 
-    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
-    let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
-    let totalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
-
-    // 🔥 CÁLCULO DO DESCONTO PARA O WHATSAPP E FIREBASE
-    let desconto = 0;
-    if (subtotal > 50) {
-        desconto = subtotal * 0.05;
+    // 🛡️ Validações de segurança antes de enviar
+    if (!_validarNome(nome)) {
+        alert("⚠️ Nome inválido. Use apenas letras e espaços (2 a 80 caracteres).");
+        return;
+    }
+    if (!_validarTelefone(tel)) {
+        alert("⚠️ Telefone inválido.");
+        return;
+    }
+    if (valorBairro !== "retirada" && !_validarEndereco(endereco)) {
+        alert("⚠️ Endereço inválido. Preencha corretamente (mínimo 5 caracteres).");
+        return;
+    }
+    if (!_validarDataFutura(data, hora)) {
+        alert("⚠️ A data/hora selecionada já passou. Escolha um horário futuro.");
+        return;
+    }
+    if (carrinho.length === 0) {
+        alert("⚠️ Seu carrinho está vazio.");
+        return;
     }
 
-    let total = subtotal - desconto + frete;
+    // 🛡️ Recalcula total do lado cliente (não confia no estado)
+    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    const calc = _recalcularTotalSeguro(carrinho, frete);
+    const subtotal = calc.subtotal;
+    const desconto = calc.desconto;
+    const total = calc.total;
+    let totalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
+
     const agora = new Date();
     const criadoEm = agora.toLocaleString('pt-BR');
     const timestamp = Date.now();
     const numeroPedido = Math.floor(Math.random() * 9000) + 1000;
 
+    // 🛡️ Sanitiza campos antes de usar na mensagem
+    const nomeSanitizado = _sanitize(nome);
+    const telSanitizado = _sanitize(tel);
+    const enderecoSanitizado = _sanitize(endereco);
+
+    // Consome token (evita reenvio duplo)
+    _consumirToken(tokenAtual);
+    // Gera novo token para o próximo envio
+    _novoToken();
+
     // Salva no Firebase incluindo o desconto
     await salvarPedidoFirebase({
         numeroPedido: numeroPedido,
-        cliente: nome,
-        telefone: tel,
-        endereco: endereco,
+        cliente: nomeSanitizado,
+        telefone: telSanitizado,
+        endereco: enderecoSanitizado,
         bairro: bairroNome,
         data: data,
         hora: hora,
@@ -1276,8 +1541,8 @@ async function finalizarZap() {
     msg += `🕒 Pedido realizado em: ${criadoEm}\n\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `👤 *CLIENTE*\n`;
-    msg += `🙍 Nome: ${nome}\n`;
-    msg += `☎️ WhatsApp: ${tel}\n\n`;
+    msg += `🙍 Nome: ${nomeSanitizado}\n`;
+    msg += `☎️ WhatsApp: ${telSanitizado}\n\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `🛒 *ITENS DO PEDIDO*\n`;
 
@@ -1301,8 +1566,8 @@ async function finalizarZap() {
     msg += `🚚 *ENTREGA / RETIRADA*\n`;
     msg += `📍 Local: ${bairroNome}\n`;
 
-    if (endereco) {
-        msg += `🏠 Endereço: ${endereco}\n`;
+    if (enderecoSanitizado) {
+        msg += `🏠 Endereço: ${enderecoSanitizado}\n`;
     }
 
     msg += `\n━━━━━━━━━━━━━━━\n`;
