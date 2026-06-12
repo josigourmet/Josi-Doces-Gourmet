@@ -79,7 +79,6 @@
     margin-bottom: 40px;
   }
 
-  /* Ícone de digital */
   .digital-wrapper {
     position: relative;
     width: 110px;
@@ -137,7 +136,6 @@
     80%      { transform: translateX(4px); }
   }
 
-  /* Anel pulsante quando aguardando */
   .digital-bg.aguardando::before {
     content: '';
     position: absolute;
@@ -151,6 +149,18 @@
   @keyframes ringPulse {
     0%,100% { transform: scale(1); opacity: 0.6; }
     50%      { transform: scale(1.1); opacity: 0; }
+  }
+
+  .auth-badge-primeiro {
+    display: inline-block;
+    background: linear-gradient(90deg, var(--ouro), var(--marrom-claro));
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 20px;
   }
 
   .auth-instrucao {
@@ -188,10 +198,9 @@
 
   .btn-auth-fallback:hover { border-color: var(--marrom-claro); color: var(--marrom); }
 
-  /* ── APP (oculto até autenticar) ── */
+  /* ── APP ── */
   #app { display: none; }
 
-  /* TOPO */
   .topo {
     background: linear-gradient(135deg, var(--marrom) 0%, var(--marrom-medio) 100%);
     color: white;
@@ -216,7 +225,6 @@
   }
 
   .topo-logo span { color: var(--ouro); }
-
   .topo-right { display: flex; align-items: center; gap: 18px; }
 
   .badge-notif {
@@ -240,7 +248,6 @@
 
   .topo-hora { font-size: 13px; color: rgba(255,255,255,0.7); }
 
-  /* LAYOUT */
   .layout {
     display: grid;
     grid-template-columns: 260px 1fr;
@@ -248,7 +255,6 @@
     min-height: calc(100vh - 70px);
   }
 
-  /* SIDEBAR */
   .sidebar {
     background: var(--marrom);
     padding: 28px 18px;
@@ -321,7 +327,6 @@
 
   .stat-label { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; margin-top: 2px; }
 
-  /* MAIN */
   .main { padding: 28px; overflow-y: auto; }
 
   .main-header {
@@ -351,14 +356,12 @@
 
   .btn-atualizar:hover { background: var(--marrom-medio); }
 
-  /* GRID PEDIDOS */
   #pedidos {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
     gap: 20px;
   }
 
-  /* CARD */
   .card {
     background: white;
     border-radius: var(--raio);
@@ -465,7 +468,6 @@
 
   .total-linha { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 4px; }
   .total-label { font-size: 13px; color: var(--cinza); font-weight: 600; }
-
   .total-valor { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--marrom); }
 
   .card-acoes { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 8px; }
@@ -510,10 +512,9 @@
   .btn:hover  { opacity: 0.88; transform: translateY(-1px); }
   .btn:active { transform: translateY(0); }
 
-  .btn-zap    { background: #25D366; color: white; }
+  .btn-zap     { background: #25D366; color: white; }
   .btn-excluir { background: #fef2f2; color: var(--vermelho); border: 1.5px solid #fecaca; }
 
-  /* MODAL MENSAGEM */
   .modal-overlay {
     position: fixed; inset: 0;
     background: rgba(0,0,0,0.5);
@@ -641,13 +642,11 @@
 
   .btn-modal-enviar:hover { background: #1ebe59; }
 
-  /* VAZIO */
   .vazio { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--cinza); }
   .vazio-icone  { font-size: 60px; margin-bottom: 16px; }
   .vazio-titulo { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--marrom); margin-bottom: 8px; }
   .vazio-sub    { font-size: 14px; color: var(--cinza); }
 
-  /* TOAST */
   .toast {
     position: fixed;
     bottom: 28px; right: 28px;
@@ -689,9 +688,12 @@
     <div class="auth-logo">🍬 <span>Josi</span> Doces Gourmet</div>
     <div class="auth-sub">Painel Administrativo</div>
 
+    <div id="badgePrimeiroAcesso" class="auth-badge-primeiro" style="display:none">
+      ✨ Primeiro acesso — cadastre sua digital
+    </div>
+
     <div class="digital-wrapper" id="digitalWrapper" onclick="autenticar()">
       <div class="digital-bg" id="digitalBg">
-        <!-- Ícone SVG de impressão digital -->
         <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" id="digitalIcon">
           <path d="M32 8C19.85 8 10 17.85 10 30c0 4.48 1.35 8.65 3.66 12.12" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
           <path d="M50.34 42.12C52.65 38.65 54 34.48 54 30c0-12.15-9.85-22-22-22" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
@@ -708,8 +710,8 @@
       </div>
     </div>
 
-    <div class="auth-instrucao" id="authInstrucao">Toque para autenticar</div>
-    <div class="auth-desc" id="authDesc">Use sua impressão digital ou Face ID</div>
+    <div class="auth-instrucao" id="authInstrucao">Verificando dispositivo…</div>
+    <div class="auth-desc" id="authDesc">Aguarde um momento</div>
 
     <button class="btn-auth-fallback" id="btnFallback" onclick="autenticarSenha()" style="display:none">
       🔑 Usar senha em vez disso
@@ -720,7 +722,6 @@
 <!-- ══════════ APP PRINCIPAL ══════════ -->
 <div id="app">
 
-  <!-- TOPO -->
   <div class="topo">
     <div class="topo-logo">🍬 <span>Josi</span> Doces Gourmet</div>
     <div class="topo-right">
@@ -729,10 +730,8 @@
     </div>
   </div>
 
-  <!-- LAYOUT -->
   <div class="layout">
 
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="sidebar-titulo">Filtros</div>
 
@@ -795,7 +794,6 @@
       </div>
     </div>
 
-    <!-- MAIN -->
     <div class="main">
       <div class="main-header">
         <div>
@@ -808,7 +806,7 @@
     </div>
   </div>
 
-</div><!-- /#app -->
+</div>
 
 <!-- MODAL MENSAGEM -->
 <div id="modalOverlay" class="modal-overlay" style="display:none">
@@ -844,114 +842,83 @@
 <script>
   let autenticado = false;
 
+  /* ── Utilitários de UI ──────────────────────────────────────── */
+  function setEstado(estado, instrucao, desc, classeExtra) {
+    const bg    = document.getElementById('digitalBg');
+    const instr = document.getElementById('authInstrucao');
+    const descEl = document.getElementById('authDesc');
+    bg.className = 'digital-bg' + (estado ? ' ' + estado : '');
+    instr.textContent = instrucao;
+    instr.className   = 'auth-instrucao' + (classeExtra ? ' ' + classeExtra : '');
+    descEl.textContent = desc;
+  }
+
+  function resetEstado(delay) {
+    setTimeout(function() {
+      setEstado('', 'Toque para autenticar', 'Use sua impressão digital ou Face ID');
+    }, delay || 2000);
+  }
+
+  function mostrarFallback() {
+    document.getElementById('btnFallback').style.display = 'block';
+  }
+
+  /* ── Verifica suporte a biometria de plataforma ─────────────── */
+  async function checarSuporteBio() {
+    if (!window.PublicKeyCredential) return false;
+    return await PublicKeyCredential
+      .isUserVerifyingPlatformAuthenticatorAvailable()
+      .catch(function() { return false; });
+  }
+
+  /* ── Ponto de entrada principal ─────────────────────────────── */
   async function autenticar() {
-    const bg = document.getElementById('digitalBg');
-    const instrucao = document.getElementById('authInstrucao');
-    const desc = document.getElementById('authDesc');
-    const fallback = document.getElementById('btnFallback');
+    var jaRegistrou = localStorage.getItem('bioRegistrada') === '1';
 
-    // Verifica suporte a WebAuthn / biometria
-    if (!window.PublicKeyCredential) {
-      // Navegador não suporta — cai direto para senha
-      fallback.style.display = 'block';
-      instrucao.textContent = 'Biometria não disponível';
-      desc.textContent = 'Use o botão abaixo para entrar com senha';
-      return;
-    }
-
-    // Verifica se há autenticador de plataforma (Touch ID, Face ID, Windows Hello etc.)
-    const disponivel = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);
-
+    var disponivel = await checarSuporteBio();
     if (!disponivel) {
-      fallback.style.display = 'block';
-      instrucao.textContent = 'Biometria não configurada';
-      desc.textContent = 'Ative a biometria no dispositivo ou use a senha';
+      setEstado('', 'Biometria não disponível', 'Use a senha para continuar');
+      mostrarFallback();
       return;
     }
 
-    // Estado: aguardando
-    bg.className = 'digital-bg aguardando';
-    instrucao.textContent = 'Aguardando autenticação…';
-    instrucao.className = 'auth-instrucao';
-    desc.textContent = 'Use sua biometria quando solicitado';
-
-    try {
-      // Desafio aleatório (não precisa ser verificado pelo servidor neste contexto local)
-      const challenge = new Uint8Array(32);
-      crypto.getRandomValues(challenge);
-
-      const credencial = await navigator.credentials.get({
-        publicKey: {
-          challenge,
-          timeout: 60000,
-          userVerification: 'required',
-          rpId: location.hostname || 'localhost',
-        }
-      });
-
-      if (credencial) {
-        // Sucesso
-        bg.className = 'digital-bg sucesso';
-        instrucao.textContent = '✓ Autenticado com sucesso!';
-        instrucao.className = 'auth-instrucao ok-txt';
-        desc.textContent = 'Abrindo o painel…';
-
-        setTimeout(liberarApp, 700);
-      }
-
-    } catch (err) {
-      // Usuário cancelou ou falhou
-      if (err.name === 'NotAllowedError') {
-        bg.className = 'digital-bg erro';
-        instrucao.textContent = 'Autenticação cancelada';
-        instrucao.className = 'auth-instrucao erro-txt';
-        desc.textContent = 'Tente novamente ou use a senha';
-      } else if (err.name === 'InvalidStateError' || err.name === 'NotSupportedError') {
-        // Não há credencial cadastrada — precisa registrar primeiro.
-        // Neste fluxo simplificado, tentamos criar uma credencial nova.
-        await registrarEAutenticar();
-        return;
-      } else {
-        bg.className = 'digital-bg erro';
-        instrucao.textContent = 'Erro na autenticação';
-        instrucao.className = 'auth-instrucao erro-txt';
-        desc.textContent = err.message || 'Tente novamente';
-      }
-
-      fallback.style.display = 'block';
-
-      // Reseta visual após 2s
-      setTimeout(() => {
-        bg.className = 'digital-bg';
-        instrucao.textContent = 'Toque para autenticar';
-        instrucao.className = 'auth-instrucao';
-        desc.textContent = 'Use sua impressão digital ou Face ID';
-      }, 2000);
+    if (jaRegistrou) {
+      await verificarBiometria();
+    } else {
+      /* Mostra badge de primeiro acesso antes de iniciar */
+      document.getElementById('badgePrimeiroAcesso').style.display = 'inline-block';
+      await registrarBiometria();
     }
   }
 
-  // Registra credencial biométrica pela primeira vez e já autentica
-  async function registrarEAutenticar() {
-    const bg = document.getElementById('digitalBg');
-    const instrucao = document.getElementById('authInstrucao');
-    const desc = document.getElementById('authDesc');
-
-    bg.className = 'digital-bg aguardando';
-    instrucao.textContent = 'Cadastrando biometria…';
-    desc.textContent = 'Confirme com seu sensor biométrico';
+  /* ── PRIMEIRO ACESSO: Registrar digital ─────────────────────── */
+  async function registrarBiometria() {
+    setEstado('aguardando',
+      'Cadastrando sua digital…',
+      'Confirme com seu sensor biométrico quando solicitado');
 
     try {
-      const challenge = new Uint8Array(32);
+      var challenge = new Uint8Array(32);
       crypto.getRandomValues(challenge);
-      const userId = new Uint8Array(16);
+      var userId = new Uint8Array(16);
       crypto.getRandomValues(userId);
 
-      await navigator.credentials.create({
+      var credencial = await navigator.credentials.create({
         publicKey: {
-          challenge,
-          rp: { name: 'Josi Doces Gourmet', id: location.hostname || 'localhost' },
-          user: { id: userId, name: 'admin', displayName: 'Admin' },
-          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          challenge: challenge,
+          rp: {
+            name: 'Josi Doces Gourmet',
+            id: location.hostname || 'localhost'
+          },
+          user: {
+            id: userId,
+            name: 'admin',
+            displayName: 'Admin'
+          },
+          pubKeyCredParams: [
+            { type: 'public-key', alg: -7   },
+            { type: 'public-key', alg: -257 }
+          ],
           authenticatorSelection: {
             authenticatorAttachment: 'platform',
             userVerification: 'required',
@@ -961,31 +928,105 @@
         }
       });
 
-      // Registro feito com sucesso = autenticado
-      bg.className = 'digital-bg sucesso';
-      instrucao.textContent = '✓ Biometria configurada!';
-      instrucao.className = 'auth-instrucao ok-txt';
-      desc.textContent = 'Abrindo o painel…';
-      setTimeout(liberarApp, 700);
+      /* Salva flag + ID codificado para usar na verificação futura */
+      var rawIdArr = new Uint8Array(credencial.rawId);
+      var b64 = btoa(String.fromCharCode.apply(null, rawIdArr));
+      localStorage.setItem('bioRegistrada', '1');
+      localStorage.setItem('bioCredId', b64);
 
-    } catch (e) {
-      bg.className = 'digital-bg erro';
-      instrucao.textContent = 'Não foi possível configurar';
-      instrucao.className = 'auth-instrucao erro-txt';
-      desc.textContent = 'Use a senha para continuar';
-      document.getElementById('btnFallback').style.display = 'block';
+      document.getElementById('badgePrimeiroAcesso').style.display = 'none';
 
-      setTimeout(() => {
-        bg.className = 'digital-bg';
-        instrucao.textContent = 'Toque para autenticar';
-        instrucao.className = 'auth-instrucao';
-        desc.textContent = 'Use sua impressão digital ou Face ID';
-      }, 2500);
+      setEstado('sucesso',
+        '✓ Digital cadastrada com sucesso!',
+        'Abrindo o painel…', 'ok-txt');
+
+      setTimeout(liberarApp, 800);
+
+    } catch (err) {
+      document.getElementById('badgePrimeiroAcesso').style.display = 'none';
+
+      if (err.name === 'NotAllowedError') {
+        setEstado('erro', 'Cadastro cancelado',
+          'Toque novamente para tentar outra vez', 'erro-txt');
+      } else {
+        setEstado('erro', 'Não foi possível cadastrar',
+          err.message || 'Tente com a senha abaixo', 'erro-txt');
+      }
+      mostrarFallback();
+      resetEstado(2500);
     }
   }
 
+  /* ── ACESSOS SEGUINTES: Verificar digital ───────────────────── */
+  async function verificarBiometria() {
+    setEstado('aguardando',
+      'Aguardando autenticação…',
+      'Use sua biometria quando solicitado');
+
+    try {
+      var challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      /* Monta allowCredentials com o ID salvo anteriormente */
+      var credIdB64 = localStorage.getItem('bioCredId');
+      var allowCredentials = [];
+      if (credIdB64) {
+        var binStr = atob(credIdB64);
+        var credBytes = new Uint8Array(binStr.length);
+        for (var i = 0; i < binStr.length; i++) {
+          credBytes[i] = binStr.charCodeAt(i);
+        }
+        allowCredentials = [{
+          type: 'public-key',
+          id: credBytes,
+          transports: ['internal']
+        }];
+      }
+
+      var credencial = await navigator.credentials.get({
+        publicKey: {
+          challenge: challenge,
+          timeout: 60000,
+          userVerification: 'required',
+          rpId: location.hostname || 'localhost',
+          allowCredentials: allowCredentials
+        }
+      });
+
+      if (credencial) {
+        setEstado('sucesso', '✓ Autenticado com sucesso!',
+          'Abrindo o painel…', 'ok-txt');
+        setTimeout(liberarApp, 700);
+      }
+
+    } catch (err) {
+      if (err.name === 'NotAllowedError') {
+        setEstado('erro', 'Autenticação cancelada',
+          'Tente novamente ou use a senha', 'erro-txt');
+        mostrarFallback();
+        resetEstado(2200);
+      } else if (err.name === 'InvalidStateError' || err.name === 'NotFoundError') {
+        /* Credencial sumiu (limpeza de cache, novo dispositivo) — força recadastro */
+        localStorage.removeItem('bioRegistrada');
+        localStorage.removeItem('bioCredId');
+        setEstado('erro', 'Digital não encontrada',
+          'Vamos recadastrar sua biometria…', 'erro-txt');
+        setTimeout(function() {
+          document.getElementById('badgePrimeiroAcesso').style.display = 'inline-block';
+          registrarBiometria();
+        }, 1800);
+      } else {
+        setEstado('erro', 'Erro na autenticação',
+          err.message || 'Tente com a senha abaixo', 'erro-txt');
+        mostrarFallback();
+        resetEstado(2200);
+      }
+    }
+  }
+
+  /* ── Fallback: senha ─────────────────────────────────────────── */
   function autenticarSenha() {
-    const senha = prompt('🔐 Digite a senha do admin:');
+    var senha = prompt('🔐 Digite a senha do admin:');
     if (senha === '123456') {
       liberarApp();
     } else {
@@ -993,15 +1034,15 @@
     }
   }
 
+  /* ── Libera o painel ─────────────────────────────────────────── */
   function liberarApp() {
     document.getElementById('telaAuth').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     autenticado = true;
   }
 
-  // Inicia tentativa de autenticação automaticamente ao carregar
-  window.addEventListener('load', () => {
-    // Pequeno delay para a animação de entrada do card terminar
+  /* ── Auto-inicia após animação de entrada do card ───────────── */
+  window.addEventListener('load', function() {
     setTimeout(autenticar, 600);
   });
 </script>
@@ -1026,12 +1067,11 @@ const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 const pedidosRef = ref(db, "pedidos");
 
-let primeiraCarga  = true;
-let idsConhecidos  = new Set(); // IDs que já existiam na carga anterior
-let filtroAtivo    = 'todos';
-let todosPedidos   = [];
+let primeiraCarga = true;
+let idsConhecidos = new Set();
+let filtroAtivo   = 'todos';
+let todosPedidos  = [];
 
-// ── Relógio ──────────────────────────────────────────────────
 function atualizarRelogio() {
   document.getElementById('relogioTopo').textContent =
     new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
@@ -1039,7 +1079,6 @@ function atualizarRelogio() {
 setInterval(atualizarRelogio, 1000);
 atualizarRelogio();
 
-// ── Filtro ────────────────────────────────────────────────────
 window.filtrar = function(status, btn) {
   filtroAtivo = status;
   document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
@@ -1057,7 +1096,6 @@ window.filtrar = function(status, btn) {
   renderPedidos(todosPedidos);
 };
 
-// ── Render ────────────────────────────────────────────────────
 function renderPedidos(pedidosArray) {
   const container = document.getElementById('pedidos');
   container.innerHTML = '';
@@ -1147,7 +1185,6 @@ function renderPedidos(pedidosArray) {
   });
 }
 
-// ── Stats ─────────────────────────────────────────────────────
 function atualizarStats(pedidosArray) {
   const counts = { todos:0, novo:0, preparando:0, pronto:0, saiu:0, entregue:0, rejeitado:0 };
   let faturamento = 0;
@@ -1177,7 +1214,6 @@ function atualizarStats(pedidosArray) {
   }
 }
 
-// ── Listener Firebase ─────────────────────────────────────────
 onValue(pedidosRef, (snapshot) => {
   const dados = snapshot.val();
   const container = document.getElementById('pedidos');
@@ -1191,21 +1227,16 @@ onValue(pedidosRef, (snapshot) => {
   const idsAtuais = new Set(Object.keys(dados));
 
   if (!primeiraCarga) {
-    // Descobre IDs que NÃO existiam antes → pedidos genuinamente novos
     const idsMaisNovos = [...idsAtuais].filter(id => !idsConhecidos.has(id));
-
     if (idsMaisNovos.length > 0) {
-      // Toca o som UMA vez, independentemente de quantos chegaram
       const som = document.getElementById('somNovoPedido');
       som.currentTime = 0;
-      som.play().catch(() => {}); // silencia erros de autoplay
-
+      som.play().catch(() => {});
       const qtd = idsMaisNovos.length;
       mostrarToast(`🔔 ${qtd > 1 ? qtd + ' novos pedidos recebidos!' : 'Novo pedido recebido!'}`);
     }
   }
 
-  // Atualiza o conjunto de IDs conhecidos
   idsConhecidos = idsAtuais;
   primeiraCarga = false;
 
@@ -1216,7 +1247,6 @@ onValue(pedidosRef, (snapshot) => {
   renderPedidos(pedidosArray);
 });
 
-// ── Funções globais ───────────────────────────────────────────
 window.textoStatus = function(status) {
   return {
     novo:'🟡 Recebido', preparando:'🟠 Em Preparo', saiu:'🔵 Saiu p/ Entrega',
@@ -1235,7 +1265,6 @@ window.excluirPedido = async function(id) {
   mostrarToast('🗑️ Pedido excluído.');
 };
 
-// ── Modal ─────────────────────────────────────────────────────
 let modalDados = {};
 
 const mensagens = {
@@ -1285,7 +1314,6 @@ document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) fecharModal();
 });
 
-// ── Toast ─────────────────────────────────────────────────────
 function mostrarToast(msg) {
   const t = document.createElement('div');
   t.className = 'toast';
@@ -1295,4 +1323,4 @@ function mostrarToast(msg) {
 }
 </script>
 </body>
-</html>
+  </html>
