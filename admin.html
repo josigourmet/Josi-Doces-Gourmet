@@ -35,6 +35,162 @@
       radial-gradient(circle at 90% 80%, rgba(196,149,106,0.10) 0%, transparent 50%);
   }
 
+  /* ── TELA DE AUTENTICAÇÃO ── */
+  #telaAuth {
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(135deg, var(--marrom) 0%, var(--marrom-medio) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    padding: 24px;
+  }
+
+  .auth-card {
+    background: white;
+    border-radius: 28px;
+    padding: 48px 40px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 32px 80px rgba(0,0,0,0.35);
+    animation: authEntrada 0.5s cubic-bezier(.22,1,.36,1);
+  }
+
+  @keyframes authEntrada {
+    from { opacity: 0; transform: translateY(40px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .auth-logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 26px;
+    color: var(--marrom);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .auth-logo span { color: var(--ouro); }
+
+  .auth-sub {
+    font-size: 13px;
+    color: var(--cinza);
+    margin-bottom: 40px;
+  }
+
+  /* Ícone de digital */
+  .digital-wrapper {
+    position: relative;
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 32px;
+    cursor: pointer;
+  }
+
+  .digital-wrapper svg {
+    width: 100%;
+    height: 100%;
+    transition: transform 0.2s;
+  }
+
+  .digital-wrapper:hover svg { transform: scale(1.05); }
+  .digital-wrapper:active svg { transform: scale(0.96); }
+
+  .digital-bg {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--creme), var(--creme-escuro));
+    border: 3px solid var(--creme-escuro);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .digital-bg.aguardando {
+    border-color: var(--ouro);
+    background: linear-gradient(135deg, #fffbf0, #fff8e0);
+    box-shadow: 0 0 0 8px rgba(212,168,83,0.12), 0 0 0 16px rgba(212,168,83,0.06);
+  }
+
+  .digital-bg.sucesso {
+    border-color: var(--verde);
+    background: linear-gradient(135deg, #f0fff8, #e0fff0);
+    box-shadow: 0 0 0 8px rgba(46,125,94,0.15), 0 0 0 16px rgba(46,125,94,0.07);
+  }
+
+  .digital-bg.erro {
+    border-color: var(--vermelho);
+    background: linear-gradient(135deg, #fff0f0, #ffe8e8);
+    box-shadow: 0 0 0 8px rgba(192,57,43,0.12);
+    animation: shake 0.4s ease;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(6px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(4px); }
+  }
+
+  /* Anel pulsante quando aguardando */
+  .digital-bg.aguardando::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid var(--ouro);
+    animation: ringPulse 1.4s ease-in-out infinite;
+    opacity: 0.6;
+  }
+
+  @keyframes ringPulse {
+    0%,100% { transform: scale(1); opacity: 0.6; }
+    50%      { transform: scale(1.1); opacity: 0; }
+  }
+
+  .auth-instrucao {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--marrom);
+    margin-bottom: 10px;
+    min-height: 22px;
+    transition: color 0.3s;
+  }
+
+  .auth-instrucao.erro-txt { color: var(--vermelho); }
+  .auth-instrucao.ok-txt   { color: var(--verde); }
+
+  .auth-desc {
+    font-size: 12px;
+    color: var(--cinza);
+    margin-bottom: 28px;
+    min-height: 16px;
+  }
+
+  .btn-auth-fallback {
+    background: transparent;
+    border: 1.5px solid var(--creme-escuro);
+    color: var(--cinza);
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    width: 100%;
+  }
+
+  .btn-auth-fallback:hover { border-color: var(--marrom-claro); color: var(--marrom); }
+
+  /* ── APP (oculto até autenticar) ── */
+  #app { display: none; }
+
   /* TOPO */
   .topo {
     background: linear-gradient(135deg, var(--marrom) 0%, var(--marrom-medio) 100%);
@@ -59,15 +215,9 @@
     gap: 10px;
   }
 
-  .topo-logo span {
-    color: var(--ouro);
-  }
+  .topo-logo span { color: var(--ouro); }
 
-  .topo-right {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-  }
+  .topo-right { display: flex; align-items: center; gap: 18px; }
 
   .badge-notif {
     background: var(--vermelho);
@@ -77,22 +227,18 @@
     border-radius: 50%;
     width: 22px;
     height: 22px;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     animation: pulseRed 1.5s infinite;
-    display: none;
   }
 
   @keyframes pulseRed {
     0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
+    50%       { transform: scale(1.2); }
   }
 
-  .topo-hora {
-    font-size: 13px;
-    color: rgba(255,255,255,0.7);
-  }
+  .topo-hora { font-size: 13px; color: rgba(255,255,255,0.7); }
 
   /* LAYOUT */
   .layout {
@@ -141,11 +287,7 @@
   .filtro-btn:hover { background: rgba(255,255,255,0.08); color: white; }
   .filtro-btn.ativo { background: rgba(212,168,83,0.2); color: var(--ouro); }
 
-  .filtro-dot {
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
+  .filtro-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 
   .filtro-count {
     margin-left: auto;
@@ -159,19 +301,9 @@
 
   .filtro-btn.ativo .filtro-count { background: var(--ouro); color: var(--marrom); }
 
-  .sidebar-sep {
-    height: 1px;
-    background: rgba(255,255,255,0.08);
-    margin: 10px 0;
-  }
+  .sidebar-sep { height: 1px; background: rgba(255,255,255,0.08); margin: 10px 0; }
 
-  /* STATS */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin: 16px 0 8px;
-  }
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0 8px; }
 
   .stat-card {
     background: rgba(255,255,255,0.06);
@@ -187,18 +319,10 @@
     color: var(--ouro);
   }
 
-  .stat-label {
-    font-size: 10px;
-    color: rgba(255,255,255,0.5);
-    letter-spacing: 0.5px;
-    margin-top: 2px;
-  }
+  .stat-label { font-size: 10px; color: rgba(255,255,255,0.5); letter-spacing: 0.5px; margin-top: 2px; }
 
   /* MAIN */
-  .main {
-    padding: 28px;
-    overflow-y: auto;
-  }
+  .main { padding: 28px; overflow-y: auto; }
 
   .main-header {
     display: flex;
@@ -207,18 +331,8 @@
     margin-bottom: 24px;
   }
 
-  .main-titulo {
-    font-family: 'Playfair Display', serif;
-    font-size: 26px;
-    color: var(--marrom);
-    font-weight: 700;
-  }
-
-  .main-sub {
-    color: var(--cinza);
-    font-size: 13px;
-    margin-top: 2px;
-  }
+  .main-titulo { font-family: 'Playfair Display', serif; font-size: 26px; color: var(--marrom); font-weight: 700; }
+  .main-sub { color: var(--cinza); font-size: 13px; margin-top: 2px; }
 
   .btn-atualizar {
     background: var(--marrom);
@@ -263,10 +377,9 @@
 
   @keyframes novoPulse {
     0%, 100% { box-shadow: var(--sombra); }
-    50% { box-shadow: 0 0 0 4px rgba(192,57,43,0.2), var(--sombra); }
+    50%       { box-shadow: 0 0 0 4px rgba(192,57,43,0.2), var(--sombra); }
   }
 
-  /* CARD HEADER */
   .card-header {
     padding: 16px 18px 12px;
     display: flex;
@@ -275,17 +388,8 @@
     border-bottom: 1px solid var(--creme-escuro);
   }
 
-  .card-num {
-    font-family: 'Playfair Display', serif;
-    font-size: 20px;
-    font-weight: 700;
-    color: var(--marrom);
-  }
-
-  .card-hora {
-    font-size: 12px;
-    color: var(--cinza);
-  }
+  .card-num { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 700; color: var(--marrom); }
+  .card-hora { font-size: 12px; color: var(--cinza); }
 
   .status-badge {
     padding: 5px 12px;
@@ -298,13 +402,12 @@
     gap: 5px;
   }
 
-  /* STATUS COLORS */
-  .s-novo { background: #f39c12; }
+  .s-novo       { background: #f39c12; }
   .s-preparando { background: var(--laranja); }
-  .s-saiu { background: var(--azul); }
-  .s-pronto { background: var(--roxo); }
-  .s-entregue { background: var(--verde); }
-  .s-rejeitado { background: var(--vermelho); }
+  .s-saiu       { background: var(--azul); }
+  .s-pronto     { background: var(--roxo); }
+  .s-entregue   { background: var(--verde); }
+  .s-rejeitado  { background: var(--vermelho); }
 
   .alerta-banner {
     background: linear-gradient(90deg, var(--vermelho), #e74c3c);
@@ -320,36 +423,16 @@
 
   @keyframes slideIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* CARD BODY */
   .card-body { padding: 16px 18px; }
 
-  .cliente-nome {
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--marrom);
-    margin-bottom: 10px;
-  }
+  .cliente-nome { font-size: 18px; font-weight: 700; color: var(--marrom); margin-bottom: 10px; }
 
-  .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 14px; }
 
-  .info-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-    font-size: 13px;
-    color: #555;
-    line-height: 1.4;
-  }
-
+  .info-item { display: flex; align-items: flex-start; gap: 6px; font-size: 13px; color: #555; line-height: 1.4; }
   .info-item.full { grid-column: 1/-1; }
   .info-icon { flex-shrink: 0; font-size: 14px; }
 
-  /* ITENS */
   .itens-box {
     background: var(--creme);
     border-radius: 12px;
@@ -380,23 +463,11 @@
   .item-linha:last-child { border-bottom: none; }
   .item-qtd { background: var(--ouro); color: white; font-weight: 700; padding: 1px 7px; border-radius: 6px; font-size: 11px; }
 
-  .total-linha {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0 4px;
-  }
-
+  .total-linha { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 4px; }
   .total-label { font-size: 13px; color: var(--cinza); font-weight: 600; }
 
-  .total-valor {
-    font-family: 'Playfair Display', serif;
-    font-size: 22px;
-    font-weight: 700;
-    color: var(--marrom);
-  }
+  .total-valor { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--marrom); }
 
-  /* AÇÕES */
   .card-acoes { padding: 0 18px 18px; display: flex; flex-direction: column; gap: 8px; }
 
   .select-status {
@@ -436,10 +507,10 @@
     transition: all 0.2s;
   }
 
-  .btn:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn:hover  { opacity: 0.88; transform: translateY(-1px); }
   .btn:active { transform: translateY(0); }
 
-  .btn-zap { background: #25D366; color: white; }
+  .btn-zap    { background: #25D366; color: white; }
   .btn-excluir { background: #fef2f2; color: var(--vermelho); border: 1.5px solid #fecaca; }
 
   /* MODAL MENSAGEM */
@@ -479,7 +550,7 @@
   }
 
   .modal-titulo { font-family: 'Playfair Display', serif; font-size: 18px; }
-  .modal-sub { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
+  .modal-sub    { font-size: 12px; color: rgba(255,255,255,0.65); margin-top: 2px; }
 
   .modal-fechar {
     background: rgba(255,255,255,0.15);
@@ -499,12 +570,7 @@
 
   .modal-body { padding: 24px; }
 
-  .msg-opcoes {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-bottom: 16px;
-  }
+  .msg-opcoes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
 
   .msg-opcao {
     padding: 10px 12px;
@@ -576,16 +642,10 @@
   .btn-modal-enviar:hover { background: #1ebe59; }
 
   /* VAZIO */
-  .vazio {
-    grid-column: 1/-1;
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--cinza);
-  }
-
-  .vazio-icone { font-size: 60px; margin-bottom: 16px; }
+  .vazio { grid-column: 1/-1; text-align: center; padding: 80px 20px; color: var(--cinza); }
+  .vazio-icone  { font-size: 60px; margin-bottom: 16px; }
   .vazio-titulo { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--marrom); margin-bottom: 8px; }
-  .vazio-sub { font-size: 14px; color: var(--cinza); }
+  .vazio-sub    { font-size: 14px; color: var(--cinza); }
 
   /* TOAST */
   .toast {
@@ -607,7 +667,6 @@
 
   @keyframes toastIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-  /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(74,44,42,0.2); border-radius: 3px; }
@@ -618,106 +677,138 @@
     #pedidos { grid-template-columns: 1fr; }
     .info-grid { grid-template-columns: 1fr; }
     .msg-opcoes { grid-template-columns: 1fr; }
+    .auth-card { padding: 36px 24px; }
   }
 </style>
 </head>
 <body>
 
-<script>
-  const senha = prompt("🔐 Digite a senha do admin:");
-  if (senha !== "123456") { alert("Acesso negado"); location.href = "/"; }
-</script>
+<!-- ══════════ TELA DE AUTENTICAÇÃO ══════════ -->
+<div id="telaAuth">
+  <div class="auth-card">
+    <div class="auth-logo">🍬 <span>Josi</span> Doces Gourmet</div>
+    <div class="auth-sub">Painel Administrativo</div>
 
-<!-- TOPO -->
-<div class="topo">
-  <div class="topo-logo">🍬 <span>Josi</span> Doces Gourmet</div>
-  <div class="topo-right">
-    <span id="badgeNovos" class="badge-notif">0</span>
-    <div class="topo-hora" id="relogioTopo"></div>
+    <div class="digital-wrapper" id="digitalWrapper" onclick="autenticar()">
+      <div class="digital-bg" id="digitalBg">
+        <!-- Ícone SVG de impressão digital -->
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" id="digitalIcon">
+          <path d="M32 8C19.85 8 10 17.85 10 30c0 4.48 1.35 8.65 3.66 12.12" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M50.34 42.12C52.65 38.65 54 34.48 54 30c0-12.15-9.85-22-22-22" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 16c-7.73 0-14 6.27-14 14 0 2.96.92 5.71 2.48 7.98" stroke="#d4a853" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M43.52 37.98C45.08 35.71 46 32.96 46 30c0-7.73-6.27-14-14-14" stroke="#d4a853" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M32 24c-3.31 0-6 2.69-6 6 0 3.31 2.69 6 6 6 3.31 0 6-2.69 6-6 0-3.31-2.69-6-6-6z" fill="#d4a853" opacity="0.25"/>
+          <circle cx="32" cy="30" r="3" fill="#d4a853"/>
+          <path d="M18 52c2-4 4-8 4-14" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M24 54c1-3 2-7 2-14" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M30 55c0-4 0-9 0-16" stroke="#d4a853" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M36 54c-1-3-2-7-2-14" stroke="#d4a853" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M42 52c-1-4-3-8-3-14" stroke="#c4956a" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+    </div>
+
+    <div class="auth-instrucao" id="authInstrucao">Toque para autenticar</div>
+    <div class="auth-desc" id="authDesc">Use sua impressão digital ou Face ID</div>
+
+    <button class="btn-auth-fallback" id="btnFallback" onclick="autenticarSenha()" style="display:none">
+      🔑 Usar senha em vez disso
+    </button>
   </div>
 </div>
 
-<!-- LAYOUT -->
-<div class="layout">
+<!-- ══════════ APP PRINCIPAL ══════════ -->
+<div id="app">
 
-  <!-- SIDEBAR -->
-  <div class="sidebar">
-    <div class="sidebar-titulo">Filtros</div>
-
-    <button class="filtro-btn ativo" onclick="filtrar('todos', this)">
-      <div class="filtro-dot" style="background:#888"></div>
-      Todos os Pedidos
-      <span class="filtro-count" id="cnt-todos">0</span>
-    </button>
-    <button class="filtro-btn" onclick="filtrar('novo', this)">
-      <div class="filtro-dot" style="background:#f39c12"></div>
-      Recebidos
-      <span class="filtro-count" id="cnt-novo">0</span>
-    </button>
-    <button class="filtro-btn" onclick="filtrar('preparando', this)">
-      <div class="filtro-dot" style="background:#c05c1a"></div>
-      Em Preparo
-      <span class="filtro-count" id="cnt-preparando">0</span>
-    </button>
-    <button class="filtro-btn" onclick="filtrar('pronto', this)">
-      <div class="filtro-dot" style="background:#6d3fa5"></div>
-      Prontos
-      <span class="filtro-count" id="cnt-pronto">0</span>
-    </button>
-    <button class="filtro-btn" onclick="filtrar('saiu', this)">
-      <div class="filtro-dot" style="background:#2563a8"></div>
-      Saíram p/ Entrega
-      <span class="filtro-count" id="cnt-saiu">0</span>
-    </button>
-    <button class="filtro-btn" onclick="filtrar('entregue', this)">
-      <div class="filtro-dot" style="background:#2e7d5e"></div>
-      Entregues
-      <span class="filtro-count" id="cnt-entregue">0</span>
-    </button>
-    <button class="filtro-btn" onclick="filtrar('rejeitado', this)">
-      <div class="filtro-dot" style="background:#c0392b"></div>
-      Rejeitados
-      <span class="filtro-count" id="cnt-rejeitado">0</span>
-    </button>
-
-    <div class="sidebar-sep"></div>
-    <div class="sidebar-titulo">Resumo do Dia</div>
-
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-num" id="statTotal">0</div>
-        <div class="stat-label">Pedidos</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statFaturamento">R$0</div>
-        <div class="stat-label">Faturamento</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statEntregues">0</div>
-        <div class="stat-label">Entregues</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-num" id="statPendentes">0</div>
-        <div class="stat-label">Pendentes</div>
-      </div>
+  <!-- TOPO -->
+  <div class="topo">
+    <div class="topo-logo">🍬 <span>Josi</span> Doces Gourmet</div>
+    <div class="topo-right">
+      <span id="badgeNovos" class="badge-notif">0</span>
+      <div class="topo-hora" id="relogioTopo"></div>
     </div>
   </div>
 
-  <!-- MAIN -->
-  <div class="main">
-    <div class="main-header">
-      <div>
-        <div class="main-titulo">Pedidos em Tempo Real</div>
-        <div class="main-sub" id="textoFiltro">Exibindo todos os pedidos</div>
-      </div>
-      <button class="btn-atualizar" onclick="location.reload()">
-        🔄 Atualizar
+  <!-- LAYOUT -->
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-titulo">Filtros</div>
+
+      <button class="filtro-btn ativo" onclick="filtrar('todos', this)">
+        <div class="filtro-dot" style="background:#888"></div>
+        Todos os Pedidos
+        <span class="filtro-count" id="cnt-todos">0</span>
       </button>
+      <button class="filtro-btn" onclick="filtrar('novo', this)">
+        <div class="filtro-dot" style="background:#f39c12"></div>
+        Recebidos
+        <span class="filtro-count" id="cnt-novo">0</span>
+      </button>
+      <button class="filtro-btn" onclick="filtrar('preparando', this)">
+        <div class="filtro-dot" style="background:#c05c1a"></div>
+        Em Preparo
+        <span class="filtro-count" id="cnt-preparando">0</span>
+      </button>
+      <button class="filtro-btn" onclick="filtrar('pronto', this)">
+        <div class="filtro-dot" style="background:#6d3fa5"></div>
+        Prontos
+        <span class="filtro-count" id="cnt-pronto">0</span>
+      </button>
+      <button class="filtro-btn" onclick="filtrar('saiu', this)">
+        <div class="filtro-dot" style="background:#2563a8"></div>
+        Saíram p/ Entrega
+        <span class="filtro-count" id="cnt-saiu">0</span>
+      </button>
+      <button class="filtro-btn" onclick="filtrar('entregue', this)">
+        <div class="filtro-dot" style="background:#2e7d5e"></div>
+        Entregues
+        <span class="filtro-count" id="cnt-entregue">0</span>
+      </button>
+      <button class="filtro-btn" onclick="filtrar('rejeitado', this)">
+        <div class="filtro-dot" style="background:#c0392b"></div>
+        Rejeitados
+        <span class="filtro-count" id="cnt-rejeitado">0</span>
+      </button>
+
+      <div class="sidebar-sep"></div>
+      <div class="sidebar-titulo">Resumo do Dia</div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="statTotal">0</div>
+          <div class="stat-label">Pedidos</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statFaturamento">R$0</div>
+          <div class="stat-label">Faturamento</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statEntregues">0</div>
+          <div class="stat-label">Entregues</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="statPendentes">0</div>
+          <div class="stat-label">Pendentes</div>
+        </div>
+      </div>
     </div>
 
-    <div id="pedidos"></div>
+    <!-- MAIN -->
+    <div class="main">
+      <div class="main-header">
+        <div>
+          <div class="main-titulo">Pedidos em Tempo Real</div>
+          <div class="main-sub" id="textoFiltro">Exibindo todos os pedidos</div>
+        </div>
+        <button class="btn-atualizar" onclick="location.reload()">🔄 Atualizar</button>
+      </div>
+      <div id="pedidos"></div>
+    </div>
   </div>
-</div>
+
+</div><!-- /#app -->
 
 <!-- MODAL MENSAGEM -->
 <div id="modalOverlay" class="modal-overlay" style="display:none">
@@ -749,8 +840,175 @@
   <source src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg" type="audio/ogg">
 </audio>
 
+<!-- ══════════ AUTENTICAÇÃO ══════════ -->
+<script>
+  let autenticado = false;
+
+  async function autenticar() {
+    const bg = document.getElementById('digitalBg');
+    const instrucao = document.getElementById('authInstrucao');
+    const desc = document.getElementById('authDesc');
+    const fallback = document.getElementById('btnFallback');
+
+    // Verifica suporte a WebAuthn / biometria
+    if (!window.PublicKeyCredential) {
+      // Navegador não suporta — cai direto para senha
+      fallback.style.display = 'block';
+      instrucao.textContent = 'Biometria não disponível';
+      desc.textContent = 'Use o botão abaixo para entrar com senha';
+      return;
+    }
+
+    // Verifica se há autenticador de plataforma (Touch ID, Face ID, Windows Hello etc.)
+    const disponivel = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable().catch(() => false);
+
+    if (!disponivel) {
+      fallback.style.display = 'block';
+      instrucao.textContent = 'Biometria não configurada';
+      desc.textContent = 'Ative a biometria no dispositivo ou use a senha';
+      return;
+    }
+
+    // Estado: aguardando
+    bg.className = 'digital-bg aguardando';
+    instrucao.textContent = 'Aguardando autenticação…';
+    instrucao.className = 'auth-instrucao';
+    desc.textContent = 'Use sua biometria quando solicitado';
+
+    try {
+      // Desafio aleatório (não precisa ser verificado pelo servidor neste contexto local)
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+
+      const credencial = await navigator.credentials.get({
+        publicKey: {
+          challenge,
+          timeout: 60000,
+          userVerification: 'required',
+          rpId: location.hostname || 'localhost',
+        }
+      });
+
+      if (credencial) {
+        // Sucesso
+        bg.className = 'digital-bg sucesso';
+        instrucao.textContent = '✓ Autenticado com sucesso!';
+        instrucao.className = 'auth-instrucao ok-txt';
+        desc.textContent = 'Abrindo o painel…';
+
+        setTimeout(liberarApp, 700);
+      }
+
+    } catch (err) {
+      // Usuário cancelou ou falhou
+      if (err.name === 'NotAllowedError') {
+        bg.className = 'digital-bg erro';
+        instrucao.textContent = 'Autenticação cancelada';
+        instrucao.className = 'auth-instrucao erro-txt';
+        desc.textContent = 'Tente novamente ou use a senha';
+      } else if (err.name === 'InvalidStateError' || err.name === 'NotSupportedError') {
+        // Não há credencial cadastrada — precisa registrar primeiro.
+        // Neste fluxo simplificado, tentamos criar uma credencial nova.
+        await registrarEAutenticar();
+        return;
+      } else {
+        bg.className = 'digital-bg erro';
+        instrucao.textContent = 'Erro na autenticação';
+        instrucao.className = 'auth-instrucao erro-txt';
+        desc.textContent = err.message || 'Tente novamente';
+      }
+
+      fallback.style.display = 'block';
+
+      // Reseta visual após 2s
+      setTimeout(() => {
+        bg.className = 'digital-bg';
+        instrucao.textContent = 'Toque para autenticar';
+        instrucao.className = 'auth-instrucao';
+        desc.textContent = 'Use sua impressão digital ou Face ID';
+      }, 2000);
+    }
+  }
+
+  // Registra credencial biométrica pela primeira vez e já autentica
+  async function registrarEAutenticar() {
+    const bg = document.getElementById('digitalBg');
+    const instrucao = document.getElementById('authInstrucao');
+    const desc = document.getElementById('authDesc');
+
+    bg.className = 'digital-bg aguardando';
+    instrucao.textContent = 'Cadastrando biometria…';
+    desc.textContent = 'Confirme com seu sensor biométrico';
+
+    try {
+      const challenge = new Uint8Array(32);
+      crypto.getRandomValues(challenge);
+      const userId = new Uint8Array(16);
+      crypto.getRandomValues(userId);
+
+      await navigator.credentials.create({
+        publicKey: {
+          challenge,
+          rp: { name: 'Josi Doces Gourmet', id: location.hostname || 'localhost' },
+          user: { id: userId, name: 'admin', displayName: 'Admin' },
+          pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+          authenticatorSelection: {
+            authenticatorAttachment: 'platform',
+            userVerification: 'required',
+            requireResidentKey: false
+          },
+          timeout: 60000
+        }
+      });
+
+      // Registro feito com sucesso = autenticado
+      bg.className = 'digital-bg sucesso';
+      instrucao.textContent = '✓ Biometria configurada!';
+      instrucao.className = 'auth-instrucao ok-txt';
+      desc.textContent = 'Abrindo o painel…';
+      setTimeout(liberarApp, 700);
+
+    } catch (e) {
+      bg.className = 'digital-bg erro';
+      instrucao.textContent = 'Não foi possível configurar';
+      instrucao.className = 'auth-instrucao erro-txt';
+      desc.textContent = 'Use a senha para continuar';
+      document.getElementById('btnFallback').style.display = 'block';
+
+      setTimeout(() => {
+        bg.className = 'digital-bg';
+        instrucao.textContent = 'Toque para autenticar';
+        instrucao.className = 'auth-instrucao';
+        desc.textContent = 'Use sua impressão digital ou Face ID';
+      }, 2500);
+    }
+  }
+
+  function autenticarSenha() {
+    const senha = prompt('🔐 Digite a senha do admin:');
+    if (senha === '123456') {
+      liberarApp();
+    } else {
+      alert('Senha incorreta. Acesso negado.');
+    }
+  }
+
+  function liberarApp() {
+    document.getElementById('telaAuth').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    autenticado = true;
+  }
+
+  // Inicia tentativa de autenticação automaticamente ao carregar
+  window.addEventListener('load', () => {
+    // Pequeno delay para a animação de entrada do card terminar
+    setTimeout(autenticar, 600);
+  });
+</script>
+
+<!-- ══════════ FIREBASE + LÓGICA ══════════ -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
@@ -765,45 +1023,44 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+const db  = getDatabase(app);
 const pedidosRef = ref(db, "pedidos");
 
-let primeiraCarga = true;
-let ultimoPedido = null;
-let filtroAtivo = 'todos';
-let todosPedidos = [];
+let primeiraCarga  = true;
+let idsConhecidos  = new Set(); // IDs que já existiam na carga anterior
+let filtroAtivo    = 'todos';
+let todosPedidos   = [];
 
-// Relógio
+// ── Relógio ──────────────────────────────────────────────────
 function atualizarRelogio() {
-  const agora = new Date();
   document.getElementById('relogioTopo').textContent =
-    agora.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    new Date().toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
 }
 setInterval(atualizarRelogio, 1000);
 atualizarRelogio();
 
-// Filtro
+// ── Filtro ────────────────────────────────────────────────────
 window.filtrar = function(status, btn) {
   filtroAtivo = status;
   document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
   btn.classList.add('ativo');
   const labels = {
-    'todos': 'Exibindo todos os pedidos',
-    'novo': 'Exibindo pedidos recebidos',
-    'preparando': 'Exibindo pedidos em preparo',
-    'pronto': 'Exibindo pedidos prontos para retirada',
-    'saiu': 'Exibindo pedidos saídos para entrega',
-    'entregue': 'Exibindo pedidos entregues',
-    'rejeitado': 'Exibindo pedidos rejeitados'
+    todos:      'Exibindo todos os pedidos',
+    novo:       'Exibindo pedidos recebidos',
+    preparando: 'Exibindo pedidos em preparo',
+    pronto:     'Exibindo pedidos prontos para retirada',
+    saiu:       'Exibindo pedidos saídos para entrega',
+    entregue:   'Exibindo pedidos entregues',
+    rejeitado:  'Exibindo pedidos rejeitados'
   };
   document.getElementById('textoFiltro').textContent = labels[status] || '';
   renderPedidos(todosPedidos);
-}
+};
 
-// Render
+// ── Render ────────────────────────────────────────────────────
 function renderPedidos(pedidosArray) {
-  const container = document.getElementById("pedidos");
-  container.innerHTML = "";
+  const container = document.getElementById('pedidos');
+  container.innerHTML = '';
 
   const filtrados = filtroAtivo === 'todos'
     ? pedidosArray
@@ -814,25 +1071,25 @@ function renderPedidos(pedidosArray) {
       <div class="vazio">
         <div class="vazio-icone">🍰</div>
         <div class="vazio-titulo">Nenhum pedido encontrado</div>
-        <div class="vazio-sub">Aguardando novos pedidos...</div>
+        <div class="vazio-sub">Aguardando novos pedidos…</div>
       </div>`;
     return;
   }
 
   filtrados.forEach(([id, pedido]) => {
     const classeStatus = {
-      novo: 's-novo', preparando: 's-preparando', saiu: 's-saiu',
-      pronto: 's-pronto', entregue: 's-entregue', rejeitado: 's-rejeitado'
+      novo:'s-novo', preparando:'s-preparando', saiu:'s-saiu',
+      pronto:'s-pronto', entregue:'s-entregue', rejeitado:'s-rejeitado'
     }[pedido.status] || 's-novo';
 
-    const card = document.createElement("div");
-    card.className = pedido.status === "novo" ? "card novo-pedido" : "card";
+    const card = document.createElement('div');
+    card.className = pedido.status === 'novo' ? 'card novo-pedido' : 'card';
     card.innerHTML = `
-      ${pedido.status === "novo" ? `<div class="alerta-banner">🚨 NOVO PEDIDO AGUARDANDO CONFIRMAÇÃO</div>` : ""}
+      ${pedido.status === 'novo' ? `<div class="alerta-banner">🚨 NOVO PEDIDO AGUARDANDO CONFIRMAÇÃO</div>` : ''}
       <div class="card-header">
         <div>
-          <div class="card-num">Pedido #${pedido.numeroPedido || "000"}</div>
-          <div class="card-hora">🕒 ${pedido.timestamp ? new Date(pedido.timestamp).toLocaleString('pt-BR') : "Horário não disponível"}</div>
+          <div class="card-num">Pedido #${pedido.numeroPedido || '000'}</div>
+          <div class="card-hora">🕒 ${pedido.timestamp ? new Date(pedido.timestamp).toLocaleString('pt-BR') : 'Horário não disponível'}</div>
         </div>
         <div class="status-badge ${classeStatus}">${textoStatus(pedido.status)}</div>
       </div>
@@ -859,7 +1116,7 @@ function renderPedidos(pedidosArray) {
               <span>${item.nome}</span>
               <span class="item-qtd">${item.qtd}x</span>
             </div>
-          `).join("")}
+          `).join('')}
           <div class="total-linha">
             <span class="total-label">Total</span>
             <span class="total-valor">R$ ${pedido.total.toFixed(2)}</span>
@@ -868,19 +1125,19 @@ function renderPedidos(pedidosArray) {
       </div>
       <div class="card-acoes">
         <select class="select-status" onchange="alterarStatus('${id}', this.value)">
-          <option value="novo" ${pedido.status=="novo"?"selected":""}>🟡 Pedido Recebido</option>
-          <option value="preparando" ${pedido.status=="preparando"?"selected":""}>🟠 Em Preparação</option>
-          <option value="pronto" ${pedido.status=="pronto"?"selected":""}>🟣 Pronto p/ Retirada</option>
-          <option value="saiu" ${pedido.status=="saiu"?"selected":""}>🔵 Saiu para Entrega</option>
-          <option value="entregue" ${pedido.status=="entregue"?"selected":""}>🟢 Entregue</option>
-          <option value="rejeitado" ${pedido.status=="rejeitado"?"selected":""}>❌ Rejeitado</option>
+          <option value="novo"       ${pedido.status=='novo'       ?'selected':''}>🟡 Pedido Recebido</option>
+          <option value="preparando" ${pedido.status=='preparando' ?'selected':''}>🟠 Em Preparação</option>
+          <option value="pronto"     ${pedido.status=='pronto'     ?'selected':''}>🟣 Pronto p/ Retirada</option>
+          <option value="saiu"       ${pedido.status=='saiu'       ?'selected':''}>🔵 Saiu para Entrega</option>
+          <option value="entregue"   ${pedido.status=='entregue'   ?'selected':''}>🟢 Entregue</option>
+          <option value="rejeitado"  ${pedido.status=='rejeitado'  ?'selected':''}>❌ Rejeitado</option>
         </select>
         <div class="btns-row">
           <button class="btn btn-zap" onclick="abrirModal(
             '${pedido.telefone}',
             '${pedido.cliente.replace(/'/g,"\\'")}',
             '${pedido.status}',
-            '${pedido.numeroPedido || "000"}'
+            '${pedido.numeroPedido || '000'}'
           )">💬 Mensagem</button>
           <button class="btn btn-excluir" onclick="excluirPedido('${id}')">🗑️ Excluir</button>
         </div>
@@ -890,9 +1147,9 @@ function renderPedidos(pedidosArray) {
   });
 }
 
-// Stats
+// ── Stats ─────────────────────────────────────────────────────
 function atualizarStats(pedidosArray) {
-  const counts = { todos: 0, novo: 0, preparando: 0, pronto: 0, saiu: 0, entregue: 0, rejeitado: 0 };
+  const counts = { todos:0, novo:0, preparando:0, pronto:0, saiu:0, entregue:0, rejeitado:0 };
   let faturamento = 0;
 
   pedidosArray.forEach(([, p]) => {
@@ -920,87 +1177,80 @@ function atualizarStats(pedidosArray) {
   }
 }
 
+// ── Listener Firebase ─────────────────────────────────────────
 onValue(pedidosRef, (snapshot) => {
   const dados = snapshot.val();
-  const container = document.getElementById("pedidos");
+  const container = document.getElementById('pedidos');
 
   if (!dados) {
-    container.innerHTML = `<div class="vazio"><div class="vazio-icone">🍰</div><div class="vazio-titulo">Nenhum pedido encontrado</div><div class="vazio-sub">Aguardando novos pedidos...</div></div>`;
+    container.innerHTML = `<div class="vazio"><div class="vazio-icone">🍰</div><div class="vazio-titulo">Nenhum pedido encontrado</div><div class="vazio-sub">Aguardando novos pedidos…</div></div>`;
+    primeiraCarga = false;
     return;
   }
 
-  const pedidosArray = Object.entries(dados).reverse();
+  const idsAtuais = new Set(Object.keys(dados));
 
-  // Som novo pedido
   if (!primeiraCarga) {
-    const maisRecenteId = Object.keys(dados)[Object.keys(dados).length - 1];
-    if (ultimoPedido && ultimoPedido !== maisRecenteId) {
-      document.getElementById("somNovoPedido").play();
-      mostrarToast("🔔 Novo pedido recebido!");
+    // Descobre IDs que NÃO existiam antes → pedidos genuinamente novos
+    const idsMaisNovos = [...idsAtuais].filter(id => !idsConhecidos.has(id));
+
+    if (idsMaisNovos.length > 0) {
+      // Toca o som UMA vez, independentemente de quantos chegaram
+      const som = document.getElementById('somNovoPedido');
+      som.currentTime = 0;
+      som.play().catch(() => {}); // silencia erros de autoplay
+
+      const qtd = idsMaisNovos.length;
+      mostrarToast(`🔔 ${qtd > 1 ? qtd + ' novos pedidos recebidos!' : 'Novo pedido recebido!'}`);
     }
-    ultimoPedido = maisRecenteId;
-  } else {
-    ultimoPedido = Object.keys(dados)[Object.keys(dados).length - 1];
   }
 
+  // Atualiza o conjunto de IDs conhecidos
+  idsConhecidos = idsAtuais;
   primeiraCarga = false;
+
+  const pedidosArray = Object.entries(dados).reverse();
   todosPedidos = pedidosArray;
 
   atualizarStats(pedidosArray);
   renderPedidos(pedidosArray);
 });
 
-// Funções globais
+// ── Funções globais ───────────────────────────────────────────
 window.textoStatus = function(status) {
-  return { novo: '🟡 Recebido', preparando: '🟠 Em Preparo', saiu: '🔵 Saiu p/ Entrega', pronto: '🟣 Pronto', entregue: '🟢 Entregue', rejeitado: '❌ Rejeitado' }[status] || status;
-}
+  return {
+    novo:'🟡 Recebido', preparando:'🟠 Em Preparo', saiu:'🔵 Saiu p/ Entrega',
+    pronto:'🟣 Pronto', entregue:'🟢 Entregue', rejeitado:'❌ Rejeitado'
+  }[status] || status;
+};
 
 window.alterarStatus = async function(id, status) {
   await update(ref(db, `pedidos/${id}`), { status });
-  mostrarToast("✅ Status atualizado!");
-}
+  mostrarToast('✅ Status atualizado!');
+};
 
 window.excluirPedido = async function(id) {
-  if (!confirm("Deseja realmente excluir este pedido?")) return;
+  if (!confirm('Deseja realmente excluir este pedido?')) return;
   await remove(ref(db, `pedidos/${id}`));
-  mostrarToast("🗑️ Pedido excluído.");
-}
+  mostrarToast('🗑️ Pedido excluído.');
+};
 
-// MODAL
+// ── Modal ─────────────────────────────────────────────────────
 let modalDados = {};
 
 const mensagens = {
-  novo: {
-    emoji: '✅', label: 'Pedido Recebido',
-    texto: (c, n) => `🍬 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido foi recebido com sucesso! 🤎\n\nJá vamos iniciar o preparo em breve. Qualquer dúvida é só chamar! 😊`
-  },
-  preparando: {
-    emoji: '👩‍🍳', label: 'Em Preparação',
-    texto: (c, n) => `👩‍🍳 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido está sendo preparado com muito carinho! 🤎🍰\n\nEm breve te avisamos quando estiver pronto!`
-  },
-  pronto: {
-    emoji: '🟣', label: 'Pronto p/ Retirada',
-    texto: (c, n) => `🟣 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido está PRONTO para retirada! 🤎🍰\n\nJá pode vir buscar quando quiser. Te esperamos! 😊`
-  },
-  saiu: {
-    emoji: '🚚', label: 'Saiu p/ Entrega',
-    texto: (c, n) => `🚚 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido acabou de sair para entrega! 🤎\n\nFique atento, nosso entregador está a caminho! 😊`
-  },
-  entregue: {
-    emoji: '✅', label: 'Entregue',
-    texto: (c, n) => `✅ Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido foi entregue! Esperamos que tenha adorado! 🤎🍬\n\nMuito obrigada pela preferência! Volte sempre 😊`
-  },
-  rejeitado: {
-    emoji: '❌', label: 'Rejeitado',
-    texto: (c, n) => `❌ Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nInfelizmente não conseguiremos aceitar seu pedido neste momento. 😔\n\nPedimos desculpas pelo transtorno. 🤎`
-  }
+  novo:       { emoji:'✅', label:'Pedido Recebido',    texto:(c,n)=>`🍬 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido foi recebido com sucesso! 🤎\n\nJá vamos iniciar o preparo em breve. Qualquer dúvida é só chamar! 😊` },
+  preparando: { emoji:'👩‍🍳', label:'Em Preparação',      texto:(c,n)=>`👩‍🍳 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido está sendo preparado com muito carinho! 🤎🍰\n\nEm breve te avisamos quando estiver pronto!` },
+  pronto:     { emoji:'🟣', label:'Pronto p/ Retirada', texto:(c,n)=>`🟣 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido está PRONTO para retirada! 🤎🍰\n\nJá pode vir buscar quando quiser. Te esperamos! 😊` },
+  saiu:       { emoji:'🚚', label:'Saiu p/ Entrega',    texto:(c,n)=>`🚚 Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido acabou de sair para entrega! 🤎\n\nFique atento, nosso entregador está a caminho! 😊` },
+  entregue:   { emoji:'✅', label:'Entregue',            texto:(c,n)=>`✅ Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nSeu pedido foi entregue! Esperamos que tenha adorado! 🤎🍬\n\nMuito obrigada pela preferência! Volte sempre 😊` },
+  rejeitado:  { emoji:'❌', label:'Rejeitado',           texto:(c,n)=>`❌ Olá ${c}!\n\n🧾 Pedido Nº: ${n}\n\nInfelizmente não conseguiremos aceitar seu pedido neste momento. 😔\n\nPedimos desculpas pelo transtorno. 🤎` }
 };
 
 window.abrirModal = function(telefone, cliente, status, numeroPedido) {
   modalDados = { telefone, cliente, status, numeroPedido };
   document.getElementById('modalSub').textContent = `Para: ${cliente} — Pedido #${numeroPedido}`;
 
-  // Montar opções
   const opcoes = document.getElementById('msgOpcoes');
   opcoes.innerHTML = '';
   Object.entries(mensagens).forEach(([key, val]) => {
@@ -1015,30 +1265,27 @@ window.abrirModal = function(telefone, cliente, status, numeroPedido) {
     opcoes.appendChild(btn);
   });
 
-  // Preencher com status atual
   const msgAtual = mensagens[status] || mensagens['novo'];
   document.getElementById('msgTexto').value = msgAtual.texto(cliente, numeroPedido);
-
   document.getElementById('modalOverlay').style.display = 'flex';
-}
+};
 
 window.fecharModal = function() {
   document.getElementById('modalOverlay').style.display = 'none';
-}
+};
 
 window.confirmarEnvio = function() {
-  const texto = document.getElementById('msgTexto').value;
+  const texto  = document.getElementById('msgTexto').value;
   const numero = modalDados.telefone.replace(/\D/g, '');
   window.open(`https://wa.me/55${numero}?text=${encodeURIComponent(texto)}`);
   fecharModal();
-}
+};
 
-// Fechar modal clicando fora
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) fecharModal();
 });
 
-// Toast
+// ── Toast ─────────────────────────────────────────────────────
 function mostrarToast(msg) {
   const t = document.createElement('div');
   t.className = 'toast';
