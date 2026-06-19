@@ -67,11 +67,15 @@
             z-index: 1005;
             box-shadow: 0 2px 12px rgba(0,0,0,0.2);
             letter-spacing: 0.6px;
-            animation: pulseBarra 2.5s infinite;
+            animation: piscarPromo 1s infinite;
         }
         @keyframes pulseBarra {
             0%, 100% { opacity: 0.93; }
             50% { opacity: 1; }
+        }
+        @keyframes piscarPromo {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
 
         .alerta-progresso-cupom {
@@ -94,6 +98,7 @@
             font-size: 13px;
             margin-bottom: 12px;
             font-weight: 700;
+            animation: piscarPromo 1s infinite;
         }
 
         header {
@@ -627,7 +632,7 @@
 <body onload="saudacaoInicial(); carregarBannerDinamico(); carregarDados();">
 
 <div class="barra-cupom" id="barraCupom">
-    🎉 PROMOÇÃO: Ganhe 5% de DESCONTO AUTOMÁTICO em compras acima de R$ 50,00! 🍰
+    🎉 PROMOÇÃO: Ganhe 5% de DESCONTO + FRETE GRÁTIS em compras acima de R$ 50,00! 🍰
 </div>
 
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
@@ -971,7 +976,7 @@ function avisoHorario() {
 }
   
 const CONFIG_PROMO = {
-    ativa: true,
+    ativa: false,
     imagemUrl: "https://i.postimg.cc/T3BNcdCq/1777779837866.png",
     nomeProduto: "COMBO: Bolo Pudim + Torta Bolacha Doce de Leite",
     preco: 22.90,
@@ -1165,8 +1170,8 @@ function alternarEndereco() {
 
 function atualizar() {
     const valorBairro = document.getElementById("bairro").value;
-    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
+    let frete = (subtotal > 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     
     let desconto = 0;
     const divAlertaCupom = document.getElementById("alertaCupomDinamico");
@@ -1174,12 +1179,12 @@ function atualizar() {
     if (subtotal > 50) {
         desconto = subtotal * 0.05;
         if(divAlertaCupom) {
-            divAlertaCupom.innerHTML = `<div class="alerta-sucesso-cupom">🎉 Parabéns! Você atingiu mais de R$ 50,00 e ganhou 5% de desconto!</div>`;
+            divAlertaCupom.innerHTML = `<div class="alerta-sucesso-cupom">🎉 Parabéns! Você atingiu mais de R$ 50,00 e ganhou 5% de desconto + FRETE GRÁTIS!</div>`;
         }
     } else if (subtotal > 0 && subtotal <= 50) {
         let quantoFalta = (50 - subtotal).toFixed(2).replace('.', ',');
         if(divAlertaCupom) {
-            divAlertaCupom.innerHTML = `<div class="alerta-progresso-cupom">🛒 Adicione mais <b>R$ ${quantoFalta}</b> para ganhar <b>5% de DESCONTO</b> no seu pedido!</div>`;
+            divAlertaCupom.innerHTML = `<div class="alerta-progresso-cupom">🛒 Adicione mais <b>R$ ${quantoFalta}</b> para ganhar <b>5% de DESCONTO + FRETE GRÁTIS</b> no seu pedido!</div>`;
         }
     } else {
         if(divAlertaCupom) divAlertaCupom.innerHTML = "";
@@ -1224,13 +1229,14 @@ function atualizar() {
     const tipoEntrega = (valorBairro === "retirada") ? "Retirada no local" : "Entrega";
 
     let descontoHtml = desconto > 0 ? `<div style="color: #2e7d32;">🏷️ <b>Desconto (5%):</b> -R$ ${desconto.toFixed(2).replace('.', ',')}</div>` : '';
+    let freteTexto = (frete === 0) ? '<span style="color:#2e7d32; font-weight:700;">GRÁTIS</span>' : `R$ ${frete.toFixed(2).replace('.', ',')}`;
 
     document.getElementById("resumo").innerHTML = `
         <div style="font-size:14px; text-align:left; line-height:1.8;">
             <div>🧁 <b>Itens:</b> ${qtdTotal}</div>
             <div>💰 <b>Subtotal:</b> R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
             ${descontoHtml}
-            <div>🚚 <b>Frete:</b> R$ ${frete.toFixed(2).replace('.', ',')}</div>
+            <div>🚚 <b>Frete:</b> ${freteTexto}</div>
             <div>📍 <b>Forma:</b> ${tipoEntrega}</div>
             <hr style="margin:10px 0; border:none; border-top: 1.5px dashed var(--creme-escuro);">
             <div style="font-size:20px; color: var(--marrom-escuro); font-family: 'Playfair Display', serif;">
@@ -1415,7 +1421,8 @@ async function finalizarZap() {
         return;
     }
 
-    let frete = (promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    let subtotalPrevio = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
+    let frete = (subtotalPrevio > 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     const calc = _recalcularTotalSeguro(carrinho, frete);
     const subtotal = calc.subtotal;
     const desconto = calc.desconto;
@@ -1478,7 +1485,7 @@ async function finalizarZap() {
         msg += `🏷️ Desconto (5%): -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
     }
     
-    msg += `🚚 Frete: R$ ${frete.toFixed(2).replace('.', ',')}\n`;
+    msg += `🚚 Frete: ${frete === 0 ? 'GRÁTIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
     msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `🚚 *ENTREGA / RETIRADA*\n`;
@@ -1541,4 +1548,4 @@ window.salvarPedidoFirebase = async function(pedido) {
 };
 </script>
 </body>
-    </html>
+</html>
