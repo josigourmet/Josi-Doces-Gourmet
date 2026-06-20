@@ -632,7 +632,7 @@
 <body onload="saudacaoInicial(); carregarBannerDinamico(); carregarDados();">
 
 <div class="barra-cupom" id="barraCupom">
-    🎉 PROMOÇÃO: Ganhe 5% de DESCONTO + FRETE GRÁTIS em compras acima de R$ 50,00! 🍰
+    🎉 PROMOÇÃO: Ganhe 5% de DESCONTO + FRETE GRÁTIS em compras a partir de R$ 50,00! 🍰
 </div>
 
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
@@ -949,7 +949,7 @@ function _recalcularTotalSeguro(carrinhoLocal, frete) {
             : item.preco;
         subtotal += precoOficial * item.qtd;
     }
-    const desconto = subtotal > 50 ? subtotal * 0.05 : 0;
+    const desconto = subtotal >= 50 ? subtotal * 0.05 : 0;
     return { subtotal, desconto, total: subtotal - desconto + frete };
 }
 
@@ -1171,17 +1171,17 @@ function alternarEndereco() {
 function atualizar() {
     const valorBairro = document.getElementById("bairro").value;
     let subtotal = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
-    let frete = (subtotal > 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    let frete = (subtotal >= 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     
     let desconto = 0;
     const divAlertaCupom = document.getElementById("alertaCupomDinamico");
 
-    if (subtotal > 50) {
+    if (subtotal >= 50) {
         desconto = subtotal * 0.05;
         if(divAlertaCupom) {
-            divAlertaCupom.innerHTML = `<div class="alerta-sucesso-cupom">🎉 Parabéns! Você atingiu mais de R$ 50,00 e ganhou 5% de desconto + FRETE GRÁTIS!</div>`;
+            divAlertaCupom.innerHTML = `<div class="alerta-sucesso-cupom">🎉 Parabéns! Você atingiu R$ 50,00 e ganhou 5% de desconto + FRETE GRÁTIS!</div>`;
         }
-    } else if (subtotal > 0 && subtotal <= 50) {
+    } else if (subtotal > 0 && subtotal < 50) {
         let quantoFalta = (50 - subtotal).toFixed(2).replace('.', ',');
         if(divAlertaCupom) {
             divAlertaCupom.innerHTML = `<div class="alerta-progresso-cupom">🛒 Adicione mais <b>R$ ${quantoFalta}</b> para ganhar <b>5% de DESCONTO + FRETE GRÁTIS</b> no seu pedido!</div>`;
@@ -1422,7 +1422,7 @@ async function finalizarZap() {
     }
 
     let subtotalPrevio = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
-    let frete = (subtotalPrevio > 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
+    let frete = (subtotalPrevio >= 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     const calc = _recalcularTotalSeguro(carrinho, frete);
     const subtotal = calc.subtotal;
     const desconto = calc.desconto;
@@ -1441,26 +1441,7 @@ async function finalizarZap() {
     _consumirToken(tokenAtual);
     _novoToken();
 
-    await salvarPedidoFirebase({
-        numeroPedido: numeroPedido,
-        cliente: nomeSanitizado,
-        telefone: telSanitizado,
-        endereco: valorBairro === "retirada" ? ENDERECO_RETIRADA : enderecoSanitizado,
-        bairro: bairroNome,
-        data: data,
-        hora: hora,
-        pagamento: pag,
-        itens: carrinho,
-        subtotal: subtotal,
-        desconto: desconto,
-        frete: frete,
-        total: total,
-        quantidadeItens: totalItens,
-        criadoEm: criadoEm,
-        timestamp: timestamp,
-        status: "novo"
-    });
-
+    // ── Monta a mensagem do WhatsApp ANTES de salvar, para enviar o texto completo também ao painel admin ──
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
     msg += `🧾 Pedido Nº: #${numeroPedido}\n`;
     msg += `🕒 Pedido realizado em: ${criadoEm}\n\n`;
@@ -1507,7 +1488,31 @@ async function finalizarZap() {
     msg += `💰 Forma: ${pag}\n\n`;
     msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
     msg += `❤️ Obrigado pela preferência!`;
-  
+
+    // ── Salva no Firebase TODAS as informações do pedido, incluindo o texto EXATO enviado ao WhatsApp ──
+    // O painel admin pode ler o campo "mensagemWhatsapp" para exibir a mensagem completa,
+    // além de todos os campos estruturados (cliente, itens, valores, endereço, pagamento, etc.)
+    await salvarPedidoFirebase({
+        numeroPedido: numeroPedido,
+        cliente: nomeSanitizado,
+        telefone: telSanitizado,
+        endereco: valorBairro === "retirada" ? ENDERECO_RETIRADA : enderecoSanitizado,
+        bairro: bairroNome,
+        data: data,
+        hora: hora,
+        pagamento: pag,
+        itens: carrinho,
+        subtotal: subtotal,
+        desconto: desconto,
+        frete: frete,
+        total: total,
+        quantidadeItens: totalItens,
+        criadoEm: criadoEm,
+        timestamp: timestamp,
+        status: "novo",
+        mensagemWhatsapp: msg
+    });
+
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
 </script>
