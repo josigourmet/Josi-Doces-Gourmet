@@ -54,6 +54,104 @@
             scroll-behavior: smooth;
         }
 
+        /* ══════════════════════════════════════════════
+           SPLASH DE BOAS-VINDAS (efeito ao abrir o site)
+        ══════════════════════════════════════════════ */
+        .splash-boas-vindas {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: linear-gradient(155deg, var(--marrom-escuro) 0%, var(--marrom-medio) 55%, var(--marrom-claro) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 30px;
+            opacity: 0;
+            pointer-events: none;
+            animation: splashFade 6s ease forwards;
+        }
+        .splash-boas-vindas::before {
+            content: '';
+            position: absolute;
+            top: -70px; right: -70px;
+            width: 220px; height: 220px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .splash-boas-vindas::after {
+            content: '';
+            position: absolute;
+            bottom: -50px; left: -50px;
+            width: 180px; height: 180px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 50%;
+        }
+        .splash-conteudo {
+            position: relative;
+            z-index: 1;
+            color: #fff;
+            opacity: 0;
+            transform: translateY(14px) scale(0.96);
+            animation: splashConteudoEntra 0.9s ease 0.15s forwards;
+        }
+        .splash-emoji {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 14px;
+            animation: splashFlutuar 2.4s ease-in-out infinite;
+        }
+        .splash-saudacao {
+            display: block;
+            font-family: 'Lato', sans-serif;
+            font-size: 14px;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .splash-conteudo h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0 0 4px;
+            line-height: 1.3;
+        }
+        .splash-conteudo h1 strong {
+            display: block;
+            color: var(--destaque);
+            font-size: 32px;
+        }
+        .splash-linha {
+            width: 56px; height: 2px;
+            background: var(--destaque);
+            margin: 16px auto;
+            opacity: 0.85;
+        }
+        .splash-conteudo p {
+            font-family: 'Lato', sans-serif;
+            font-size: 15px;
+            color: rgba(255,255,255,0.9);
+            max-width: 270px;
+            margin: 0 auto;
+            line-height: 1.55;
+            letter-spacing: 0.2px;
+        }
+        @keyframes splashFade {
+            0%   { opacity: 0; }
+            5%   { opacity: 1; }
+            85%  { opacity: 1; }
+            100% { opacity: 0; }
+        }
+        @keyframes splashConteudoEntra {
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes splashFlutuar {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+
         .barra-cupom {
             background: linear-gradient(90deg, #c8860a, #a06810);
             color: white;
@@ -629,12 +727,24 @@
         #carrinhoBox::-webkit-scrollbar-thumb { background: var(--creme-escuro); border-radius: 4px; }
     </style>
 </head>
-<body onload="saudacaoInicial(); carregarBannerDinamico(); carregarDados();">
+<body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados();">
+
+<!-- SPLASH DE BOAS-VINDAS: aparece ao abrir o site e desaparece sozinho -->
+<div id="splashBoasVindas" class="splash-boas-vindas" aria-hidden="true">
+    <div class="splash-conteudo">
+        <span class="splash-emoji">🍰</span>
+        <span class="splash-saudacao" id="splashSaudacao">Bem-vindo(a)</span>
+        <h1>Sejam Bem-vindos à<strong>Josi Doces Gourmet</strong></h1>
+        <div class="splash-linha"></div>
+        <p>As melhores tortas de Venâncio Aires</p>
+    </div>
+</div>
 
 <div class="barra-cupom" id="barraCupom">
     🎉 PROMOÇÃO: Ganhe 5% de DESCONTO + FRETE GRÁTIS em compras a partir de R$ 50,00! 🍰
 </div>
 
+<a href="https://wa.me/5551985803243" target="_blank" class="insta-float" style="display:none;"></a> <!-- Ajuste técnico mantido invisível -->
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
 </a>
@@ -976,7 +1086,7 @@ const ENDERECO_RETIRADA = "Rua Marechal Floriano, 3197";
 function avisoHorario() {
     alert("⏰ Atenção!\n\nPor favor, escolha um horário com pelo menos 1 hora de antecedência.\n\nEsse é o tempo médio para preparo, entrega ou retirada do pedido. 🤎🍰");
 }
-  
+
 const CONFIG_PROMO = {
     ativa: false,
     imagemUrl: "https://i.postimg.cc/T3BNcdCq/1777779837866.png",
@@ -986,14 +1096,32 @@ const CONFIG_PROMO = {
     textoBotaoFlutuante: "🔥 PROMOÇÃO"
 };
 
-function saudacaoInicial() {
+// ══════════════════════════════════════════════════════
+// SPLASH DE BOAS-VINDAS (substitui o antigo alert() de saudação)
+// ══════════════════════════════════════════════════════
+function mostrarSplashBoasVindas() {
+    const splash = document.getElementById('splashBoasVindas');
+    if (!splash) return;
+
     const agora = new Date();
     const hora = agora.getHours();
     let saudacao;
-    if (hora >= 4 && hora < 12) saudacao = "☀️ Bom dia!";
-    else if (hora >= 12 && hora < 18) saudacao = "🍰 Boa tarde!";
-    else saudacao = "🌙 Boa noite!";
-    alert(saudacao + " Bem-vindo(a) à Josi Doces Gourmet! Preparamos tudo com muito carinho para você.");
+    if (hora >= 4 && hora < 12) saudacao = "☀️ Bom dia";
+    else if (hora >= 12 && hora < 18) saudacao = "🍰 Boa tarde";
+    else saudacao = "🌙 Boa noite";
+
+    const elSaudacao = document.getElementById('splashSaudacao');
+    if (elSaudacao) elSaudacao.textContent = saudacao;
+
+    // Remove o splash do DOM quando a animação de fade terminar
+    splash.addEventListener('animationend', function() {
+        splash.remove();
+    });
+
+    // Segurança extra ajustada para 6.5 segundos para cobrir a nova animação de 6s
+    setTimeout(function() {
+        if (splash && splash.parentNode) splash.remove();
+    }, 6500);
 }
 
 function carregarBannerDinamico() {
@@ -1443,7 +1571,6 @@ async function finalizarZap() {
     _consumirToken(tokenAtual);
     _novoToken();
 
-    // ── Monta a mensagem do WhatsApp ANTES de salvar, para enviar o texto completo também ao painel admin ──
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
     msg += `🧾 Pedido Nº: #${numeroPedido}\n`;
     msg += `🕒 Pedido realizado em: ${criadoEm}\n\n`;
@@ -1474,7 +1601,6 @@ async function finalizarZap() {
     msg += `🚚 *ENTREGA / RETIRADA*\n`;
     msg += `📍 Local: ${bairroNome}\n`;
 
-    // ── AJUSTE: endereço automático conforme tipo de pedido ──
     if (valorBairro === "retirada") {
         msg += `🏠 Endereço de Retirada: ${ENDERECO_RETIRADA}\n`;
     } else if (enderecoSanitizado) {
@@ -1491,9 +1617,6 @@ async function finalizarZap() {
     msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
     msg += `❤️ Obrigado pela preferência!`;
 
-    // ── Salva no Firebase TODAS as informações do pedido, incluindo o texto EXATO enviado ao WhatsApp ──
-    // O painel admin pode ler o campo "mensagemWhatsapp" para exibir a mensagem completa,
-    // além de todos os campos estruturados (cliente, itens, valores, endereço, pagamento, etc.)
     await salvarPedidoFirebase({
         numeroPedido: numeroPedido,
         cliente: nomeSanitizado,
