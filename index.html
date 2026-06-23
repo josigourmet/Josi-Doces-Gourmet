@@ -55,7 +55,7 @@
         }
 
         /* ══════════════════════════════════════════════
-           SPLASH DE BOAS-VINDAS (efeito ao abrir o site)
+           SPLASH DE BOAS-VINDAS (Ajustado para 10 segundos reais)
         ══════════════════════════════════════════════ */
         .splash-boas-vindas {
             position: fixed;
@@ -67,9 +67,9 @@
             justify-content: center;
             text-align: center;
             padding: 30px;
-            opacity: 0;
-            pointer-events: none;
-            animation: splashFade 6s ease forwards;
+            opacity: 1;
+            visibility: visible;
+            animation: splashFade 10s ease-in-out forwards; /* Duração de 6 segundos exatos */
         }
         .splash-boas-vindas::before {
             content: '';
@@ -139,10 +139,9 @@
             letter-spacing: 0.2px;
         }
         @keyframes splashFade {
-            0%   { opacity: 0; }
-            5%   { opacity: 1; }
-            85%  { opacity: 1; }
-            100% { opacity: 0; }
+            0%   { opacity: 1; visibility: visible; }
+            90%  { opacity: 1; visibility: visible; } /* Fica totalmente visível até os 9 segundos */
+            100% { opacity: 0; visibility: hidden; pointer-events: none; } /* Esmaece no último segundo e libera cliques */
         }
         @keyframes splashConteudoEntra {
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -729,7 +728,7 @@
 </head>
 <body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados();">
 
-<!-- SPLASH DE BOAS-VINDAS: aparece ao abrir o site e desaparece sozinho -->
+<!-- SPLASH DE BOAS-VINDAS -->
 <div id="splashBoasVindas" class="splash-boas-vindas" aria-hidden="true">
     <div class="splash-conteudo">
         <span class="splash-emoji">🍰</span>
@@ -744,7 +743,7 @@
     🎉 PROMOÇÃO: Ganhe 5% de DESCONTO + FRETE GRÁTIS em compras a partir de R$ 50,00! 🍰
 </div>
 
-<a href="https://wa.me/5551985803243" target="_blank" class="insta-float" style="display:none;"></a> <!-- Ajuste técnico mantido invisível -->
+<a href="https://wa.me/5551985803243" target="_blank" class="insta-float" style="display:none;"></a>
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
 </a>
@@ -945,17 +944,13 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
         <div id="pixDisplay">
             <div id="qrcode" style="display: flex; justify-content: center; margin-bottom:10px;"></div>
             <textarea id="brcode" readonly style="font-size: 10px; height: 50px; width: 100%; border-radius: 8px; border: 1px solid var(--creme-escuro); padding: 8px;"></textarea>
-            <button onclick="copiarPix()" style="background: linear-gradient(135deg, #444, #222); padding: 9px; font-size: 12px; width:100%; margin-top:8px; border-radius: 10px;">Copiar Código Pix</button>
+            <button onclick="copyPix()" style="background: linear-gradient(135deg, #444, #222); padding: 9px; font-size: 12px; width:100%; margin-top:8px; border-radius: 10px;">Copiar Código Pix</button>
         </div>
         <button id="btnWhatsapp" onclick="finalizarZap()" class="btn-finalizar" disabled>⚠️ Preencha os dados no formulário</button>
     </div>
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════
-// 🛡️ BLINDAGEM DE SEGURANÇA
-// ══════════════════════════════════════════════════════
-
 const _RL = (function(){
     const JANELA = 60000;
     const LIMITE = 5;
@@ -1076,11 +1071,6 @@ function _consumirToken(t) {
 }
 _novoToken();
 
-// ══════════════════════════════════════════════════════
-// FIM DA BLINDAGEM
-// ══════════════════════════════════════════════════════
-
-// ── ENDEREÇO DE RETIRADA ──
 const ENDERECO_RETIRADA = "Rua Marechal Floriano, 3197";
 
 function avisoHorario() {
@@ -1097,7 +1087,7 @@ const CONFIG_PROMO = {
 };
 
 // ══════════════════════════════════════════════════════
-// SPLASH DE BOAS-VINDAS (substitui o antigo alert() de saudação)
+// CORREÇÃO DOS 10 SEGUNDOS EXATOS DO SPLASH
 // ══════════════════════════════════════════════════════
 function mostrarSplashBoasVindas() {
     const splash = document.getElementById('splashBoasVindas');
@@ -1113,15 +1103,10 @@ function mostrarSplashBoasVindas() {
     const elSaudacao = document.getElementById('splashSaudacao');
     if (elSaudacao) elSaudacao.textContent = saudacao;
 
-    // Remove o splash do DOM quando a animação de fade terminar
-    splash.addEventListener('animationend', function() {
-        splash.remove();
-    });
-
-    // Segurança extra ajustada para 6.5 segundos para cobrir a nova animação de 6s
+    // Remove do documento exatamente após 10 segundos
     setTimeout(function() {
-        if (splash && splash.parentNode) splash.remove();
-    }, 6500);
+        if (splash) splash.remove();
+    }, 10000);
 }
 
 function carregarBannerDinamico() {
@@ -1446,7 +1431,7 @@ function gerarPixReal() {
     const valor = atualizar().toFixed(2);
     const chavePix = CHAVE_PIX.replace(/\D/g, "");
     const nome = NOME_RECEBEDOR.substring(0, 25).toUpperCase();
-    const cidade = CIDADE_RECEBEDOR.substring(0, 15).toUpperCase();
+    const city = CIDADE_RECEBEDOR.substring(0, 15).toUpperCase();
 
     function format(id, value) {
         const size = value.length.toString().padStart(2, '0');
@@ -1477,7 +1462,7 @@ function gerarPixReal() {
         format("54", valor) +
         format("58", "BR") +
         format("59", nome) +
-        format("60", cidade) +
+        format("60", city) +
         format("62", format("05", "***")) +
         "6304";
 
@@ -1494,7 +1479,7 @@ function gerarPixReal() {
     verificarPgto();
 }
 
-function copiarPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
+function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
 
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
 
