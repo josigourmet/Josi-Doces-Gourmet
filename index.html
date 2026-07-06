@@ -1154,9 +1154,9 @@ function verificarHorarioValidoParaAgendamento(dataStr, horaStr) {
     const ehFeriado = feriados.includes(dataFormatada);
     
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-        return (horaAtual >= 8 && horaAtual < 23);
+        return (horaAtual >= 10 && horaAtual < 23);
     } else {
-        return (horaAtual >= 8 && horaAtual < 17);
+        return (horaAtual >= 10 && horaAtual < 17);
     }
 }
 
@@ -1378,11 +1378,11 @@ function verificarPgto() {
     const bairro = document.getElementById("bairro").value;
     const endereco = document.getElementById("endereco").value.trim();
 
-    atualizar();
+    const totalAtual = atualizar();
     let telValido = (telRaw.length === 11 && telRaw[2] === "9") || (telRaw.length === 9 && telRaw[0] === "9");
     document.getElementById("erroTelefone").style.display = (telRaw.length > 0 && !telValido) ? "block" : "none";
 
-    const tudoPronto = (nome !== "" && telValido && data !== "" && hora !== "" && (bairro === "retirada" || endereco !== ""));
+    const tudoPronto = (nome !== "" && telValido && data !== "" && hora !== "" && (bairro === "retirada" || endereco !== "") && totalAtual > 0);
 
     if (data !== "" && hora !== "") {
         const horarioValido = verificarHorarioValidoParaAgendamento(data, hora);
@@ -1407,7 +1407,12 @@ function verificarPgto() {
 }
 
 function gerarPixReal() {
-    const valor = atualizar().toFixed(2);
+    const totalCalculado = atualizar();
+    if (totalCalculado <= 0) {
+        alert("⚠️ O valor do pedido está zerado. Adicione itens ao carrinho antes de gerar o PIX.");
+        return;
+    }
+    const valor = totalCalculado.toFixed(2);
     const chavePix = CHAVE_PIX.replace(/\D/g, "");
     const nome = NOME_RECEBEDOR.substring(0, 25).toUpperCase();
     const city = CIDADE_RECEBEDOR.substring(0, 15).toUpperCase();
@@ -1470,6 +1475,7 @@ async function finalizarZap() {
     let frete = (subtotalPrevio >= 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     const calc = _recalcularTotalSeguro(carrinho, frete);
     const subtotal = calc.subtotal; const desconto = calc.desconto; const total = calc.total;
+    if (total <= 0) { alert("⚠️ O valor do pedido está zerado. Adicione itens ao carrinho antes de finalizar."); return; }
     let totalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
 
     const criadoEm = new Date().toLocaleString('pt-BR');
@@ -1557,4 +1563,4 @@ window.salvarPedidoFirebase = async function(pedido) {
 };
 </script>
 </body>
-    </html>
+</html>
