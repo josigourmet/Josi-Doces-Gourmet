@@ -1644,7 +1644,7 @@ function gerarPixReal() {
     pixGerado = true; verificarPgto();
 }
 
-function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
+function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copied!"); }
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
 function limparCarrinhoCompleto() {
     if(confirm("Deseja limpar todo o carrinho?")) {
@@ -1761,11 +1761,11 @@ const db = getDatabase(app);
 window.salvarPedidoFirebase = async function(pedido) {
   try {
     await set(push(ref(db, "pedidos")), pedido);
-    console.log("Pedido saved com sucesso!");
+    console.log("Pedido salvo com sucesso!");
   } catch (erro) {
     console.error("Erro ao salvar pedido:", erro);
   }
 };
 </script>
 </body>
-        </html>
+</html>
