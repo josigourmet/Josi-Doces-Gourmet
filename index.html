@@ -54,9 +54,6 @@
             scroll-behavior: smooth;
         }
 
-        /* ══════════════════════════════════════════════
-           SPLASH DE BOAS-VINDAS (Ajustado para 10 segundos reais)
-        ══════════════════════════════════════════════ */
         .splash-boas-vindas {
             position: fixed;
             inset: 0;
@@ -69,7 +66,7 @@
             padding: 30px;
             opacity: 1;
             visibility: visible;
-            animation: splashFade 6s ease-in-out forwards; /* Duração de 6 segundos exatos */
+            animation: splashFade 4s ease-in-out forwards;
         }
         .splash-boas-vindas::before {
             content: '';
@@ -140,8 +137,8 @@
         }
         @keyframes splashFade {
             0%   { opacity: 1; visibility: visible; }
-            90%  { opacity: 1; visibility: visible; } /* Fica totalmente visível até os 9 segundos */
-            100% { opacity: 0; visibility: hidden; pointer-events: none; } /* Esmaece no último segundo e libera cliques */
+            85%  { opacity: 1; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; pointer-events: none; }
         }
         @keyframes splashConteudoEntra {
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -164,15 +161,6 @@
             z-index: 1005;
             box-shadow: 0 2px 12px rgba(0,0,0,0.2);
             letter-spacing: 0.6px;
-            animation: piscarPromo 1s infinite;
-        }
-        @keyframes pulseBarra {
-            0%, 100% { opacity: 0.93; }
-            50% { opacity: 1; }
-        }
-        @keyframes piscarPromo {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
         }
 
         .alerta-progresso-cupom {
@@ -185,6 +173,7 @@
             margin-bottom: 12px;
             font-weight: 600;
             line-height: 1.5;
+            text-align: left;
         }
         .alerta-sucesso-cupom {
             background: linear-gradient(135deg, #e8f5e9, #d4edda);
@@ -195,7 +184,7 @@
             font-size: 13px;
             margin-bottom: 12px;
             font-weight: 700;
-            animation: piscarPromo 1s infinite;
+            text-align: left;
         }
 
         header {
@@ -256,11 +245,6 @@
             color: var(--destaque); display: block;
             letter-spacing: 1px;
         }
-        .logo-content .name-contato {
-            font-size: 9px; font-weight: 700;
-            color: var(--marrom-claro); display: block;
-            margin-top: 20px;
-        }
 
         header h1 {
             font-family: 'Playfair Display', serif;
@@ -306,7 +290,7 @@
             padding: 24px 18px;
             max-width: 500px;
             margin: auto;
-            padding-bottom: 360px;
+            padding-bottom: 120px;
         }
 
         label {
@@ -401,6 +385,18 @@
             font-family: 'Lato', sans-serif;
         }
 
+        .sabores-tags {
+            font-size: 12px;
+            color: var(--marrom-claro);
+            margin: 6px auto 12px;
+            max-width: 90%;
+            line-height: 1.4;
+            font-style: italic;
+            background: var(--creme-medio);
+            padding: 6px 10px;
+            border-radius: 8px;
+        }
+
         .controles-quantidade {
             display: flex;
             align-items: center;
@@ -434,7 +430,6 @@
             font-weight: 700;
             margin-top: 10px;
             transition: 0.25s;
-            font-size: 15px;
             font-family: 'Lato', sans-serif;
             letter-spacing: 0.3px;
         }
@@ -460,8 +455,6 @@
         }
         .btn-menor:hover, .btn-maior:hover { filter: brightness(1.1); transform: scale(1.08); }
 
-        .btn-add { background: linear-gradient(135deg, #25D366, #1da851); }
-        
         .btn-finalizar {
             background: linear-gradient(135deg, #25D366, #1da851);
             padding: 13px; font-size: 15px; margin-top: 15px;
@@ -728,7 +721,6 @@
 </head>
 <body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados();">
 
-<!-- SPLASH DE BOAS-VINDAS -->
 <div id="splashBoasVindas" class="splash-boas-vindas" aria-hidden="true">
     <div class="splash-conteudo">
         <span class="splash-emoji">🍰</span>
@@ -743,7 +735,6 @@
     🎉 PROMOÇÃO: Ganhe 5% de DESCONTO + FRETE GRÁTIS em compras a partir de R$ 50,00! 🍰
 </div>
 
-<a href="https://wa.me/5551985803243" target="_blank" class="insta-float" style="display:none;"></a>
 <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-float">
     <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="25" alt="Instagram">
 </a>
@@ -751,8 +742,7 @@
 <div class="reabrir-promo" id="btnReabrirPromo" onclick="abrirBannerPromo()">🔥 PROMOÇÃO</div>
 
 <div id="modalPromo" class="modal-aviso">
-    <div class="promo-fullscreen-content" id="conteudoBanner">
-    </div>
+    <div class="promo-fullscreen-content" id="conteudoBanner"></div>
 </div>
 
 <div id="modalFotosIniciais" class="modal-aviso" style="display: block;">
@@ -760,14 +750,14 @@
         <h2 style="margin-bottom: 5px;">📸 Nossas Delícias</h2>
         <p class="instrucao-slide">Deslize para o lado para ver mais ➔</p>
         <div class="galeria-inicial">
-          <img src="https://i.postimg.cc/zBcTdCcZ/IMG-20260621-WA0015.jpg">
-          <img src="https://i.postimg.cc/SKmLjN9p/IMG-20260621-WA0014.jpg">
-          <img src="https://i.postimg.cc/BQtwsX6P/IMG-20260508-WA0009.jpg">
-          <img src="https://i.postimg.cc/0yR3f9k8/IMG-20260508-WA0008.jpg">
-          <img src="https://i.postimg.cc/tJP0qJqM/IMG-20260507-WA0006.jpg">
-          <img src="https://i.postimg.cc/T5p2j48b/IMG-20260418-WA0008.jpg">
-          <img src="https://i.postimg.cc/WF9bkPyX/IMG-20260418-WA0010.jpg">
-          <img src="https://i.postimg.cc/28M6M4QK/1777779837866.png">
+          <img src="https://i.postimg.cc/zBcTdCcZ/IMG-20260621-WA0015.jpg" alt="Doce Josi">
+          <img src="https://i.postimg.cc/SKmLjN9p/IMG-20260621-WA0014.jpg" alt="Doce Josi">
+          <img src="https://i.postimg.cc/BQtwsX6P/IMG-20260508-WA0009.jpg" alt="Doce Josi">
+          <img src="https://i.postimg.cc/0yR3f9k8/IMG-20260508-WA0008.jpg" alt="Doce Josi">
+          <img src="https://i.postimg.cc/tJP0qJqM/IMG-20260507-WA0006.jpg" alt="Doce Josi">
+          <img src="https://i.postimg.cc/T5p2j48b/IMG-20260418-WA0008.jpg" alt="Doce Josi">
+          <img src="https://i.postimg.cc/WF9bkPyX/IMG-20260418-WA0010.jpg" alt="Doce Josi">
+          <img src="https://i.postimg.cc/28M6M4QK/1777779837866.png" alt="Doce Josi">
         </div>
         <button class="btn-entendi" onclick="fecharGaleriaAbrirHorarios()">Ver Cardápio e Preços</button>
     </div>
@@ -778,9 +768,9 @@
         <h2>⚠️ Horários de Funcionamento</h2>
         <p>Confira nossos horários para pedidos e agendamentos:</p>
         <ul style="text-align: left; font-size: 14px; color: #555;">
-            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos das 08h às 12h.</li>
-            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos das 08h às 17h.</li>
-            <li>⏰ <b>Atenção:</b> Pedidos fora desses horários ficam bloqueados automaticamente.</li>
+            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos para entrega/retirada das 08h às 23h.</li>
+            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos para entrega/retirada das 08h às 17h.</li>
+            <li>⏰ <b>Atenção:</b> Agendamentos fora desses horários serão validados no fechamento.</li>
         </ul>
         <a href="https://wa.me/5551985803243?text=Olá Josi! Tenho uma dúvida sobre agendamentos." target="_blank" class="btn-duvida">💬 Dúvidas no WhatsApp</a>
         <button class="btn-entendi" onclick="fecharModalAviso()">Fazer meu Pedido ➔</button>
@@ -798,7 +788,7 @@
     </div>
     <h1>🍬 Josi Doces Gourmet</h1>
     <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-header">
-        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="18"> Siga @josigourmet
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a5/Instagram_icon.png" width="18" alt="Instagram Logo"> Siga @josigourmet
     </a>
 </header>
 
@@ -809,55 +799,62 @@
         <a href="https://wa.me/5551985803243?text=Olá Josi! Gostaria de um orçamento para evento." target="_blank" class="btn-evento">Solicitar Orçamento</a>
     </div>
 
-    <div class="card"><h3>Torta de Bolacha (1kg)</h3><p class="price">R$ 55,00</p>
+    <div class="card">
+        <h3>Torta de bolacha no pote</h3>
+        <p class="price">R$ 10,00</p>
+        <div class="sabores-tags">🍫 Sabores: Nata Ninho, Doce de leite com chocolate amargo e Bombom</div>
         <div class="controles-quantidade">
-            <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha (1Kg)')">-</button>
-            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Bolacha (1Kg)">0</span>
-            <button class="btn-maior" onclick="add('Torta de Bolacha (1Kg)', 55)">+</button>
+            <button class="btn-menor" onclick="removerPorNomeBasico('Torta de bolacha no pote')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de bolacha no pote">0</span>
+            <button class="btn-maior" onclick="addComSabor('Torta de bolacha no pote', 10, ['Nata Ninho', 'Doce de leite com chocolate amargo', 'Bombom'])">+</button>
         </div>
     </div>
 
-    <div class="card"><h3>Torta de Bolacha Pequena (250g)</h3><p class="price">R$ 10,00</p>
+    <div class="card">
+        <h3>Torta de Bolacha Grande 1 kg</h3>
+        <p class="price">+ ou - R$ 55,00</p>
         <div class="controles-quantidade">
-            <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha Pequena')">-</button>
-            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Bolacha Pequena">0</span>
-            <button class="btn-maior" onclick="add('Torta de Bolacha Pequena', 10)">+</button>
+            <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha Grande 1 kg')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Bolacha Grande 1 kg">0</span>
+            <button class="btn-maior" onclick="add('Torta de Bolacha Grande 1 kg', 55)">+</button>
         </div>
     </div>
 
-    <div class="card"><h3>Torta de Bolacha Grande (300g)</h3><p class="price">R$ 12,00</p>
+    <div class="card">
+        <h3>Bolo grande</h3>
+        <p class="price">R$ 35,00</p>
+        <div class="sabores-tags">🍰 Sabores: Chocolate, Beijinhos e Brigadeiro, Cenoura com brigadeiro, Chocolate amargo e Doce de leite</div>
         <div class="controles-quantidade">
-            <button class="btn-menor" onclick="removerPorNome('Torta de Bolacha Grande')">-</button>
-            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Bolacha Grande">0</span>
-            <button class="btn-maior" onclick="add('Torta de Bolacha Grande', 12)">+</button>
+            <button class="btn-menor" onclick="removerPorNomeBasico('Bolo grande')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo grande">0</span>
+            <button class="btn-maior" onclick="addComSabor('Bolo grande', 35, ['Chocolate', 'Beijinhos e Brigadeiro', 'Cenoura com brigadeiro', 'Chocolate amargo', 'Doce de leite'])">+</button>
         </div>
     </div>
 
-    <div class="card"><h3>Torta de Ninho Pequena (250g)</h3><p class="price">R$ 10,00</p>
+    <div class="card">
+        <h3>Bolo no pote</h3>
+        <p class="price">R$ 10,00</p>
+        <div class="sabores-tags">🧁 Sabores: Beijinho, Coco, Doce de leite, Brigadeiro e Cenoura com brigadeiro</div>
         <div class="controles-quantidade">
-            <button class="btn-menor" onclick="removerPorNome('Torta de Ninho Pequena')">-</button>
-            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de Ninho Pequena">0</span>
-            <button class="btn-maior" onclick="add('Torta de Ninho Pequena', 10)">+</button>
+            <button class="btn-menor" onclick="removerPorNomeBasico('Bolo no pote')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo no pote">0</span>
+            <button class="btn-maior" onclick="addComSabor('Bolo no pote', 10, ['Beijinho', 'Coco', 'Doce de leite', 'Brigadeiro', 'Cenoura com brigadeiro'])">+</button>
         </div>
     </div>
 
-    <div class="card"><h3>Bolo de Chocolate no Pote</h3><p class="price">R$ 12,00</p>
+    <div class="card">
+        <h3>Torta grande (A partir de 1 kg)</h3>
+        <p class="price">A partir de R$ 60,00</p>
         <div class="controles-quantidade">
-            <button class="btn-menor" onclick="removerPorNome('Bolo de Chocolate no Pote')">-</button>
-            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Chocolate no Pote">0</span>
-            <button class="btn-maior" onclick="add('Bolo de Chocolate no Pote', 12)">+</button>
+            <button class="btn-menor" onclick="removerPorNome('Torta grande (A partir de 1 kg)')">-</button>
+            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta grande (A partir de 1 kg)">0</span>
+            <button class="btn-maior" onclick="add('Torta grande (A partir de 1 kg)', 60)">+</button>
         </div>
     </div>
 
-    <div class="card"><h3>Bolo de Brigadeiro no Pote</h3><p class="price">R$ 12,00</p>
-        <div class="controles-quantidade">
-            <button class="btn-menor" onclick="removerPorNome('Bolo de Brigadeiro no Pote')">-</button>
-            <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Brigadeiro no Pote">0</span>
-            <button class="btn-maior" onclick="add('Bolo de Brigadeiro no Pote', 12)">+</button>
-        </div>
-    </div>
-
-    <div class="card"><h3>Bolo no Pote com Pudim</h3><p class="price">R$ 14,00</p>
+    <div class="card">
+        <h3>Bolo no Pote com Pudim</h3>
+        <p class="price">R$ 14,00</p>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNome('Bolo no Pote com Pudim')">-</button>
             <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo no Pote com Pudim">0</span>
@@ -865,7 +862,9 @@
         </div>
     </div>
 
-    <div class="card"><h3>Bolo de Stikadinho no Pote</h3><p class="price">R$ 12,00</p>
+    <div class="card">
+        <h3>Bolo de Stikadinho no Pote</h3>
+        <p class="price">R$ 12,00</p>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNome('Bolo de Stikadinho no Pote')">-</button>
             <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Stikadinho no Pote">0</span>
@@ -873,7 +872,9 @@
         </div>
     </div>
 
-    <div class="card"><h3>Bolo de Cenoura no Pote</h3><p class="price">R$ 12,00</p>
+    <div class="card">
+        <h3>Bolo de Cenoura no Pote</h3>
+        <p class="price">R$ 12,00</p>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNome('Bolo de Cenoura no Pote')">-</button>
             <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo de Cenoura no Pote">0</span>
@@ -908,9 +909,7 @@
         <label>⏰ Data e Horário de Recebimento</label>
         <div style="display:flex; gap:8px;">
             <input type="date" id="dataAgendamento" onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
-            <input type="time" id="horaAgendamento" 
-onclick="avisoHorario()"
-onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
+            <input type="time" id="horaAgendamento" onclick="avisoHorario()" onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto();">
         </div>
 
         <label>💳 Forma de Pagamento</label>
@@ -934,7 +933,6 @@ onchange="validarDataHora(); resetPagamentoFluxo(); salvarDados(); verificarPgto
     <h3>🛒 Seu Pedido</h3>
     
     <div id="alertaCupomDinamico"></div>
-
     <div id="itensCarrinhoLista"></div>
     <button class="btn-limpar" onclick="limparCarrinhoCompleto()">🗑️ Esvaziar Carrinho</button>
     <div id="resumo"><b>Total: R$ 0,00</b></div>
@@ -1022,12 +1020,8 @@ function _lsSet(chave, valor) {
 }
 
 const PRECOS_OFICIAIS = {
-    'Torta de Bolacha (1Kg)': 55,
-    'Torta de Bolacha Pequena': 10,
-    'Torta de Bolacha Grande': 12,
-    'Torta de Ninho Pequena': 10,
-    'Bolo de Chocolate no Pote': 12,
-    'Bolo de Brigadeiro no Pote': 12,
+    'Torta grande (A partir de 1 kg)': 60,
+    'Torta de Bolacha Grande 1 kg': 55,
     'Bolo no Pote com Pudim': 14,
     'Bolo de Stikadinho no Pote': 12,
     'Bolo de Cenoura no Pote': 12,
@@ -1039,11 +1033,15 @@ function _validarCarrinho(arr) {
     return arr.filter(item => {
         if (!item || typeof item.nome !== 'string') return false;
         if (typeof item.qtd !== 'number' || item.qtd < 1 || item.qtd > 999) return false;
-        if (PRECOS_OFICIAIS.hasOwnProperty(item.nome)) {
-            item.preco = PRECOS_OFICIAIS[item.nome];
+        
+        const baseConhecida = Object.keys(PRECOS_OFICIAIS).some(base => item.nome.startsWith(base)) || 
+                             item.nome.includes('Torta de bolacha no pote') || 
+                             item.nome.includes('Bolo grande') || 
+                             item.nome.includes('Bolo no pote');
+                             
+        if (baseConhecida && typeof item.preco === 'number' && item.preco >= 0 && item.preco < 10000) {
             return true;
         }
-        if (typeof item.preco === 'number' && item.preco >= 0 && item.preco < 10000) return true;
         return false;
     });
 }
@@ -1051,10 +1049,7 @@ function _validarCarrinho(arr) {
 function _recalcularTotalSeguro(carrinhoLocal, frete) {
     let subtotal = 0;
     for (const item of carrinhoLocal) {
-        const precoOficial = PRECOS_OFICIAIS.hasOwnProperty(item.nome)
-            ? PRECOS_OFICIAIS[item.nome]
-            : item.preco;
-        subtotal += precoOficial * item.qtd;
+        subtotal += item.preco * item.qtd;
     }
     const desconto = subtotal >= 50 ? subtotal * 0.05 : 0;
     return { subtotal, desconto, total: subtotal - desconto + frete };
@@ -1086,56 +1081,34 @@ const CONFIG_PROMO = {
     textoBotaoFlutuante: "🔥 PROMOÇÃO"
 };
 
-// ══════════════════════════════════════════════════════
-// CORREÇÃO DOS 10 SEGUNDOS EXATOS DO SPLASH
-// ══════════════════════════════════════════════════════
 function mostrarSplashBoasVindas() {
     const splash = document.getElementById('splashBoasVindas');
     if (!splash) return;
-
     const agora = new Date();
     const hora = agora.getHours();
-    let saudacao;
-    if (hora >= 4 && hora < 12) saudacao = "☀️ Bom dia";
-    else if (hora >= 12 && hora < 18) saudacao = "🍰 Boa tarde";
-    else saudacao = "🌙 Boa noite";
-
+    let saudacao = (hora >= 4 && hora < 12) ? "☀️ Bom dia" : (hora >= 12 && hora < 18) ? "🍰 Boa tarde" : "🌙 Boa noite";
     const elSaudacao = document.getElementById('splashSaudacao');
     if (elSaudacao) elSaudacao.textContent = saudacao;
-
-    // Remove do documento exatamente após 10 segundos
-    setTimeout(function() {
-        if (splash) splash.remove();
-    }, 10000);
+    setTimeout(function() { if (splash) splash.remove(); }, 4000);
 }
 
 function carregarBannerDinamico() {
     const container = document.getElementById("conteudoBanner");
     const btnFlutuante = document.getElementById("btnReabrirPromo");
-    
-    if (!CONFIG_PROMO.ativa) {
-        btnFlutuante.style.display = "none";
-        return;
-    }
+    if (!CONFIG_PROMO.ativa) { btnFlutuante.style.display = "none"; return; }
     btnFlutuante.innerText = CONFIG_PROMO.textoBotaoFlutuante;
     const img = document.createElement('img');
     img.alt = 'Promoção';
     if (/^https:\/\//.test(CONFIG_PROMO.imagemUrl)) img.src = CONFIG_PROMO.imagemUrl;
-
     const btnAdd = document.createElement('button');
     btnAdd.className = 'btn-promo-add';
     btnAdd.textContent = CONFIG_PROMO.textoBotao;
     btnAdd.onclick = function(){ addPromoCombo(); fecharBannerPromo(); };
-
     const btnClose = document.createElement('button');
     btnClose.className = 'btn-promo-close';
     btnClose.textContent = 'Ver outros produtos';
     btnClose.onclick = fecharBannerPromo;
-
-    container.innerHTML = '';
-    container.appendChild(img);
-    container.appendChild(btnAdd);
-    container.appendChild(btnClose);
+    container.innerHTML = ''; container.appendChild(img); container.appendChild(btnAdd); container.appendChild(btnClose);
 }
 
 function fecharGaleriaAbrirHorarios() { document.getElementById("modalFotosIniciais").style.display = "none"; document.getElementById("modalAviso").style.display = "block"; }
@@ -1150,13 +1123,12 @@ const CHAVE_PIX = "00431179026";
 const NOME_RECEBEDOR = "JOSI DOCES";
 const CIDADE_RECEBEDOR = "VENANCIO AIRES";
 
-function configurarLimitesData() {
+function configuringLimitesData() {
     const hoje = new Date();
     const ano = hoje.getFullYear();
     const mes = String(hoje.getMonth() + 1).padStart(2, '0');
     const dia = String(hoje.getDate()).padStart(2, '0');
-    const dataMinima = `${ano}-${mes}-${dia}`;
-    document.getElementById('dataAgendamento').setAttribute('min', dataMinima);
+    document.getElementById('dataAgendamento').setAttribute('min', `${ano}-${mes}-${dia}`);
 }
 
 function validarDataHora() {
@@ -1181,36 +1153,22 @@ function validarDataHora() {
     }
 }
 
-function verificarLojaAberta() {
-    const agora = new Date();
-    const diaSemana = agora.getDay(); 
-    const horaAtual = agora.getHours();
-
-    const feriados = [
-        "01/01", "17/02", "03/04", "21/04",
-        "01/05", "04/06", "07/09",
-        "12/10", "02/11", "15/11", "25/12"
-    ];
-
-    const hojeFormatado = agora.toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: '2-digit'
-    });
-
-    const ehFeriado = feriados.includes(hojeFormatado);
-
-    let aberta = false;
-
+function verificarHorarioValidoParaAgendamento(dataStr, horaStr) {
+    if (!dataStr || !horaStr) return false;
+    
+    const dataAgendada = new Date(dataStr + 'T' + horaStr);
+    const diaSemana = dataAgendada.getDay(); 
+    const horaAtual = dataAgendada.getHours();
+    
+    const feriados = ["01/01", "17/02", "03/04", "21/04", "01/05", "04/06", "07/09", "12/10", "02/11", "15/11", "25/12"];
+    const dataFormatada = dataAgendada.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    const ehFeriado = feriados.includes(dataFormatada);
+    
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-        if (horaAtual >= 00 && horaAtual < 23) {
-            aberta = true;
-        }
+        return (horaAtual >= 8 && horaAtual < 23);
     } else {
-        if (horaAtual >= 00 && horaAtual < 17) {
-            aberta = true;
-        }
+        return (horaAtual >= 8 && horaAtual < 17);
     }
-    return aberta;
 }
 
 function toggleVisibilidadeCarrinho() {
@@ -1227,7 +1185,7 @@ function mascaraTelefone(i) {
 }
 
 function salvarDados() {
-    const dados = {
+    _lsSet('pedidoJosiDoces', {
         nome: document.getElementById("nome").value,
         telefone: document.getElementById("telefone").value,
         bairro: document.getElementById("bairro").value,
@@ -1237,12 +1195,11 @@ function salvarDados() {
         pagamento: document.getElementById("pagamento").value,
         carrinho: carrinho,
         promoAtiva: promoAtiva
-    };
-    _lsSet('pedidoJosiDoces', dados);
+    });
 }
 
 function carregarDados() {
-    configurarLimitesData();
+    configuringLimitesData();
     const d = _lsGet('pedidoJosiDoces');
     if (d) {
         document.getElementById("nome").value = d.nome || "";
@@ -1254,10 +1211,45 @@ function carregarDados() {
         promoAtiva = d.promoAtiva || false;
         document.getElementById('dataAgendamento').value = d.data || "";
         document.getElementById('horaAgendamento').value = d.hora || "";
-        alternarEndereco();
-        validarDataHora();
-        verificarPgto();
+        alternarEndereco(); validarDataHora(); verificarPgto();
     }
+}
+
+function addComSabor(nomeBase, preco, sabores) {
+    let msgSabores = "Escolha o(s) sabor(es) digitando o(s) número(s) separados por vírgula (ex: 1,2):\n\n";
+    sabores.forEach((sabor, index) => {
+        msgSabores += `${index + 1} - ${sabor}\n`;
+    });
+    msgSabores += "\n💰 Cada sabor adicional soma +R$ 3,00 ao preço.";
+
+    const escolha = prompt(msgSabores);
+    if (escolha === null) return;
+
+    const partes = escolha.split(',').map(p => p.trim()).filter(p => p !== '');
+    if (partes.length === 0) {
+        alert("Opção inválida! Produto não adicionado.");
+        return;
+    }
+
+    let indices = [];
+    for (const parte of partes) {
+        const idx = parseInt(parte) - 1;
+        if (isNaN(idx) || idx < 0 || idx >= sabores.length) {
+            alert("Opção inválida! Produto não adicionado.");
+            return;
+        }
+        if (!indices.includes(idx)) indices.push(idx);
+    }
+
+    const saboresEscolhidos = indices.map(i => sabores[i]);
+    const precoFinal = preco + (saboresEscolhidos.length - 1) * 3;
+    const nomeCompleto = `${nomeBase} (${saboresEscolhidos.join(' + ')})`;
+
+    const item = carrinho.find(i => i.nome === nomeCompleto);
+    if (item) item.qtd++;
+    else carrinho.push({ nome: nomeCompleto, preco: precoFinal, qtd: 1, base: nomeBase });
+
+    salvarDados(); resetPagamentoFluxo(); verificarPgto();
 }
 
 function add(nome, preco) {
@@ -1274,8 +1266,7 @@ function addPromoCombo() {
     carrinho.push({ nome: CONFIG_PROMO.nomeProduto, preco: CONFIG_PROMO.preco, qtd: 1, fixo: true });
     carrinho.push({ nome: 'FRETE GRÁTIS (Ativado)', preco: 0, qtd: 1, fixo: true });
     promoAtiva = true;
-    salvarDados(); resetPagamentoFluxo(); verificarPgto();
-    toggleVisibilidadeCarrinho();
+    salvarDados(); resetPagamentoFluxo(); verificarPgto(); toggleVisibilidadeCarrinho();
 }
 
 function alternarEndereco() {
@@ -1293,14 +1284,10 @@ function atualizar() {
 
     if (subtotal >= 50) {
         desconto = subtotal * 0.05;
-        if(divAlertaCupom) {
-            divAlertaCupom.innerHTML = `<div class="alerta-sucesso-cupom">🎉 Parabéns! Você atingiu R$ 50,00 e ganhou 5% de desconto + FRETE GRÁTIS!</div>`;
-        }
+        if(divAlertaCupom) divAlertaCupom.innerHTML = `<div class="alerta-sucesso-cupom">🎉 Parabéns! Você atingiu R$ 50,00 e ganhou 5% de desconto + FRETE GRÁTIS!</div>`;
     } else if (subtotal > 0 && subtotal < 50) {
         let quantoFalta = (50 - subtotal).toFixed(2).replace('.', ',');
-        if(divAlertaCupom) {
-            divAlertaCupom.innerHTML = `<div class="alerta-progresso-cupom">🛒 Adicione mais <b>R$ ${quantoFalta}</b> para ganhar <b>5% de DESCONTO + FRETE GRÁTIS</b> no seu pedido!</div>`;
-        }
+        if(divAlertaCupom) divAlertaCupom.innerHTML = `<div class="alerta-progresso-cupom">🛒 Adicione mais <b>R$ ${quantoFalta}</b> para ganhar <b>5% de DESCONTO + FRETE GRÁTIS</b> no seu pedido!</div>`;
     } else {
         if(divAlertaCupom) divAlertaCupom.innerHTML = "";
     }
@@ -1309,14 +1296,18 @@ function atualizar() {
     const qtdTotal = carrinho.reduce((acc, item) => acc + (item.nome !== 'FRETE GRÁTIS (Ativado)' ? item.qtd : 0), 0);
     
     document.getElementById("cartBadge").innerText = qtdTotal;
-    const btnToggle = document.getElementById("btnToggle");
-    btnToggle.style.background = (qtdTotal > 0) ? "linear-gradient(135deg, #25D366, #1da851)" : "linear-gradient(135deg, #007bff, #0055cc)";
+    document.getElementById("btnToggle").style.background = (qtdTotal > 0) ? "linear-gradient(135deg, #25D366, #1da851)" : "linear-gradient(135deg, #007bff, #0055cc)";
 
     const todosDisplays = document.querySelectorAll('.qtd-display');
     todosDisplays.forEach(span => span.innerText = "0");
+    
     carrinho.forEach(item => {
-        const span = document.getElementById(`qtd-${item.nome}`);
-        if(span) span.innerText = item.qtd;
+        const idAlvo = item.base ? `qtd-${item.base}` : `qtd-${item.nome}`;
+        const span = document.getElementById(idAlvo);
+        if(span) {
+            let totalDaqueleCard = carrinho.filter(i => (i.base && i.base === item.base) || (i.nome === item.nome)).reduce((a, b) => a + b.qtd, 0);
+            span.innerText = totalDaqueleCard;
+        }
     });
 
     const listaDiv = document.getElementById("itensCarrinhoLista");
@@ -1324,24 +1315,16 @@ function atualizar() {
     carrinho.forEach((item, index) => {
         const row = document.createElement('div');
         row.className = 'item-carrinho';
-
         const spanNome = document.createElement('span');
         spanNome.textContent = `${item.qtd}x ${item.nome}`;
-
         const spanPreco = document.createElement('span');
         spanPreco.textContent = `R$ ${(item.preco*item.qtd).toFixed(2).replace('.', ',')} `;
-
         const spanRemover = document.createElement('span');
         spanRemover.className = 'remover';
         spanRemover.textContent = '×';
         spanRemover.onclick = (function(i){ return function(){ remover(i); }; })(index);
-
-        spanPreco.appendChild(spanRemover);
-        row.appendChild(spanNome);
-        row.appendChild(spanPreco);
-        listaDiv.appendChild(row);
+        spanPreco.appendChild(spanRemover); row.appendChild(spanNome); row.appendChild(spanPreco); listaDiv.appendChild(row);
     });
-    const tipoEntrega = (valorBairro === "retirada") ? "Retirada no local" : "Entrega";
 
     let descontoHtml = desconto > 0 ? `<div style="color: #2e7d32;">🏷️ <b>Desconto (5%):</b> -R$ ${desconto.toFixed(2).replace('.', ',')}</div>` : '';
     let freteTexto = (frete === 0) ? '<span style="color:#2e7d32; font-weight:700;">GRÁTIS</span>' : `R$ ${frete.toFixed(2).replace('.', ',')}`;
@@ -1352,7 +1335,7 @@ function atualizar() {
             <div>💰 <b>Subtotal:</b> R$ ${subtotal.toFixed(2).replace('.', ',')}</div>
             ${descontoHtml}
             <div>🚚 <b>Frete:</b> ${freteTexto}</div>
-            <div>📍 <b>Forma:</b> ${tipoEntrega}</div>
+            <div>📍 <b>Forma:</b> ${valorBairro === "retirada" ? "Retirada no local" : "Entrega"}</div>
             <hr style="margin:10px 0; border:none; border-top: 1.5px dashed var(--creme-escuro);">
             <div style="font-size:20px; color: var(--marrom-escuro); font-family: 'Playfair Display', serif;">
                 <b>TOTAL: R$ ${total.toFixed(2).replace('.', ',')}</b>
@@ -1360,14 +1343,18 @@ function atualizar() {
         </div>
     `;
     
-    const aberta = verificarLojaAberta();
-    document.getElementById("secaoDadosPedido").style.display = (carrinho.length > 0 && aberta) ? "block" : "none";
+    document.getElementById("secaoDadosPedido").style.display = (carrinho.length > 0) ? "block" : "none";
     document.getElementById("btnToggle").style.display = "flex";
     return total;
 }
 
 function removerPorNome(nome) {
     const index = carrinho.findIndex(i => i.nome === nome);
+    if (index !== -1) remover(index);
+}
+
+function removerPorNomeBasico(nomeBase) {
+    const index = carrinho.findIndex(i => i.base === nomeBase || i.nome === nomeBase);
     if (index !== -1) remover(index);
 }
 
@@ -1378,8 +1365,7 @@ function remover(index) {
         const itemRemovido = carrinho[index].nome;
         carrinho.splice(index, 1);
         if (itemRemovido === CONFIG_PROMO.nomeProduto) {
-            const aindaTemCombo = carrinho.some(i => i.nome === CONFIG_PROMO.nomeProduto);
-            if (!aindaTemCombo) {
+            if (!carrinho.some(i => i.nome === CONFIG_PROMO.nomeProduto)) {
                 carrinho = carrinho.filter(i => i.nome !== 'FRETE GRÁTIS (Ativado)');
                 promoAtiva = false;
             }
@@ -1404,17 +1390,21 @@ function verificarPgto() {
     const endereco = document.getElementById("endereco").value.trim();
 
     atualizar();
-    const aberta = verificarLojaAberta();
     let telValido = (telRaw.length === 11 && telRaw[2] === "9") || (telRaw.length === 9 && telRaw[0] === "9");
     document.getElementById("erroTelefone").style.display = (telRaw.length > 0 && !telValido) ? "block" : "none";
 
-    if (!aberta) {
-        btnPix.style.display = "none"; btnMP.style.display = "none";
-        btnZap.disabled = true; btnZap.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)"; btnZap.innerText = "🔴 LOJA FECHADA AGORA";
-        return;
+    const tudoPronto = (nome !== "" && telValido && data !== "" && hora !== "" && (bairro === "retirada" || endereco !== ""));
+
+    if (data !== "" && hora !== "") {
+        const horarioValido = verificarHorarioValidoParaAgendamento(data, hora);
+        if (!horarioValido) {
+            btnPix.style.display = "none"; btnMP.style.display = "none";
+            btnZap.disabled = true; btnZap.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)"; 
+            btnZap.innerText = "🔴 HORÁRIO DE ATENDIMENTO INVÁLIDO";
+            return;
+        }
     }
 
-    const tudoPronto = (nome !== "" && telValido && data !== "" && hora !== "" && (bairro === "retirada" || endereco !== ""));
     btnPix.style.display = (pag === "Pix" && !pixGerado) ? "block" : "none";
     btnMP.style.display = (pag.includes("Cartão")) ? "block" : "none";
     btnPix.disabled = !tudoPronto; btnMP.disabled = !tudoPronto;
@@ -1433,14 +1423,9 @@ function gerarPixReal() {
     const nome = NOME_RECEBEDOR.substring(0, 25).toUpperCase();
     const city = CIDADE_RECEBEDOR.substring(0, 15).toUpperCase();
 
-    function format(id, value) {
-        const size = value.length.toString().padStart(2, '0');
-        return id + size + value;
-    }
-
+    function format(id, value) { return id + value.length.toString().padStart(2, '0') + value; }
     function crc16(payload) {
-        let polinomio = 0x1021;
-        let resultado = 0xFFFF;
+        let polinomio = 0x1021, resultado = 0xFFFF;
         for (let i = 0; i < payload.length; i++) {
             resultado ^= (payload.charCodeAt(i) << 8);
             for (let j = 0; j < 8; j++) {
@@ -1451,59 +1436,29 @@ function gerarPixReal() {
         return resultado.toString(16).toUpperCase().padStart(4, '0');
     }
 
-    const payloadSemCRC =
-        format("00", "01") +
-        format("26",
-            format("00", "BR.GOV.BCB.PIX") +
-            format("01", chavePix)
-        ) +
-        format("52", "0000") +
-        format("53", "986") +
-        format("54", valor) +
-        format("58", "BR") +
-        format("59", nome) +
-        format("60", city) +
-        format("62", format("05", "***")) +
-        "6304";
-
-    const crc = crc16(payloadSemCRC);
-    const pixCopiaECola = payloadSemCRC + crc;
-    const qrcodeContainer = document.getElementById("qrcode");
-    qrcodeContainer.innerHTML = "";
-
+    const payloadSemCRC = format("00", "01") + format("26", format("00", "BR.GOV.BCB.PIX") + format("01", chavePix)) + format("52", "0000") + format("53", "986") + format("54", valor) + format("58", "BR") + format("59", nome) + format("60", city) + format("62", format("05", "***")) + "6304";
+    const pixCopiaECola = payloadSemCRC + crc16(payloadSemCRC);
+    const qrcodeContainer = document.getElementById("qrcode"); qrcodeContainer.innerHTML = "";
     new QRCode(qrcodeContainer, { text: pixCopiaECola, width: 180, height: 180 });
-
     document.getElementById("brcode").value = pixCopiaECola;
     document.getElementById("pixDisplay").style.display = "block";
-    pixGerado = true;
-    verificarPgto();
+    pixGerado = true; verificarPgto();
 }
 
 function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
-
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
-
 function limparCarrinhoCompleto() {
     if(confirm("Deseja limpar todo o carrinho?")) {
-        carrinho = []; promoAtiva = false;
-        salvarDados(); resetPagamentoFluxo(); verificarPgto();
-        toggleVisibilidadeCarrinho();
+        carrinho = []; promoAtiva = false; salvarDados(); resetPagamentoFluxo(); verificarPgto(); toggleVisibilidadeCarrinho();
     }
 }
 </script>
 
 <script>
 async function finalizarZap() {
-    if (!_RL.ok()) {
-        alert("⚠️ Muitas tentativas em pouco tempo. Aguarde um momento e tente novamente.");
-        return;
-    }
-
+    if (!_RL.ok()) { alert("⚠️ Muitas tentativas em pouco tempo. Aguarde um momento e tente novamente."); return; }
     const tokenAtual = _tokenPedido;
-    if (!tokenAtual) {
-        alert("⚠️ Erro de segurança. Recarregue a página e tente novamente.");
-        return;
-    }
+    if (!tokenAtual) { alert("⚠️ Erro de segurança. Recarregue a página e tente novamente."); return; }
 
     const nome = document.getElementById("nome").value;
     const tel = document.getElementById("telefone").value;
@@ -1515,37 +1470,20 @@ async function finalizarZap() {
     const pag = document.getElementById("pagamento").value;
     const valorBairro = document.getElementById("bairro").value;
 
-    if (!_validarNome(nome)) {
-        alert("⚠️ Nome inválido. Use apenas letras e espaços (2 a 80 caracteres).");
-        return;
-    }
-    if (!_validarTelefone(tel)) {
-        alert("⚠️ Telefone inválido.");
-        return;
-    }
-    if (valorBairro !== "retirada" && !_validarEndereco(endereco)) {
-        alert("⚠️ Endereço inválido. Preencha corretamente (mínimo 5 caracteres).");
-        return;
-    }
-    if (!_validarDataFutura(data, hora)) {
-        alert("⚠️ A data/hora selecionada já passou. Escolha um horário futuro.");
-        return;
-    }
-    if (carrinho.length === 0) {
-        alert("⚠️ Seu carrinho está vazio.");
-        return;
-    }
+    if (!_validarNome(nome)) { alert("⚠️ Nome inválido. Use apenas letras e espaços (2 a 80 caracteres)."); return; }
+    if (!_validarTelefone(tel)) { alert("⚠️ Telefone inválido."); return; }
+    if (valorBairro !== "retirada" && !_validarEndereco(endereco)) { alert("⚠️ Endereço inválido. Preencha corretamente (mínimo 5 caracteres)."); return; }
+    if (!_validarDataFutura(data, hora)) { alert("⚠️ A data/hora selecionada já passou. Escolha um horário futuro."); return; }
+    if (carrinho.length === 0) { alert("⚠️ Seu carrinho está vazio."); return; }
+    if (!verificarHorarioValidoParaAgendamento(data, hora)) { alert("⚠️ O horário selecionado para o agendamento está fora do nosso horário de funcionamento."); return; }
 
     let subtotalPrevio = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
     let frete = (subtotalPrevio >= 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
     const calc = _recalcularTotalSeguro(carrinho, frete);
-    const subtotal = calc.subtotal;
-    const desconto = calc.desconto;
-    const total = calc.total;
+    const subtotal = calc.subtotal; const desconto = calc.desconto; const total = calc.total;
     let totalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
 
-    const agora = new Date();
-    const criadoEm = agora.toLocaleString('pt-BR');
+    const criadoEm = new Date().toLocaleString('pt-BR');
     const timestamp = Date.now();
     const numeroPedido = Math.floor(Math.random() * 9000) + 1000;
 
@@ -1553,8 +1491,7 @@ async function finalizarZap() {
     const telSanitizado = _sanitize(tel);
     const enderecoSanitizado = _sanitize(endereco);
 
-    _consumirToken(tokenAtual);
-    _novoToken();
+    _consumirToken(tokenAtual); _novoToken();
 
     let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
     msg += `🧾 Pedido Nº: #${numeroPedido}\n`;
@@ -1575,27 +1512,16 @@ async function finalizarZap() {
     msg += `📦 *RESUMO DO PEDIDO*\n`;
     msg += `🧁 Itens: ${totalItens}\n`;
     msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    
-    if (desconto > 0) {
-        msg += `🏷️ Desconto (5%): -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
-    }
-    
+    if (desconto > 0) msg += `🏷️ Desconto (5%): -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
     msg += `🚚 Frete: ${frete === 0 ? 'GRÁTIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
     msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `🚚 *ENTREGA / RETIRADA*\n`;
     msg += `📍 Local: ${bairroNome}\n`;
-
-    if (valorBairro === "retirada") {
-        msg += `🏠 Endereço de Retirada: ${ENDERECO_RETIRADA}\n`;
-    } else if (enderecoSanitizado) {
-        msg += `🏠 Endereço: ${enderecoSanitizado}\n`;
-    }
-
+    msg += valorBairro === "retirada" ? `🏠 Endereço de Retirada: ${ENDERECO_RETIRADA}\n` : `🏠 Endereço: ${enderecoSanitizado}\n`;
     msg += `\n━━━━━━━━━━━━━━━\n`;
     msg += `⏰ *AGENDAMENTO*\n`;
-    msg += `📅 Data: ${data}\n`;
-    msg += `🕒 Horário: ${hora}\n\n`;
+    msg += `📅 Data: ${data}\n🕒 Horário: ${hora}\n\n`;
     msg += `━━━━━━━━━━━━━━━\n`;
     msg += `💳 *PAGAMENTO*\n`;
     msg += `💰 Forma: ${pag}\n\n`;
@@ -1603,24 +1529,11 @@ async function finalizarZap() {
     msg += `❤️ Obrigado pela preferência!`;
 
     await salvarPedidoFirebase({
-        numeroPedido: numeroPedido,
-        cliente: nomeSanitizado,
-        telefone: telSanitizado,
+        numeroPedido: numeroPedido, cliente: nomeSanitizado, telefone: telSanitizado,
         endereco: valorBairro === "retirada" ? ENDERECO_RETIRADA : enderecoSanitizado,
-        bairro: bairroNome,
-        data: data,
-        hora: hora,
-        pagamento: pag,
-        itens: carrinho,
-        subtotal: subtotal,
-        desconto: desconto,
-        frete: frete,
-        total: total,
-        quantidadeItens: totalItens,
-        criadoEm: criadoEm,
-        timestamp: timestamp,
-        status: "novo",
-        mensagemWhatsapp: msg
+        bairro: bairroNome, data: data, hora: hora, pagamento: pag, itens: carrinho,
+        subtotal: subtotal, desconto: desconto, frete: frete, total: total,
+        quantidadeItens: totalItens, criadoEm: criadoEm, timestamp: timestamp, status: "novo", mensagemWhatsapp: msg
     });
 
     window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
@@ -1629,12 +1542,7 @@ async function finalizarZap() {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  set
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
@@ -1649,18 +1557,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-console.log("Firebase conectado!");
 
 window.salvarPedidoFirebase = async function(pedido) {
   try {
-    const pedidosRef = ref(db, "pedidos");
-    const novoPedido = push(pedidosRef);
-    await set(novoPedido, pedido);
-    console.log("Pedido salvo com sucesso!");
+    await set(push(ref(db, "pedidos")), pedido);
+    console.log("Pedido saved com sucesso!");
   } catch (erro) {
     console.error("Erro ao salvar pedido:", erro);
   }
 };
 </script>
 </body>
-</html>
+    </html>
