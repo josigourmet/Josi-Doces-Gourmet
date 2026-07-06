@@ -1079,6 +1079,14 @@ function atualizarRelogio() {
 setInterval(atualizarRelogio, 1000);
 atualizarRelogio();
 
+function formatarData(dataStr) {
+  if (!dataStr) return '—';
+  const partes = dataStr.split('-');
+  if (partes.length !== 3) return dataStr;
+  return `${partes[2]}/${partes[1]}/${partes[0]}`;
+}
+window.formatarData = formatarData;
+
 window.filtrar = function(status, btn) {
   filtroAtivo = status;
   document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
@@ -1142,6 +1150,14 @@ function renderPedidos(pedidosArray) {
             <span class="info-icon">💳</span>
             <span>${pedido.pagamento}</span>
           </div>
+          <div class="info-item">
+            <span class="info-icon">⏰</span>
+            <span>${pedido.data ? formatarData(pedido.data) : '—'} às ${pedido.hora || '—'}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-icon">🧁</span>
+            <span>${pedido.quantidadeItens || pedido.itens.reduce((a,i)=>a+(i.qtd||0),0)} ite${(pedido.quantidadeItens||0) === 1 ? 'm' : 'ns'}</span>
+          </div>
           <div class="info-item full">
             <span class="info-icon">📍</span>
             <span>${pedido.endereco ? pedido.endereco + ' — ' + pedido.bairro : 'Retirada no local'}</span>
@@ -1155,6 +1171,19 @@ function renderPedidos(pedidosArray) {
               <span class="item-qtd">${item.qtd}x</span>
             </div>
           `).join('')}
+          <div class="total-linha" style="padding-top:10px;">
+            <span class="total-label">Subtotal</span>
+            <span style="font-size:14px;color:#555;font-weight:600;">R$ ${(pedido.subtotal ?? 0).toFixed(2)}</span>
+          </div>
+          ${pedido.desconto > 0 ? `
+          <div class="total-linha" style="padding:0 0 4px;">
+            <span class="total-label">🏷️ Desconto</span>
+            <span style="font-size:14px;color:#2e7d5e;font-weight:600;">- R$ ${pedido.desconto.toFixed(2)}</span>
+          </div>` : ''}
+          <div class="total-linha" style="padding:0 0 4px;">
+            <span class="total-label">🚚 Frete</span>
+            <span style="font-size:14px;color:#555;font-weight:600;">${pedido.frete > 0 ? 'R$ ' + pedido.frete.toFixed(2) : 'Grátis'}</span>
+          </div>
           <div class="total-linha">
             <span class="total-label">Total</span>
             <span class="total-valor">R$ ${pedido.total.toFixed(2)}</span>
@@ -1323,4 +1352,4 @@ function mostrarToast(msg) {
 }
 </script>
 </body>
-  </html>
+</html>
