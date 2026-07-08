@@ -225,6 +225,13 @@
             border: 4px solid rgba(255,255,255,0.35);
             box-shadow: 0 8px 25px rgba(0,0,0,0.25), 0 0 0 8px rgba(255,255,255,0.07);
             position: relative; z-index: 1;
+            overflow: hidden;
+        }
+        
+        .logo-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .logo-content { text-align: center; color: var(--marrom-medio); line-height: 1.1; }
@@ -386,15 +393,29 @@
         }
 
         .sabores-tags {
-            font-size: 12px;
-            color: var(--marrom-claro);
-            margin: 6px auto 12px;
-            max-width: 90%;
-            line-height: 1.4;
-            font-style: italic;
-            background: var(--creme-medio);
-            padding: 6px 10px;
-            border-radius: 8px;
+            font-size: 13px;
+            color: var(--marrom-escuro);
+            margin: 8px auto 12px;
+            max-width: 94%;
+            line-height: 1.5;
+            font-weight: 700;
+            background: linear-gradient(135deg, #fff8e1, #fff3cd);
+            padding: 9px 12px;
+            border-radius: 10px;
+            border: 1.5px dashed var(--destaque);
+            position: relative;
+        }
+        .sabores-tags .sabores-tags-label {
+            display: block;
+            font-size: 10.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--destaque);
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+        .sabores-tags .sabores-tags-lista {
+            font-style: normal;
         }
 
         .controles-quantidade {
@@ -717,6 +738,108 @@
         #carrinhoBox::-webkit-scrollbar { width: 4px; }
         #carrinhoBox::-webkit-scrollbar-track { background: var(--creme-medio); border-radius: 4px; }
         #carrinhoBox::-webkit-scrollbar-thumb { background: var(--creme-escuro); border-radius: 4px; }
+
+        /* ===== Modal de seleção de sabores (destaque especial) ===== */
+        .modal-sabores-conteudo {
+            max-width: 420px;
+            padding: 26px 20px;
+        }
+        .sabores-instrucao {
+            font-size: 13px;
+            color: var(--marrom-claro);
+            margin: 0 0 16px;
+            font-weight: 600;
+        }
+        .sabores-lista {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 16px;
+            max-height: 46vh;
+            overflow-y: auto;
+            padding: 4px 2px;
+        }
+        .sabor-opcao {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 2px solid var(--creme-escuro);
+            background: var(--creme-medio);
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--marrom-escuro);
+        }
+        .sabor-opcao:active { transform: scale(0.98); }
+        .sabor-check {
+            width: 24px; height: 24px;
+            min-width: 24px;
+            border-radius: 50%;
+            border: 2px solid var(--marrom-claro);
+            background: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 700;
+            color: transparent;
+            transition: all 0.2s ease;
+        }
+        .sabor-nome { flex: 1; }
+        .sabor-opcao.selecionado {
+            background: linear-gradient(135deg, #fff8e1, #fff3cd);
+            border-color: var(--destaque);
+            box-shadow: 0 4px 14px rgba(200,134,10,0.25);
+            color: var(--marrom-escuro);
+        }
+        .sabor-opcao.selecionado .sabor-check {
+            background: var(--destaque);
+            border-color: var(--destaque);
+            color: #fff;
+        }
+        .sabores-preco-resumo {
+            background: var(--creme-medio);
+            border: 1.5px dashed var(--destaque);
+            border-radius: 14px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            min-height: 24px;
+        }
+        .sabores-selecionados-tags {
+            display: flex; flex-wrap: wrap; gap: 6px;
+            margin-bottom: 8px;
+        }
+        .tag-sabor-escolhido {
+            background: var(--destaque);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        .sabores-preco-final {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--marrom-escuro);
+            text-align: left;
+        }
+        .sabores-preco-final b { color: var(--destaque); font-size: 17px; }
+        .sabores-extra {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--marrom-claro);
+        }
+        .sabores-aviso-vazio {
+            font-size: 13px;
+            font-weight: 700;
+            color: #b25a00;
+        }
+        #btnConfirmarSabores:disabled {
+            background: linear-gradient(135deg, #bbb, #ccc);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
     </style>
 </head>
 <body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados();">
@@ -777,14 +900,20 @@
     </div>
 </div>
 
+<div id="modalSabores" class="modal-aviso">
+    <div class="modal-conteudo modal-sabores-conteudo">
+        <h2 id="saboresTitulo">🍰 Escolha o(s) Sabor(es)</h2>
+        <p class="sabores-instrucao">Toque em um ou mais sabores para selecionar:</p>
+        <div id="saboresLista" class="sabores-lista"></div>
+        <div id="saboresPrecoResumo" class="sabores-preco-resumo"></div>
+        <button class="btn-entendi" id="btnConfirmarSabores" onclick="confirmarSabores()" disabled>✅ Adicionar ao Carrinho</button>
+        <button class="btn-promo-close" onclick="fecharModalSabores()">Cancelar</button>
+    </div>
+</div>
+
 <header>
     <div class="logo-container">
-        <div class="logo-content">
-            <span class="name-josi">Josi</span>
-            <span class="name-doces">Doces</span>
-            <span class="name-gourmet">GOURMET</span>
-            <span class="name-contato">(51) 98580-3243</span>
-        </div>
+        <img src="https://i.postimg.cc/mDypYCQQ/1783324335796.png" class="logo-img" alt="Logo Josi Doces">
     </div>
     <h1>🍬 Josi Doces Gourmet</h1>
     <a href="https://www.instagram.com/josigourmet" target="_blank" class="insta-header">
@@ -802,7 +931,7 @@
     <div class="card">
         <h3>Torta de bolacha no pote</h3>
         <p class="price">R$ 10,00</p>
-        <div class="sabores-tags">🍫 Sabores: Nata Ninho, Doce de leite com chocolate amargo e Bombom</div>
+        <div class="sabores-tags"><span class="sabores-tags-label">🍫 Sabores disponíveis</span><span class="sabores-tags-lista">Nata Ninho, Doce de leite com chocolate amargo e Bombom</span></div>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNomeBasico('Torta de bolacha no pote')">-</button>
             <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Torta de bolacha no pote">0</span>
@@ -823,7 +952,7 @@
     <div class="card">
         <h3>Bolo grande</h3>
         <p class="price">R$ 35,00</p>
-        <div class="sabores-tags">🍰 Sabores: Chocolate, Beijinhos e Brigadeiro, Cenoura com brigadeiro, Chocolate amargo e Doce de leite</div>
+        <div class="sabores-tags"><span class="sabores-tags-label">🍰 Sabores disponíveis</span><span class="sabores-tags-lista">Chocolate, Beijinhos e Brigadeiro, Cenoura com brigadeiro, Chocolate amargo e Doce de leite</span></div>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNomeBasico('Bolo grande')">-</button>
             <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo grande">0</span>
@@ -834,7 +963,7 @@
     <div class="card">
         <h3>Bolo no pote</h3>
         <p class="price">R$ 10,00</p>
-        <div class="sabores-tags">🧁 Sabores: Beijinho, Coco, Doce de leite, Brigadeiro e Cenoura com brigadeiro</div>
+        <div class="sabores-tags"><span class="sabores-tags-label">🧁 Sabores disponíveis</span><span class="sabores-tags-lista">Beijinho, Coco, Doce de leite, Brigadeiro e Cenoura com brigadeiro</span></div>
         <div class="controles-quantidade">
             <button class="btn-menor" onclick="removerPorNomeBasico('Bolo no pote')">-</button>
             <span class="adicionar-texto">Adicionar</span> <span class="qtd-display" id="qtd-Bolo no pote">0</span>
@@ -1204,41 +1333,119 @@ function carregarDados() {
     }
 }
 
+let _saboresContexto = null;
+
 function addComSabor(nomeBase, preco, sabores) {
-    let msgSabores = "Escolha o(s) sabor(es) digitando o(s) número(s) separados por vírgula (ex: 1,2):\n\n";
-    sabores.forEach((sabor, index) => {
-        msgSabores += `${index + 1} - ${sabor}\n`;
+    _saboresContexto = { nomeBase, preco, sabores, selecionados: new Set() };
+
+    const titulo = document.getElementById('saboresTitulo');
+    titulo.textContent = `🍰 ${nomeBase}`;
+
+    const lista = document.getElementById('saboresLista');
+    lista.innerHTML = '';
+    sabores.forEach((sabor, idx) => {
+        const div = document.createElement('div');
+        div.className = 'sabor-opcao';
+        div.dataset.idx = idx;
+
+        const check = document.createElement('span');
+        check.className = 'sabor-check';
+        check.textContent = '✓';
+
+        const nomeSpan = document.createElement('span');
+        nomeSpan.className = 'sabor-nome';
+        nomeSpan.textContent = sabor;
+
+        div.appendChild(check);
+        div.appendChild(nomeSpan);
+        div.onclick = function () { toggleSabor(idx, div); };
+        lista.appendChild(div);
     });
-    msgSabores += "\n💰 Cada sabor adicional soma +R$ 3,00 ao preço.";
 
-    const escolha = prompt(msgSabores);
-    if (escolha === null) return;
+    atualizarResumoSabores();
+    document.getElementById('modalSabores').style.display = 'block';
+}
 
-    const partes = escolha.split(',').map(p => p.trim()).filter(p => p !== '');
-    if (partes.length === 0) {
-        alert("Opção inválida! Produto não adicionado.");
+function toggleSabor(idx, el) {
+    if (!_saboresContexto) return;
+    if (_saboresContexto.selecionados.has(idx)) {
+        _saboresContexto.selecionados.delete(idx);
+        el.classList.remove('selecionado');
+    } else {
+        _saboresContexto.selecionados.add(idx);
+        el.classList.add('selecionado');
+    }
+    atualizarResumoSabores();
+}
+
+function atualizarResumoSabores() {
+    const ctx = _saboresContexto;
+    const btn = document.getElementById('btnConfirmarSabores');
+    const resumo = document.getElementById('saboresPrecoResumo');
+    if (!ctx) return;
+    const qtd = ctx.selecionados.size;
+
+    if (qtd === 0) {
+        resumo.innerHTML = '';
+        const aviso = document.createElement('span');
+        aviso.className = 'sabores-aviso-vazio';
+        aviso.textContent = '⚠️ Selecione ao menos 1 sabor para continuar';
+        resumo.appendChild(aviso);
+        btn.disabled = true;
         return;
     }
 
-    let indices = [];
-    for (const parte of partes) {
-        const idx = parseInt(parte) - 1;
-        if (isNaN(idx) || idx < 0 || idx >= sabores.length) {
-            alert("Opção inválida! Produto não adicionado.");
-            return;
-        }
-        if (!indices.includes(idx)) indices.push(idx);
+    const precoFinal = ctx.preco + (qtd - 1) * 3;
+    const nomesEscolhidos = Array.from(ctx.selecionados).sort((a, b) => a - b).map(i => ctx.sabores[i]);
+
+    resumo.innerHTML = '';
+    const tagsWrap = document.createElement('div');
+    tagsWrap.className = 'sabores-selecionados-tags';
+    nomesEscolhidos.forEach(nome => {
+        const tag = document.createElement('span');
+        tag.className = 'tag-sabor-escolhido';
+        tag.textContent = nome;
+        tagsWrap.appendChild(tag);
+    });
+
+    const precoLinha = document.createElement('div');
+    precoLinha.className = 'sabores-preco-final';
+    precoLinha.textContent = 'Total do item: ';
+    const bPreco = document.createElement('b');
+    bPreco.textContent = `R$ ${precoFinal.toFixed(2).replace('.', ',')}`;
+    precoLinha.appendChild(bPreco);
+    if (qtd > 1) {
+        const extra = document.createElement('span');
+        extra.className = 'sabores-extra';
+        extra.textContent = ' (+R$ 3,00 por sabor extra)';
+        precoLinha.appendChild(extra);
     }
 
-    const saboresEscolhidos = indices.map(i => sabores[i]);
-    const precoFinal = preco + (saboresEscolhidos.length - 1) * 3;
-    const nomeCompleto = `${nomeBase} (${saboresEscolhidos.join(' + ')})`;
+    resumo.appendChild(tagsWrap);
+    resumo.appendChild(precoLinha);
+    btn.disabled = false;
+}
+
+function confirmarSabores() {
+    const ctx = _saboresContexto;
+    if (!ctx || ctx.selecionados.size === 0) return;
+
+    const idxOrdenados = Array.from(ctx.selecionados).sort((a, b) => a - b);
+    const saboresEscolhidos = idxOrdenados.map(i => ctx.sabores[i]);
+    const precoFinal = ctx.preco + (saboresEscolhidos.length - 1) * 3;
+    const nomeCompleto = `${ctx.nomeBase} (${saboresEscolhidos.join(' + ')})`;
 
     const item = carrinho.find(i => i.nome === nomeCompleto);
     if (item) item.qtd++;
-    else carrinho.push({ nome: nomeCompleto, preco: precoFinal, qtd: 1, base: nomeBase });
+    else carrinho.push({ nome: nomeCompleto, preco: precoFinal, qtd: 1, base: ctx.nomeBase });
 
     salvarDados(); resetPagamentoFluxo(); verificarPgto();
+    fecharModalSabores();
+}
+
+function fecharModalSabores() {
+    document.getElementById('modalSabores').style.display = 'none';
+    _saboresContexto = null;
 }
 
 function add(nome, preco) {
@@ -1439,7 +1646,7 @@ function gerarPixReal() {
     pixGerado = true; verificarPgto();
 }
 
-function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
+function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copied!"); }
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
 function limparCarrinhoCompleto() {
     if(confirm("Deseja limpar todo o carrinho?")) {
@@ -1540,7 +1747,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
+  apiKey: "AIzaSyBwU6G-T2V_Z3F8H4N9M1L0-X7K5J2W8V1",
   authDomain: "josigourmet-af3ff.firebaseapp.com",
   databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
   projectId: "josigourmet-af3ff",
@@ -1556,11 +1763,11 @@ const db = getDatabase(app);
 window.salvarPedidoFirebase = async function(pedido) {
   try {
     await set(push(ref(db, "pedidos")), pedido);
-    console.log("Pedido saved com sucesso!");
+    console.log("Pedido salvo com sucesso!");
   } catch (erro) {
     console.error("Erro ao salvar pedido:", erro);
   }
 };
 </script>
 </body>
-  </html>
+</html>
