@@ -11,24 +11,28 @@
                         https://www.gstatic.com
                         https://www.googleapis.com;
             style-src   'self' 'unsafe-inline'
-                        https://fonts.googleapis.com;
-            font-src    https://fonts.gstatic.com;
+                        https://fonts.googleapis.com
+                        https://cdnjs.cloudflare.com;
+            font-src    https://fonts.gstatic.com
+                        https://cdnjs.cloudflare.com;
             img-src     'self' data: https: blob:;
             connect-src 'self'
                         https://*.firebaseio.com
                         https://firebaseinstallations.googleapis.com
                         wss://*.firebaseio.com
-                        https://*.googleapis.com;
+                        https://*.googleapis.com
+                        https://generativelanguage.googleapis.com;
             frame-ancestors 'none';
         ">
     <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="Strict-Transport-Security" content="max-age=31536000; includeSubDomains">
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <name="referrer" content="strict-origin-when-cross-origin">
 
     <title>Josi Doces Gourmet</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
     <style>
         :root {
@@ -739,7 +743,7 @@
         #carrinhoBox::-webkit-scrollbar-track { background: var(--creme-medio); border-radius: 4px; }
         #carrinhoBox::-webkit-scrollbar-thumb { background: var(--creme-escuro); border-radius: 4px; }
 
-        /* ===== Modal de seleção de sabores (destaque especial) ===== */
+        /* ===== Modal de seleção de sabores ===== */
         .modal-sabores-conteudo {
             max-width: 420px;
             padding: 26px 20px;
@@ -840,6 +844,56 @@
             cursor: not-allowed;
             opacity: 0.7;
         }
+
+        /* ===== Estilos do Chatbot IA ===== */
+        .chatbot-flutuante {
+            position: fixed;
+            bottom: 80px;
+            right: 16px;
+            z-index: 10001;
+            font-family: 'Lato', sans-serif;
+        }
+        .chatbot-botao {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--marrom-medio), var(--marrom-escuro));
+            color: white; display: flex; align-items: center; justify-content: center;
+            font-size: 22px; cursor: pointer; box-shadow: var(--sombra-media);
+            transition: transform 0.3s; border: 2px solid var(--creme-escuro);
+        }
+        .chatbot-botao:hover { transform: scale(1.08); }
+        
+        .chatbot-janela {
+            display: none; position: fixed;
+            bottom: 145px; right: 16px;
+            width: 320px; height: 420px;
+            background: white; border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(62,39,35,0.25);
+            border: 1.5px solid var(--creme-escuro);
+            flex-direction: column; overflow: hidden;
+            animation: bounceIn 0.4s ease;
+        }
+        .chatbot-header {
+            background: linear-gradient(135deg, var(--marrom-escuro), var(--marrom-medio));
+            color: white; padding: 14px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .chatbot-header h4 { margin: 0; font-family: 'Playfair Display', serif; font-size: 16px; letter-spacing: 0.5px; }
+        .chatbot-header span { cursor: pointer; opacity: 0.85; font-size: 16px; transition: opacity 0.2s; }
+        .chatbot-header span:hover { opacity: 1; }
+        
+        .chatbot-mensagens {
+            flex: 1; padding: 14px; overflow-y: auto;
+            background: var(--creme-fundo); display: flex; flex-direction: column; gap: 10px;
+        }
+        .msg { max-width: 85%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.45; word-wrap: break-word; }
+        .msg.ia { background: white; align-self: flex-start; color: var(--marrom-escuro); box-shadow: 0 2px 8px rgba(62,39,35,0.06); border: 1px solid rgba(215,204,200,0.4); }
+        .msg.user { background: linear-gradient(135deg, var(--marrom-claro), var(--marrom-medio)); color: white; align-self: flex-end; box-shadow: 0 2px 8px rgba(93,64,55,0.2); }
+        
+        .chatbot-input-area {
+            display: flex; padding: 10px; background: white; border-top: 1px solid var(--creme-medio); align-items: center; gap: 8px;
+        }
+        .chatbot-input-area input { margin-top: 0; padding: 10px 12px; border-radius: 10px; flex: 1; height: 40px; font-size: 14px; }
+        .chatbot-input-area button { margin-top: 0; width: 40px; height: 40px; padding: 0; border-radius: 10px; background: linear-gradient(135deg, #25D366, #1da851); display: flex; align-items: center; justify-content: center; font-size: 14px; }
     </style>
 </head>
 <body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados();">
@@ -1064,6 +1118,26 @@
             <button onclick="copyPix()" style="background: linear-gradient(135deg, #444, #222); padding: 9px; font-size: 12px; width:100%; margin-top:8px; border-radius: 10px;">Copiar Código Pix</button>
         </div>
         <button id="btnWhatsapp" onclick="finalizarZap()" class="btn-finalizar" disabled>⚠️ Preencha os dados no formulário</button>
+    </div>
+</div>
+
+<!-- Interface Visual do Chatbot Flutuante IA -->
+<div class="chatbot-flutuante">
+    <div class="chatbot-janela" id="chatJanela">
+        <div class="chatbot-header">
+            <h4>🍰 Josi Doces Assistente</h4>
+            <span onclick="toggleChat()"><i class="fas fa-times"></i></span>
+        </div>
+        <div class="chatbot-mensagens" id="chatMensagens">
+            <div class="msg ia">Olá! Sou a assistente virtual da Josi Doces. Gostaria de tirar alguma dúvida sobre nossos bolos, tortas, entregas ou prazos? 🤎✨</div>
+        </div>
+        <div class="chatbot-input-area">
+            <input type="text" id="chatInput" placeholder="Digite sua dúvida..." onkeypress="if(event.key === 'Enter') enviarMensagemIa()">
+            <button onclick="enviarMensagemIa()"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+    <div class="chatbot-botao" onclick="toggleChat()">
+        <i class="fas fa-comments"></i>
     </div>
 </div>
 
@@ -1646,99 +1720,12 @@ function gerarPixReal() {
     pixGerado = true; verificarPgto();
 }
 
-function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copied!"); }
+function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
 function limparCarrinhoCompleto() {
     if(confirm("Deseja limpar todo o carrinho?")) {
         carrinho = []; promoAtiva = false; salvarDados(); resetPagamentoFluxo(); verificarPgto(); toggleVisibilidadeCarrinho();
     }
-}
-</script>
-
-<script>
-async function finalizarZap() {
-    if (!_RL.ok()) { alert("⚠️ Muitas tentativas em pouco tempo. Aguarde um momento e tente novamente."); return; }
-    const tokenAtual = _tokenPedido;
-    if (!tokenAtual) { alert("⚠️ Erro de segurança. Recarregue a página e tente novamente."); return; }
-
-    const nome = document.getElementById("nome").value;
-    const tel = document.getElementById("telefone").value;
-    const bairroSel = document.getElementById("bairro");
-    const bairroNome = bairroSel.options[bairroSel.selectedIndex].text;
-    const endereco = document.getElementById("endereco").value;
-    const data = document.getElementById("dataAgendamento").value;
-    const hora = document.getElementById("horaAgendamento").value;
-    const pag = document.getElementById("pagamento").value;
-    const valorBairro = document.getElementById("bairro").value;
-
-    if (!_validarNome(nome)) { alert("⚠️ Nome inválido. Use apenas letras e espaços (2 a 80 caracteres)."); return; }
-    if (!_validarTelefone(tel)) { alert("⚠️ Telefone inválido."); return; }
-    if (valorBairro !== "retirada" && !_validarEndereco(endereco)) { alert("⚠️ Endereço inválido. Preencha corretamente (mínimo 5 caracteres)."); return; }
-    if (!_validarDataFutura(data, hora)) { alert("⚠️ A data/hora selecionada já passou. Escolha um horário futuro."); return; }
-    if (carrinho.length === 0) { alert("⚠️ Seu carrinho está vazio."); return; }
-    if (!verificarHorarioValidoParaAgendamento(data, hora)) { alert("⚠️ O horário selecionado para o agendamento está fora do nosso horário de funcionamento."); return; }
-
-    let subtotalPrevio = carrinho.reduce((acc, item) => acc + (item.preco * (item.qtd || 1)), 0);
-    let frete = (subtotalPrevio >= 50 || promoAtiva || valorBairro === "retirada") ? 0 : parseFloat(valorBairro);
-    const calc = _recalcularTotalSeguro(carrinho, frete);
-    const subtotal = calc.subtotal; const desconto = calc.desconto; const total = calc.total;
-    if (total <= 0) { alert("⚠️ O valor do pedido está zerado. Adicione itens ao carrinho antes de finalizar."); return; }
-    let totalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
-
-    const criadoEm = new Date().toLocaleString('pt-BR');
-    const timestamp = Date.now();
-    const numeroPedido = Math.floor(Math.random() * 9000) + 1000;
-
-    const nomeSanitizado = _sanitize(nome);
-    const telSanitizado = _sanitize(tel);
-    const enderecoSanitizado = _sanitize(endereco);
-
-    _consumirToken(tokenAtual); _novoToken();
-
-    let msg = `🤎🍬 *NOVO PEDIDO JOSI DOCES GOURMET* 🍬🤎\n\n`;
-    msg += `🧾 Pedido Nº: #${numeroPedido}\n`;
-    msg += `🕒 Pedido realizado em: ${criadoEm}\n\n`;
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `👤 *CLIENTE*\n`;
-    msg += `🙍 Nome: ${nomeSanitizado}\n`;
-    msg += `☎️ WhatsApp: ${telSanitizado}\n\n`;
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `🛒 *ITENS DO PEDIDO*\n`;
-
-    carrinho.forEach(i => {
-        msg += `🍰 ${i.qtd}x ${i.nome}\n`;
-        msg += `💵 R$ ${(i.preco * i.qtd).toFixed(2).replace('.', ',')}\n\n`;
-    });
-
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `📦 *RESUMO DO PEDIDO*\n`;
-    msg += `🧁 Itens: ${totalItens}\n`;
-    msg += `💰 Subtotal: R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    if (desconto > 0) msg += `🏷️ Desconto (5%): -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
-    msg += `🚚 Frete: ${frete === 0 ? 'GRÁTIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
-    msg += `💵 TOTAL: R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `🚚 *ENTREGA / RETIRADA*\n`;
-    msg += `📍 Local: ${bairroNome}\n`;
-    msg += valorBairro === "retirada" ? `🏠 Endereço de Retirada: ${ENDERECO_RETIRADA}\n` : `🏠 Endereço: ${enderecoSanitizado}\n`;
-    msg += `\n━━━━━━━━━━━━━━━\n`;
-    msg += `⏰ *AGENDAMENTO*\n`;
-    msg += `📅 Data: ${data}\n🕒 Horário: ${hora}\n\n`;
-    msg += `━━━━━━━━━━━━━━━\n`;
-    msg += `💳 *PAGAMENTO*\n`;
-    msg += `💰 Forma: ${pag}\n\n`;
-    msg += `⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n`;
-    msg += `❤️ Obrigado pela preferência!`;
-
-    await salvarPedidoFirebase({
-        numeroPedido: numeroPedido, cliente: nomeSanitizado, telefone: telSanitizado,
-        endereco: valorBairro === "retirada" ? ENDERECO_RETIRADA : enderecoSanitizado,
-        bairro: bairroNome, data: data, hora: hora, pagamento: pag, itens: carrinho,
-        subtotal: subtotal, desconto: desconto, frete: frete, total: total,
-        quantidadeItens: totalItens, criadoEm: criadoEm, timestamp: timestamp, status: "novo", mensagemWhatsapp: msg
-    });
-
-    window.open(`https://wa.me/5551985803243?text=${encodeURIComponent(msg)}`);
 }
 </script>
 
@@ -1768,6 +1755,101 @@ window.salvarPedidoFirebase = async function(pedido) {
     console.error("Erro ao salvar pedido:", erro);
   }
 };
+</script>
+
+<!-- Logica JavaScript de Funcionamento do Chatbot IA com Gemini API -->
+<script>
+function toggleChat() {
+    const janela = document.getElementById('chatJanela');
+    const aberto = (janela.style.display === 'none' || janela.style.display === '');
+    janela.style.display = aberto ? 'flex' : 'none';
+}
+
+// CONTEXTO DE INSTRUÇÃO PARA A IA
+const CONTEXTO_PROMPT_JOSI = `Você é a assistente virtual super simpática e acolhedora da "Josi Doces Gourmet", localizada em Venâncio Aires.
+Seu objetivo principal é ajudar os clientes do site com dúvidas sobre o cardápio, entregas e pedidos.
+
+Nossos produtos e preços oficiais listados no site são:
+- Torta de bolacha no pote: R$ 10,00 (Sabores: Nata Ninho, Doce de leite com chocolate amargo e Bombom)
+- Torta de Bolacha Grande 1 kg: R$ 55,00
+- Bolo grande: R$ 35,00 (Sabores: Chocolate, Beijinhos e Brigadeiro, Cenoura com brigadeiro, Chocolate amargo, Doce de leite)
+- Bolo no pote: R$ 10,00 (Sabores: Beijinho, Coco, Doce de leite, Brigadeiro, Cenoura com brigadeiro)
+- Torta grande (A partir de 1 kg): A partir de R$ 60,00
+- Bolo no Pote com Pudim: R$ 14,00
+- Bolo de Stikadinho no Pote: R$ 12,00
+
+Regras Importantes da Loja:
+- Oferecemos Frete Grátis + 5% de desconto automático para qualquer compra a partir de R$ 50,00.
+- Atendimento e Entregas: Segunda a Sexta das 08h às 23h. Sábados, Domingos e Feriados das 08h às 17h.
+- Endereço físico para retirada no local: Rua Marechal Floriano, 3197, bairro Coronel Brito.
+- O prazo estimado para o preparo e entrega/retirada após a confirmação do pedido é de 40 a 60 minutos (solicitamos agendamento com pelo menos 1 hora de antecedência no site).
+
+Instruções de Comportamento da IA:
+- Responda sempre de forma curta, prestativa e muito fofa. Use muitos emojis de doces (🍰, 🤎, ✨, 🍬, 🧁).
+- Incentive gentilmente o cliente a escolher e adicionar os itens diretamente nas caixinhas de quantidade do site para montar o carrinho.
+- Se perguntarem coisas muito fora do assunto de confeitaria, mude de assunto ou decline educadamente dizendo que foca em adoçar a vida deles.`;
+
+const GEMINI_API_KEY = "AQ.Ab8RN6J8AxyjfImITZ8SLxoNpFQ7J7Q-W3NUHeBZ0GBhnkA1kg"; 
+
+async function enviarMensagemIa() {
+    const input = document.getElementById('chatInput');
+    const container = document.getElementById('chatMensagens');
+    const texto = input.value.trim();
+    if (!texto) return;
+
+    // 1. Adiciona a mensagem do usuário na tela
+    const msgUser = document.createElement('div');
+    msgUser.className = 'msg user';
+    msgUser.textContent = texto;
+    container.appendChild(msgUser);
+    input.value = '';
+    container.scrollTop = container.scrollHeight;
+
+    // 2. Adiciona o balão de carregamento "Digitando..."
+    const msgDigitando = document.createElement('div');
+    msgDigitando.className = 'msg ia';
+    msgDigitando.textContent = 'Digitando... 🍰';
+    container.appendChild(msgDigitando);
+    container.scrollTop = container.scrollHeight;
+
+    try {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `${CONTEXTO_PROMPT_JOSI}\n\nPergunta do cliente: ${texto}`
+                    }]
+                }]
+            })
+        });
+
+        const dados = await response.json();
+        
+        // Remove o balão indicador de "Digitando..."
+        msgDigitando.remove();
+
+        // 3. Captura o texto retornado pela IA e o exibe no chat
+        if (dados.candidates && dados.candidates[0].content.parts[0].text) {
+            const respostaIa = dados.candidates[0].content.parts[0].text;
+            const msgIa = document.createElement('div');
+            msgIa.className = 'msg ia';
+            msgIa.textContent = respostaIa;
+            container.appendChild(msgIa);
+        } else {
+            throw new Error("Formato de resposta inválido");
+        }
+
+    } catch (erro) {
+        console.error("Erro na integração com a IA:", erro);
+        msgDigitando.textContent = "Ops, deu um estalo técnico no meu sistema! 🍫 Se o seu problema for urgente, você pode falar direto com a Josi clicando no botão do WhatsApp! 🤎";
+    }
+    
+    container.scrollTop = container.scrollHeight;
+}
 </script>
 </body>
 </html>
