@@ -1981,7 +1981,7 @@ async function enviarMensagemIa() {
         if (msgDigitando.parentNode) msgDigitando.remove();
         const msgErro = document.createElement('div');
         msgErro.className = 'msg ia';
-        msgErro.textContent = "Ops, deu um estalo técnico no meu sistema! 🍫 Se for urgente, me chama direto no WhatsApp que te ajudo rapidinho! 🤎";
+        msgErro.textContent = "Ops, deu um estalo técnico! 🍫 [DEBUG TEMPORÁRIO: " + erro.message + "]";
         container.appendChild(msgErro);
     } finally {
         input.disabled = false;
