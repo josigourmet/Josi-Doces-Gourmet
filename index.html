@@ -1828,24 +1828,24 @@ async function enviarMensagemIa() {
         });
 
         const dados = await response.json();
-        
-        // Remove o balão indicador de "Digitando..."
-        msgDigitando.remove();
 
         // 3. Captura o texto retornado pela IA e o exibe no chat
         if (dados.candidates && dados.candidates[0].content.parts[0].text) {
+            msgDigitando.remove();
             const respostaIa = dados.candidates[0].content.parts[0].text;
             const msgIa = document.createElement('div');
             msgIa.className = 'msg ia';
             msgIa.textContent = respostaIa;
             container.appendChild(msgIa);
+        } else if (dados.error) {
+            throw new Error("API: " + dados.error.message);
         } else {
-            throw new Error("Formato de resposta inválido");
+            throw new Error("Formato de resposta inválido: " + JSON.stringify(dados).slice(0,200));
         }
 
     } catch (erro) {
         console.error("Erro na integração com a IA:", erro);
-        msgDigitando.textContent = "Ops, deu um estalo técnico no meu sistema! 🍫 Se o seu problema for urgente, você pode falar direto com a Josi clicando no botão do WhatsApp! 🤎";
+        msgDigitando.textContent = "Ops, deu um estalo técnico no meu sistema! 🍫 (" + erro.message + ") Se o seu problema for urgente, você pode falar direto com a Josi clicando no botão do WhatsApp! 🤎";
     }
     
     container.scrollTop = container.scrollHeight;
