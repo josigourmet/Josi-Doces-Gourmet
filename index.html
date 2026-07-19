@@ -894,9 +894,16 @@
         }
         .chatbot-input-area input { margin-top: 0; padding: 10px 12px; border-radius: 10px; flex: 1; height: 40px; font-size: 14px; }
         .chatbot-input-area button { margin-top: 0; width: 40px; height: 40px; padding: 0; border-radius: 10px; background: linear-gradient(135deg, #25D366, #1da851); display: flex; align-items: center; justify-content: center; font-size: 14px; }
+
+        .chat-notif-dot {
+            position: absolute; top: -3px; right: -3px;
+            width: 14px; height: 14px; border-radius: 50%;
+            background: #e74c3c; border: 2px solid #fff;
+            animation: pulse 1.5s infinite;
+        }
     </style>
 </head>
-<body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados();">
+<body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados(); agendarChatAutomatico();">
 
 <div id="splashBoasVindas" class="splash-boas-vindas" aria-hidden="true">
     <div class="splash-conteudo">
@@ -1133,11 +1140,12 @@
         </div>
         <div class="chatbot-input-area">
             <input type="text" id="chatInput" placeholder="Digite sua dúvida..." onkeypress="if(event.key === 'Enter') enviarMensagemIa()">
-            <button onclick="enviarMensagemIa()"><i class="fas fa-paper-plane"></i></button>
+            <button id="btnEnviarChat" onclick="enviarMensagemIa()"><i class="fas fa-paper-plane"></i></button>
         </div>
     </div>
-    <div class="chatbot-botao" onclick="toggleChat()">
+    <div class="chatbot-botao" id="chatBotaoFlutuante" onclick="toggleChat()">
         <i class="fas fa-comments"></i>
+        <span class="chat-notif-dot" id="chatNotifDot" style="display:none;"></span>
     </div>
 </div>
 
@@ -1763,6 +1771,39 @@ function toggleChat() {
     const janela = document.getElementById('chatJanela');
     const aberto = (janela.style.display === 'none' || janela.style.display === '');
     janela.style.display = aberto ? 'flex' : 'none';
+    const dot = document.getElementById('chatNotifDot');
+    if (aberto && dot) dot.style.display = 'none';
+}
+
+// Abre o chat sozinho, com uma saudação, pouco depois da splash de boas-vindas.
+// Usa sessionStorage para não incomodar o cliente reabrindo a cada rolagem/clique,
+// apenas uma vez por visita/sessão do navegador.
+function agendarChatAutomatico() {
+    setTimeout(abrirChatAutomatico, 5500);
+}
+
+function abrirChatAutomatico() {
+    let jaAbriu = false;
+    try { jaAbriu = !!sessionStorage.getItem('chatAutoAberto'); } catch(e) {}
+    if (jaAbriu) return;
+    try { sessionStorage.setItem('chatAutoAberto', '1'); } catch(e) {}
+
+    const janela = document.getElementById('chatJanela');
+    const dot = document.getElementById('chatNotifDot');
+    if (!janela) return;
+
+    janela.style.display = 'flex';
+    if (dot) dot.style.display = 'none';
+
+    const container = document.getElementById('chatMensagens');
+    const hora = new Date().getHours();
+    const saudacao = (hora >= 4 && hora < 12) ? "Bom dia" : (hora >= 12 && hora < 18) ? "Boa tarde" : "Boa noite";
+
+    const msg = document.createElement('div');
+    msg.className = 'msg ia';
+    msg.textContent = `${saudacao}! 🍰✨ Ficou com alguma dúvida sobre sabores, preços, entrega ou prazos? Pode perguntar aqui que eu te ajudo na hora!`;
+    container.appendChild(msg);
+    container.scrollTop = container.scrollHeight;
 }
 
 // CONTEXTO DE INSTRUÇÃO PARA A IA
@@ -1789,13 +1830,23 @@ Instruções de Comportamento da IA:
 - Incentive gentilmente o cliente a escolher e adicionar os itens diretamente nas caixinhas de quantidade do site para montar o carrinho.
 - Se perguntarem coisas muito fora do assunto de confeitaria, mude de assunto ou decline educadamente dizendo que foca em adoçar a vida deles.`;
 
-const GEMINI_API_KEY = "AQ.Ab8RN6J8AxyjfImITZ8SLxoNpFQ7J7Q-W3NUHeBZ0GBhnkA1kg"; 
+const GEMINI_API_KEY = "AQ.Ab8RN6Kn7Xt5mVOntet8bc2Aw1wRbWhyoZwliRplq4nxGYJcEA";
 
 async function enviarMensagemIa() {
     const input = document.getElementById('chatInput');
+    const btnEnviar = document.getElementById('btnEnviarChat');
     const container = document.getElementById('chatMensagens');
     const texto = input.value.trim();
     if (!texto) return;
+
+    if (!_RL.ok()) {
+        const msgLimite = document.createElement('div');
+        msgLimite.className = 'msg ia';
+        msgLimite.textContent = "Opa, muitas perguntas rapidinho! 🍰 Espera só um minutinho e pergunta de novo, tá bem? 🤎";
+        container.appendChild(msgLimite);
+        container.scrollTop = container.scrollHeight;
+        return;
+    }
 
     // 1. Adiciona a mensagem do usuário na tela
     const msgUser = document.createElement('div');
@@ -1803,6 +1854,8 @@ async function enviarMensagemIa() {
     msgUser.textContent = texto;
     container.appendChild(msgUser);
     input.value = '';
+    input.disabled = true;
+    if (btnEnviar) btnEnviar.disabled = true;
     container.scrollTop = container.scrollHeight;
 
     // 2. Adiciona o balão de carregamento "Digitando..."
@@ -1814,7 +1867,7 @@ async function enviarMensagemIa() {
 
     try {
         const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
-        
+
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1828,27 +1881,38 @@ async function enviarMensagemIa() {
         });
 
         const dados = await response.json();
+        msgDigitando.remove();
 
-        // 3. Captura o texto retornado pela IA e o exibe no chat
-        if (dados.candidates && dados.candidates[0].content.parts[0].text) {
-            msgDigitando.remove();
-            const respostaIa = dados.candidates[0].content.parts[0].text;
+        const respostaIa = dados && dados.candidates && dados.candidates[0] &&
+                            dados.candidates[0].content && dados.candidates[0].content.parts &&
+                            dados.candidates[0].content.parts[0] && dados.candidates[0].content.parts[0].text;
+
+        if (respostaIa) {
             const msgIa = document.createElement('div');
             msgIa.className = 'msg ia';
             msgIa.textContent = respostaIa;
             container.appendChild(msgIa);
-        } else if (dados.error) {
-            throw new Error("API: " + dados.error.message);
+        } else if (dados && dados.error) {
+            throw new Error(dados.error.message || 'Erro na API');
+        } else if (dados && dados.candidates && dados.candidates[0] && dados.candidates[0].finishReason) {
+            throw new Error('Resposta bloqueada: ' + dados.candidates[0].finishReason);
         } else {
-            throw new Error("Formato de resposta inválido: " + JSON.stringify(dados).slice(0,200));
+            throw new Error('Formato de resposta inesperado');
         }
 
     } catch (erro) {
         console.error("Erro na integração com a IA:", erro);
-        msgDigitando.textContent = "Ops, deu um estalo técnico no meu sistema! 🍫 (" + erro.message + ") Se o seu problema for urgente, você pode falar direto com a Josi clicando no botão do WhatsApp! 🤎";
+        if (msgDigitando.parentNode) msgDigitando.remove();
+        const msgErro = document.createElement('div');
+        msgErro.className = 'msg ia';
+        msgErro.textContent = "Ops, deu um estalo técnico no meu sistema! 🍫 Se for urgente, me chama direto no WhatsApp que te ajudo rapidinho! 🤎";
+        container.appendChild(msgErro);
+    } finally {
+        input.disabled = false;
+        if (btnEnviar) btnEnviar.disabled = false;
+        input.focus();
+        container.scrollTop = container.scrollHeight;
     }
-    
-    container.scrollTop = container.scrollHeight;
 }
 </script>
 </body>
