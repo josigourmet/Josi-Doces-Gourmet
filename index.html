@@ -1829,49 +1829,77 @@ async function finalizarZap() {
     const textoOriginalBtn = btnZap.innerText;
     btnZap.innerText = "⏳ Gerando número do pedido...";
 
-    let numeroPedido = null;
-    if (window.obterProximoNumeroPedido) {
-        numeroPedido = await window.obterProximoNumeroPedido();
-    }
-    if (!numeroPedido) {
-        numeroPedido = _proximoNumeroPedidoLocal();
-    }
-
-    const resumo = montarTextoPedido(numeroPedido);
-
-    if (window.salvarPedidoFirebase) {
-        window.salvarPedidoFirebase({
-            nome: resumo.nome,
-            telefone: resumo.telefone,
-            itens: carrinho,
-            subtotal: resumo.subtotal,
-            desconto: resumo.desconto,
-            frete: resumo.frete,
-            total: resumo.total,
-            enderecoTexto: resumo.bairroTexto,
-            endereco: resumo.endereco,
-            numeroPedido: resumo.numeroPedido,
-            data: resumo.data,
-            hora: resumo.hora,
-            pagamento: resumo.pagamento,
-            tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
-            status: 'recebido',
-            statusAtualizadoEm: Date.now(),
-            criadoEm: new Date().toISOString()
-        });
+    // Trava de segurança: se o Firebase não responder em 6s (rede lenta,
+    // regra bloqueando, etc.), seguimos com o número local em vez de
+    // travar a aba em branco pra sempre.
+    function comTimeout(promessa, ms) {
+        return Promise.race([
+            promessa,
+            new Promise(resolve => setTimeout(() => resolve(null), ms))
+        ]);
     }
 
-    const numeroWhatsLoja = "5551985803243";
-    const url = `https://wa.me/${numeroWhatsLoja}?text=${encodeURIComponent(resumo.texto)}`;
+    try {
+        let numeroPedido = null;
+        if (window.obterProximoNumeroPedido) {
+            try {
+                numeroPedido = await comTimeout(window.obterProximoNumeroPedido(), 6000);
+            } catch (erroNumero) {
+                console.error("Erro ao obter número do pedido:", erroNumero);
+            }
+        }
+        if (!numeroPedido) {
+            numeroPedido = _proximoNumeroPedidoLocal();
+        }
 
-    if (novaJanela && !novaJanela.closed) {
-        novaJanela.location.href = url;
-    } else {
-        window.open(url, '_blank');
+        const resumo = montarTextoPedido(numeroPedido);
+
+        if (window.salvarPedidoFirebase) {
+            try {
+                window.salvarPedidoFirebase({
+                    nome: resumo.nome,
+                    telefone: resumo.telefone,
+                    itens: carrinho,
+                    subtotal: resumo.subtotal,
+                    desconto: resumo.desconto,
+                    frete: resumo.frete,
+                    total: resumo.total,
+                    enderecoTexto: resumo.bairroTexto,
+                    endereco: resumo.endereco,
+                    numeroPedido: resumo.numeroPedido,
+                    data: resumo.data,
+                    hora: resumo.hora,
+                    pagamento: resumo.pagamento,
+                    tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
+                    status: 'recebido',
+                    statusAtualizadoEm: Date.now(),
+                    criadoEm: new Date().toISOString()
+                });
+            } catch (erroSalvar) {
+                console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
+            }
+        }
+
+        const numeroWhatsLoja = "5551985803243";
+        const url = `https://wa.me/${numeroWhatsLoja}?text=${encodeURIComponent(resumo.texto)}`;
+
+        if (novaJanela && !novaJanela.closed) {
+            novaJanela.location.href = url;
+        } else {
+            window.open(url, '_blank');
+        }
+    } catch (erroGeral) {
+        // Mesmo em caso de erro inesperado, garante que a aba em branco
+        // não fique travada: fecha ela em vez de deixar em about:blank.
+        console.error("Erro ao finalizar pedido:", erroGeral);
+        if (novaJanela && !novaJanela.closed) {
+            novaJanela.close();
+        }
+        alert("⚠️ Ocorreu um erro ao gerar o pedido. Tente novamente ou nos chame direto no WhatsApp.");
+    } finally {
+        btnZap.disabled = false;
+        btnZap.innerText = textoOriginalBtn;
     }
-
-    btnZap.disabled = false;
-    btnZap.innerText = textoOriginalBtn;
 }
 function limparCarrinhoCompleto() {
     if(confirm("Deseja limpar todo o carrinho?")) {
