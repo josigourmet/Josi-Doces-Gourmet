@@ -1730,6 +1730,79 @@ function gerarPixReal() {
 
 function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
+
+function montarResumoPedido() {
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const bairroSelect = document.getElementById("bairro");
+    const bairroTexto = bairroSelect.options[bairroSelect.selectedIndex].text;
+    const bairroValor = bairroSelect.value;
+    const endereco = document.getElementById("endereco").value.trim();
+    const data = document.getElementById("dataAgendamento").value;
+    const hora = document.getElementById("horaAgendamento").value;
+    const pagamento = document.getElementById("pagamento").value;
+
+    const subtotal = carrinho.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+    const desconto = subtotal >= 50 ? subtotal * 0.05 : 0;
+    const frete = (subtotal >= 50 || promoAtiva || bairroValor === "retirada") ? 0 : parseFloat(bairroValor);
+    const total = subtotal - desconto + frete;
+
+    let dataFormatada = "";
+    if (data) {
+        const [ano, mes, dia] = data.split('-');
+        dataFormatada = `${dia}/${mes}/${ano}`;
+    }
+
+    let texto = "🍰 *NOVO PEDIDO - Josi Doces Gourmet* 🍰\n\n";
+    texto += `👤 *Nome:* ${nome}\n`;
+    texto += `📱 *Telefone:* ${telefone}\n\n`;
+    texto += "🛒 *Itens do pedido:*\n";
+    carrinho.forEach(item => {
+        texto += `• ${item.qtd}x ${item.nome} — R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n`;
+    });
+    texto += `\n💰 *Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    if (desconto > 0) texto += `🏷️ *Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
+    texto += `🚚 *Frete:* ${frete === 0 ? 'GRÁTIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
+    texto += `💳 *Total: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
+    texto += `📍 *Entrega:* ${bairroValor === 'retirada' ? ('Retirada no local — ' + ENDERECO_RETIRADA) : (bairroTexto + ' — ' + endereco)}\n`;
+    texto += `⏰ *Data/Horário:* ${dataFormatada} às ${hora}\n`;
+    texto += `💵 *Pagamento:* ${pagamento}${(pagamento === 'Pix' && pixGerado) ? ' (PIX já gerado)' : ''}\n`;
+
+    return { texto, total, nome, telefone, bairroTexto, bairroValor, endereco, dataFormatada, hora, pagamento, subtotal, desconto, frete };
+}
+
+function finalizarZap() {
+    const btnZap = document.getElementById("btnWhatsapp");
+    if (btnZap.disabled) return;
+    if (carrinho.length === 0) {
+        alert("⚠️ Seu carrinho está vazio! Adicione itens antes de enviar o pedido.");
+        return;
+    }
+
+    const resumo = montarResumoPedido();
+
+    if (window.salvarPedidoFirebase) {
+        window.salvarPedidoFirebase({
+            nome: resumo.nome,
+            telefone: resumo.telefone,
+            itens: carrinho,
+            subtotal: resumo.subtotal,
+            desconto: resumo.desconto,
+            frete: resumo.frete,
+            total: resumo.total,
+            enderecoTexto: resumo.bairroTexto,
+            endereco: resumo.endereco,
+            data: resumo.dataFormatada,
+            hora: resumo.hora,
+            pagamento: resumo.pagamento,
+            criadoEm: new Date().toISOString()
+        });
+    }
+
+    const numeroWhatsLoja = "5551985803243";
+    const url = `https://wa.me/${numeroWhatsLoja}?text=${encodeURIComponent(resumo.texto)}`;
+    window.open(url, '_blank');
+}
 function limparCarrinhoCompleto() {
     if(confirm("Deseja limpar todo o carrinho?")) {
         carrinho = []; promoAtiva = false; salvarDados(); resetPagamentoFluxo(); verificarPgto(); toggleVisibilidadeCarrinho();
@@ -1866,11 +1939,14 @@ async function enviarMensagemIa() {
     container.scrollTop = container.scrollHeight;
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}`;
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent`;
 
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': GEMINI_API_KEY
+            },
             body: JSON.stringify({
                 contents: [{
                     parts: [{
