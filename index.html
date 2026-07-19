@@ -1854,6 +1854,9 @@ async function finalizarZap() {
             data: resumo.data,
             hora: resumo.hora,
             pagamento: resumo.pagamento,
+            tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
+            status: 'recebido',
+            statusAtualizadoEm: Date.now(),
             criadoEm: new Date().toISOString()
         });
     }
@@ -1989,7 +1992,7 @@ Instruções de Comportamento da IA:
 - Incentive gentilmente o cliente a escolher e adicionar os itens diretamente nas caixinhas de quantidade do site para montar o carrinho.
 - Se perguntarem coisas muito fora do assunto de confeitaria, mude de assunto ou decline educadamente dizendo que foca em adoçar a vida deles.`;
 
-const GEMINI_API_KEY = "AQ.Ab8RN6KbZtfqqLUbX92Ej_syk97XszWTtZVmCwyeFGLSeagnGA";
+const GEMINI_API_KEY = "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0";
 
 async function enviarMensagemIa() {
     const input = document.getElementById('chatInput');
