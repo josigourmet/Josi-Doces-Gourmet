@@ -49,6 +49,11 @@
         font-size: 18px;
         margin: 0;
     }
+    .header-botoes {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
     header button {
         background: rgba(255,255,255,0.15);
         color: #fff;
@@ -58,6 +63,7 @@
         cursor: pointer;
         font-weight: 700;
         font-size: 13px;
+        white-space: nowrap;
     }
 
     /* ===== Login ===== */
@@ -101,6 +107,38 @@
         font-weight: 700;
         margin-top: 10px;
         display: none;
+    }
+    #areaBiometria {
+        display: none;
+        margin-top: 14px;
+    }
+    #btnEntrarBiometria {
+        background: linear-gradient(135deg, var(--azul), #0077b3) !important;
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: none;
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    #linkEsqueciSenha {
+        display: block;
+        margin-top: 14px;
+        font-size: 12.5px;
+        color: var(--marrom-claro);
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    #linkEsqueciSenha:hover { text-decoration: underline; }
+    #msgReset {
+        font-size: 12.5px;
+        margin-top: 10px;
+        display: none;
+        font-weight: 700;
+        line-height: 1.5;
     }
 
     /* ===== Dashboard ===== */
@@ -248,12 +286,22 @@
     <input type="password" id="loginSenha" placeholder="Senha" autocomplete="current-password">
     <button onclick="fazerLogin()">Entrar</button>
     <div id="erroLogin"></div>
+
+    <div id="areaBiometria">
+        <button type="button" id="btnEntrarBiometria" onclick="entrarComBiometria()">🔐 Entrar com Digital</button>
+    </div>
+
+    <a href="#" id="linkEsqueciSenha" onclick="solicitarResetSenha(); return false;">Esqueci minha senha</a>
+    <div id="msgReset"></div>
 </div>
 
 <div id="telaDashboard">
     <header>
         <h1>🍰 Pedidos - Josi Doces</h1>
-        <button onclick="fazerLogout()">Sair</button>
+        <div class="header-botoes">
+            <button id="btnToggleBiometria" onclick="alternarBiometria()" style="display:none;">🔐 Ativar Digital</button>
+            <button onclick="fazerLogout()">Sair</button>
+        </div>
     </header>
 
     <div class="filtros" id="filtros">
@@ -275,7 +323,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBwU6G-T2V_Z3F8H4N9M1L0-X7K5J2W8V1",
@@ -294,6 +342,168 @@ const auth = getAuth(app);
 
 let todosOsPedidos = {};
 let filtroAtual = 'todos';
+
+/* ===================================================================
+   LOGIN COM DIGITAL / FACE ID (WebAuthn como trava local do aparelho)
+   -------------------------------------------------------------------
+   Importante entender o que isso é e o que NÃO é:
+   - Não existe um cadastro de "biometria" guardado na nuvem/Firebase.
+   - O que acontece é: o leitor de digital/Face ID do PRÓPRIO celular
+     é usado para "desbloquear" um login salvo NESTE aparelho.
+   - O e-mail e a senha ficam guardados no localStorage deste navegador
+     (levemente ofuscados em base64 — não é criptografia forte). Por
+     isso, só ative isso no seu celular pessoal, nunca em aparelho
+     compartilhado ou público.
+   - Cada aparelho precisa ativar essa opção separadamente.
+=================================================================== */
+
+function _bufParaBase64(buf) {
+    return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
+}
+function _base64ParaBuf(b64) {
+    const bin = atob(b64);
+    const arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return arr.buffer;
+}
+function _ofuscar(obj) {
+    return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
+}
+function _desofuscar(str) {
+    return JSON.parse(decodeURIComponent(escape(atob(str))));
+}
+
+const CHAVE_BIO_ID = 'josiAdminBiometriaId';
+const CHAVE_BIO_CRED = 'josiAdminBiometriaCred';
+
+function atualizarUiBiometria() {
+    const jaAtivo = !!localStorage.getItem(CHAVE_BIO_ID);
+    const areaLogin = document.getElementById('areaBiometria');
+    if (areaLogin) areaLogin.style.display = jaAtivo ? 'block' : 'none';
+    const btnDash = document.getElementById('btnToggleBiometria');
+    if (btnDash) btnDash.textContent = jaAtivo ? '🔓 Remover Digital' : '🔐 Ativar Digital';
+}
+
+async function verificarSuporteBiometria() {
+    const btnDash = document.getElementById('btnToggleBiometria');
+    if (!window.PublicKeyCredential) { if (btnDash) btnDash.style.display = 'none'; return; }
+    try {
+        const suportado = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+        if (btnDash) btnDash.style.display = suportado ? 'inline-block' : 'none';
+    } catch (e) {
+        if (btnDash) btnDash.style.display = 'none';
+    }
+    atualizarUiBiometria();
+}
+
+async function ativarBiometriaNoAparelho(email, senha) {
+    if (!window.PublicKeyCredential) {
+        alert("Esse navegador não tem suporte a login por digital/Face ID.");
+        return false;
+    }
+    try {
+        const desafio = crypto.getRandomValues(new Uint8Array(32));
+        const idUsuario = crypto.getRandomValues(new Uint8Array(16));
+        const credencial = await navigator.credentials.create({
+            publicKey: {
+                challenge: desafio,
+                rp: { name: "Josi Doces Gourmet - Admin" },
+                user: { id: idUsuario, name: email, displayName: email },
+                pubKeyCredParams: [
+                    { type: "public-key", alg: -7 },
+                    { type: "public-key", alg: -257 }
+                ],
+                authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
+                timeout: 60000,
+                attestation: "none"
+            }
+        });
+        if (!credencial) return false;
+        localStorage.setItem(CHAVE_BIO_ID, _bufParaBase64(credencial.rawId));
+        localStorage.setItem(CHAVE_BIO_CRED, _ofuscar({ email: email, senha: senha }));
+        return true;
+    } catch (erro) {
+        console.error("Erro ao ativar biometria:", erro);
+        alert("Não foi possível ativar a digital neste aparelho. Verifique se ele tem leitor de digital/Face ID configurado.");
+        return false;
+    }
+}
+
+window.entrarComBiometria = async function() {
+    const idSalvo = localStorage.getItem(CHAVE_BIO_ID);
+    const credSalva = localStorage.getItem(CHAVE_BIO_CRED);
+    const erroDiv = document.getElementById('erroLogin');
+    erroDiv.style.display = 'none';
+    if (!idSalvo || !credSalva) return;
+
+    try {
+        const desafio = crypto.getRandomValues(new Uint8Array(32));
+        const asserção = await navigator.credentials.get({
+            publicKey: {
+                challenge: desafio,
+                allowCredentials: [{ id: _base64ParaBuf(idSalvo), type: "public-key" }],
+                userVerification: "required",
+                timeout: 60000
+            }
+        });
+        if (!asserção) throw new Error("Sem resposta do leitor de digital.");
+
+        const dados = _desofuscar(credSalva);
+        await signInWithEmailAndPassword(auth, dados.email, dados.senha);
+    } catch (erro) {
+        console.error("Erro na autenticação por digital:", erro);
+        erroDiv.textContent = "Não foi possível entrar com a digital. Use e-mail e senha.";
+        erroDiv.style.display = 'block';
+    }
+};
+
+window.alternarBiometria = async function() {
+    const jaAtivo = !!localStorage.getItem(CHAVE_BIO_ID);
+
+    if (jaAtivo) {
+        if (confirm("Remover o login por digital deste aparelho?")) {
+            localStorage.removeItem(CHAVE_BIO_ID);
+            localStorage.removeItem(CHAVE_BIO_CRED);
+            atualizarUiBiometria();
+        }
+        return;
+    }
+
+    if (!auth.currentUser) return;
+    const senha = prompt("Para ativar a digital neste aparelho, confirme sua senha atual:");
+    if (!senha) return;
+
+    const sucesso = await ativarBiometriaNoAparelho(auth.currentUser.email, senha);
+    if (sucesso) alert("Digital ativada neste aparelho! 🎉 Da próxima vez você pode entrar direto pela digital.");
+    atualizarUiBiometria();
+};
+
+/* ===================== Esqueci minha senha ===================== */
+
+window.solicitarResetSenha = function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const msgDiv = document.getElementById('msgReset');
+
+    if (!email) {
+        msgDiv.style.color = '#e74c3c';
+        msgDiv.textContent = "Digite seu e-mail no campo acima e clique em \"Esqueci minha senha\" de novo.";
+        msgDiv.style.display = 'block';
+        return;
+    }
+
+    sendPasswordResetEmail(auth, email).then(function() {
+        msgDiv.style.color = '#2e7d32';
+        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha. Confira também a caixa de spam.";
+        msgDiv.style.display = 'block';
+    }).catch(function(erro) {
+        console.error("Erro ao enviar e-mail de redefinição:", erro);
+        msgDiv.style.color = '#2e7d32';
+        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha. Confira também a caixa de spam.";
+        msgDiv.style.display = 'block';
+    });
+};
+
+/* ===================== Login / Logout normais ===================== */
 
 window.fazerLogin = function() {
     const email = document.getElementById('loginEmail').value.trim();
@@ -315,10 +525,12 @@ onAuthStateChanged(auth, function(usuario) {
     if (usuario) {
         document.getElementById('telaLogin').style.display = 'none';
         document.getElementById('telaDashboard').style.display = 'block';
+        verificarSuporteBiometria();
         escutarPedidos();
     } else {
         document.getElementById('telaLogin').style.display = 'block';
         document.getElementById('telaDashboard').style.display = 'none';
+        atualizarUiBiometria();
     }
 });
 
@@ -482,6 +694,8 @@ function criarCardPedido(id, pedido) {
 
     return card;
 }
+
+atualizarUiBiometria();
 </script>
 </body>
 </html>
