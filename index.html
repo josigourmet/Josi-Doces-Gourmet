@@ -1763,57 +1763,60 @@ function montarTextoPedido(numeroPedido) {
     const pad = n => String(n).padStart(2, '0');
     const dataPedidoFormatada = `${pad(agora.getDate())}/${pad(agora.getMonth() + 1)}/${agora.getFullYear()}, ${pad(agora.getHours())}:${pad(agora.getMinutes())}:${pad(agora.getSeconds())}`;
 
-    const linha = "\u{2796}\u{2796}\u{2796}\u{2796}\u{2796}\u{2796}\u{2796}\u{2796}\u{2796}\u{2796}";
+    const linha = "-----------------------------";
 
-    let texto = "\u{2764}\u{FE0F}\u{1F36C} *NOVO PEDIDO JOSI DOCES GOURMET* \u{1F36C}\u{2764}\u{FE0F}\n\n";
-    texto += `\u{1F4DD} *Pedido N\u{B0}:* #${numeroPedido}\n`;
-    texto += `\u{1F550} *Pedido realizado em:* ${dataPedidoFormatada}\n\n`;
+    let texto = "🍰 *NOVO PEDIDO JOSI DOCES GOURMET* 🍰\n\n";
+    texto += `📝 *Pedido N°:* #${numeroPedido}\n`;
+    texto += `🕐 *Pedido realizado em:* ${dataPedidoFormatada}\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "\u{1F464} *CLIENTE*\n";
-    texto += `\u{1F9D1} *Nome:* ${nome}\n`;
-    texto += `\u{260E}\u{FE0F} *WhatsApp:* ${telefone}\n\n`;
+    texto += "👤 *CLIENTE*\n";
+    texto += `🧑 *Nome:* ${nome}\n`;
+    texto += `☎️ *WhatsApp:* ${telefone}\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "\u{1F6D2} *ITENS DO PEDIDO*\n";
+    texto += "🛒 *ITENS DO PEDIDO*\n";
     carrinho.forEach(item => {
-        texto += `\u{1F370} ${item.qtd}x ${item.nome}\n\u{1F4B5} R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n\n`;
+        texto += `🍰 ${item.qtd}x ${item.nome}\n💵 R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n\n`;
     });
     texto += `${linha}\n\n`;
 
-    texto += "\u{1F4E6} *RESUMO DO PEDIDO*\n";
-    texto += `\u{1F9C1} *Itens:* ${qtdTotalItens}\n`;
-    texto += `\u{1F4B0} *Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    if (desconto > 0) texto += `\u{1F3F7}\u{FE0F} *Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
-    texto += `\u{1F69A} *Frete:* ${frete === 0 ? 'GR\u{C1}TIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
-    texto += `\u{1F4B5} *TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
+    texto += "📦 *RESUMO DO PEDIDO*\n";
+    texto += `🧁 *Itens:* ${qtdTotalItens}\n`;
+    texto += `💰 *Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    if (desconto > 0) texto += `🏷️ *Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
+    texto += `🚚 *Frete:* ${frete === 0 ? 'GRÁTIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
+    texto += `💵 *TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "\u{1F69A} *ENTREGA / RETIRADA*\n";
+    texto += "🚚 *ENTREGA / RETIRADA*\n";
     if (bairroValor === "retirada") {
-        texto += "\u{1F4CD} *Local:* Vou retirar no local (R$ 0,00)\n";
-        texto += `\u{1F3E0} *Endere\u{E7}o de Retirada:* ${ENDERECO_RETIRADA}\n\n`;
+        texto += "📍 *Local:* Vou retirar no local (R$ 0,00)\n";
+        texto += `🏠 *Endereço de Retirada:* ${ENDERECO_RETIRADA}\n\n`;
     } else {
-        texto += `\u{1F4CD} *Local:* ${bairroTexto}\n`;
-        texto += `\u{1F3E0} *Endere\u{E7}o de Entrega:* ${endereco}\n\n`;
+        texto += `📍 *Local:* ${bairroTexto}\n`;
+        texto += `🏠 *Endereço de Entrega:* ${endereco}\n\n`;
     }
     texto += `${linha}\n\n`;
 
-    texto += "\u{23F0} *AGENDAMENTO*\n";
-    texto += `\u{1F4C5} *Data:* ${data}\n`;
-    texto += `\u{1F550} *Hor\u{E1}rio:* ${hora}\n\n`;
+    texto += "⏰ *AGENDAMENTO*\n";
+    texto += `📅 *Data:* ${data}\n`;
+    texto += `🕐 *Horário:* ${hora}\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "\u{1F4B3} *PAGAMENTO*\n";
-    texto += `\u{1F4B0} *Forma:* ${pagamento}${(pagamento === 'Pix' && pixGerado) ? ' (PIX j\u{E1} gerado)' : ''}\n\n`;
+    texto += "💳 *PAGAMENTO*\n";
+    texto += `💰 *Forma:* ${pagamento}${(pagamento === 'Pix' && pixGerado) ? ' (PIX já gerado)' : ''}\n\n`;
 
-    texto += "\u{23F3} *Aviso:* O prazo estimado para preparo e entrega dos pedidos \u{E9} de *40 a 60 minutos*.\n\n";
-    texto += "\u{2764}\u{FE0F} Obrigado pela prefer\u{EA}ncia!";
+    texto += "⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n";
+    texto += "❤️ Obrigado pela preferência!";
 
     return { texto, total, nome, telefone, bairroTexto, bairroValor, endereco, data, hora, pagamento, subtotal, desconto, frete, numeroPedido };
 }
 
-async function finalizarZap() {
+// ✅ VERSÃO CORRIGIDA: abre o WhatsApp IMEDIATAMENTE (sem esperar o Firebase),
+// para funcionar de forma confiável em navegadores de celular. O pedido
+// continua sendo salvo no Firebase, só que em segundo plano, sem travar o envio.
+function finalizarZap() {
     const btnZap = document.getElementById("btnWhatsapp");
     if (btnZap.disabled) return;
     if (carrinho.length === 0) {
@@ -1821,112 +1824,44 @@ async function finalizarZap() {
         return;
     }
 
-    // Abre a aba em branco já no clique (gesto do usuário), para o navegador
-    // não bloquear o pop-up enquanto esperamos o número do pedido no Firebase.
-    const novaJanela = window.open('', '_blank');
-    try {
-        if (novaJanela && !novaJanela.closed) {
-            novaJanela.document.write(`
-                <!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8">
-                <title>Preparando seu pedido...</title>
-                <style>
-                    body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
-                         background:linear-gradient(155deg,#3e2723 0%,#5d4037 55%,#8d6e63 100%);
-                         font-family:Arial,sans-serif;color:#fff;text-align:center;}
-                    .caixa{padding:20px;}
-                    .spinner{width:44px;height:44px;margin:0 auto 18px;border:4px solid rgba(255,255,255,0.25);
-                             border-top-color:#c8860a;border-radius:50%;animation:girar 0.8s linear infinite;}
-                    @keyframes girar{to{transform:rotate(360deg);}}
-                    p{font-size:15px;opacity:0.9;}
-                </style></head>
-                <body><div class="caixa"><div class="spinner"></div>
-                <p>🍰 Preparando seu pedido...<br>Já te levamos para o WhatsApp!</p>
-                </div></body></html>
-            `);
-            novaJanela.document.close();
+    const numeroPedido = _proximoNumeroPedidoLocal();
+    const resumo = montarTextoPedido(numeroPedido);
+
+    const numeroWhatsLoja = "5551985803243";
+    const url = `https://wa.me/${numeroWhatsLoja}?text=${encodeURIComponent(resumo.texto)}`;
+
+    // Abre o WhatsApp na hora, dentro do próprio clique do usuário —
+    // isso evita o travamento em navegadores de celular.
+    window.open(url, '_blank');
+
+    // Salva o pedido no Firebase por trás dos panos, sem atrasar o cliente.
+    if (window.salvarPedidoFirebase) {
+        try {
+            window.salvarPedidoFirebase({
+                nome: resumo.nome,
+                telefone: resumo.telefone,
+                itens: carrinho,
+                subtotal: resumo.subtotal,
+                desconto: resumo.desconto,
+                frete: resumo.frete,
+                total: resumo.total,
+                enderecoTexto: resumo.bairroTexto,
+                endereco: resumo.endereco,
+                numeroPedido: resumo.numeroPedido,
+                data: resumo.data,
+                hora: resumo.hora,
+                pagamento: resumo.pagamento,
+                tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
+                status: 'recebido',
+                statusAtualizadoEm: Date.now(),
+                criadoEm: new Date().toISOString()
+            });
+        } catch (erroSalvar) {
+            console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
         }
-    } catch (erroSpinner) {
-        // Se a telinha de carregamento falhar por qualquer motivo (restrição
-        // do navegador, etc.), não deixamos isso travar o envio do pedido.
-        console.error("Erro ao exibir tela de carregamento:", erroSpinner);
-    }
-
-    btnZap.disabled = true;
-    const textoOriginalBtn = btnZap.innerText;
-    btnZap.innerText = "⏳ Gerando número do pedido...";
-
-    // Trava de segurança: se o Firebase não responder em 6s (rede lenta,
-    // regra bloqueando, etc.), seguimos com o número local em vez de
-    // travar a aba em branco pra sempre.
-    function comTimeout(promessa, ms) {
-        return Promise.race([
-            promessa,
-            new Promise(resolve => setTimeout(() => resolve(null), ms))
-        ]);
-    }
-
-    try {
-        let numeroPedido = null;
-        if (window.obterProximoNumeroPedido) {
-            try {
-                numeroPedido = await comTimeout(window.obterProximoNumeroPedido(), 3000);
-            } catch (erroNumero) {
-                console.error("Erro ao obter número do pedido:", erroNumero);
-            }
-        }
-        if (!numeroPedido) {
-            numeroPedido = _proximoNumeroPedidoLocal();
-        }
-
-        const resumo = montarTextoPedido(numeroPedido);
-
-        if (window.salvarPedidoFirebase) {
-            try {
-                window.salvarPedidoFirebase({
-                    nome: resumo.nome,
-                    telefone: resumo.telefone,
-                    itens: carrinho,
-                    subtotal: resumo.subtotal,
-                    desconto: resumo.desconto,
-                    frete: resumo.frete,
-                    total: resumo.total,
-                    enderecoTexto: resumo.bairroTexto,
-                    endereco: resumo.endereco,
-                    numeroPedido: resumo.numeroPedido,
-                    data: resumo.data,
-                    hora: resumo.hora,
-                    pagamento: resumo.pagamento,
-                    tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
-                    status: 'recebido',
-                    statusAtualizadoEm: Date.now(),
-                    criadoEm: new Date().toISOString()
-                });
-            } catch (erroSalvar) {
-                console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
-            }
-        }
-
-        const numeroWhatsLoja = "5551985803243";
-        const url = `https://wa.me/${numeroWhatsLoja}?text=${encodeURIComponent(resumo.texto)}`;
-
-        if (novaJanela && !novaJanela.closed) {
-            novaJanela.location.href = url;
-        } else {
-            window.open(url, '_blank');
-        }
-    } catch (erroGeral) {
-        // Mesmo em caso de erro inesperado, garante que a aba em branco
-        // não fique travada: fecha ela em vez de deixar em about:blank.
-        console.error("Erro ao finalizar pedido:", erroGeral);
-        if (novaJanela && !novaJanela.closed) {
-            novaJanela.close();
-        }
-        alert("⚠️ Ocorreu um erro ao gerar o pedido. Tente novamente ou nos chame direto no WhatsApp.");
-    } finally {
-        btnZap.disabled = false;
-        btnZap.innerText = textoOriginalBtn;
     }
 }
+
 function limparCarrinhoCompleto() {
     if(confirm("Deseja limpar todo o carrinho?")) {
         carrinho = []; promoAtiva = false; salvarDados(); resetPagamentoFluxo(); verificarPgto(); toggleVisibilidadeCarrinho();
@@ -1936,7 +1871,7 @@ function limparCarrinhoCompleto() {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBwU6G-T2V_Z3F8H4N9M1L0-X7K5J2W8V1",
@@ -1960,28 +1895,9 @@ window.salvarPedidoFirebase = async function(pedido) {
     console.error("Erro ao salvar pedido:", erro);
   }
 };
-
-// Contador de pedidos compartilhado entre todos os clientes, usando transação
-// atômica do Firebase para garantir que dois pedidos simultâneos nunca recebam
-// o mesmo número.
-window.obterProximoNumeroPedido = async function() {
-  try {
-    const contadorRef = ref(db, "contadorPedidos");
-    const resultado = await runTransaction(contadorRef, function(valorAtual) {
-      return (valorAtual || 3500) + 1;
-    });
-    if (resultado.committed && resultado.snapshot.val()) {
-      return resultado.snapshot.val();
-    }
-    throw new Error("Transação de contador não confirmada");
-  } catch (erro) {
-    console.error("Erro ao obter número sequencial do pedido (usando fallback local):", erro);
-    return null;
-  }
-};
 </script>
 
-<!-- Logica JavaScript de Funcionamento do Chatbot IA com Gemini API -->
+<!-- Logica JavaScript de Funcionamento do Chatbot IA com Groq API -->
 <script>
 function toggleChat() {
     const janela = document.getElementById('chatJanela');
@@ -1991,9 +1907,6 @@ function toggleChat() {
     if (aberto && dot) dot.style.display = 'none';
 }
 
-// Abre o chat sozinho, com uma saudação, pouco depois da splash de boas-vindas.
-// Usa sessionStorage para não incomodar o cliente reabrindo a cada rolagem/clique,
-// apenas uma vez por visita/sessão do navegador.
 function agendarChatAutomatico() {
     setTimeout(abrirChatAutomatico, 5500);
 }
@@ -2022,7 +1935,6 @@ function abrirChatAutomatico() {
     container.scrollTop = container.scrollHeight;
 }
 
-// CONTEXTO DE INSTRUÇÃO PARA A IA
 const CONTEXTO_PROMPT_JOSI = `Você é a assistente virtual super simpática e acolhedora da "Josi Doces Gourmet", localizada em Venâncio Aires.
 Seu objetivo principal é ajudar os clientes do site com dúvidas sobre o cardápio, entregas e pedidos.
 
@@ -2065,7 +1977,6 @@ async function enviarMensagemIa() {
         return;
     }
 
-    // 1. Adiciona a mensagem do usuário na tela
     const msgUser = document.createElement('div');
     msgUser.className = 'msg user';
     msgUser.textContent = texto;
@@ -2075,7 +1986,6 @@ async function enviarMensagemIa() {
     if (btnEnviar) btnEnviar.disabled = true;
     container.scrollTop = container.scrollHeight;
 
-    // 2. Adiciona o balão de carregamento "Digitando..."
     const msgDigitando = document.createElement('div');
     msgDigitando.className = 'msg ia';
     msgDigitando.textContent = 'Digitando... 🍰';
