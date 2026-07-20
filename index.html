@@ -1813,10 +1813,14 @@ function montarTextoPedido(numeroPedido) {
     return { texto, total, nome, telefone, bairroTexto, bairroValor, endereco, data, hora, pagamento, subtotal, desconto, frete, numeroPedido };
 }
 
-// ✅ VERSÃO CORRIGIDA: abre o WhatsApp IMEDIATAMENTE (sem esperar o Firebase),
-// para funcionar de forma confiável em navegadores de celular. O pedido
-// continua sendo salvo no Firebase, só que em segundo plano, sem travar o envio.
-function finalizarZap() {
+// ✅ VERSÃO CORRIGIDA: o número do pedido agora vem de um contador único e
+// sequencial guardado no Firebase (transação atômica), então a numeração é
+// a mesma para TODOS os clientes/celulares, sem pular nem repetir números.
+// Para continuar funcionando de forma confiável em navegadores de celular
+// (que bloqueiam pop-ups abertos fora do clique do usuário), a janela do
+// WhatsApp é aberta em branco IMEDIATAMENTE no clique, e só depois — quando
+// o número do Firebase chega — ela é redirecionada para o link do WhatsApp.
+async function finalizarZap() {
     const btnZap = document.getElementById("btnWhatsapp");
     if (btnZap.disabled) return;
     if (carrinho.length === 0) {
@@ -1824,15 +1828,36 @@ function finalizarZap() {
         return;
     }
 
-    const numeroPedido = _proximoNumeroPedidoLocal();
-    const resumo = montarTextoPedido(numeroPedido);
+    // Abre a aba/janela já aqui, ainda dentro do clique do usuário, para não
+    // ser bloqueada pelo navegador enquanto aguardamos o Firebase.
+    const janelaZap = window.open('', '_blank');
 
+    btnZap.disabled = true;
+    const textoOriginalBtn = btnZap.innerText;
+    btnZap.innerText = "⏳ Gerando número do pedido...";
+
+    let numeroPedido;
+    try {
+        numeroPedido = await window.obterProximoNumeroPedidoFirebase();
+    } catch (erroContador) {
+        console.error("Erro ao gerar número sequencial no Firebase, usando numeração local como reserva:", erroContador);
+        numeroPedido = _proximoNumeroPedidoLocal();
+    }
+
+    const resumo = montarTextoPedido(numeroPedido);
     const numeroWhatsLoja = "5551985803243";
     const url = `https://wa.me/${numeroWhatsLoja}?text=${encodeURIComponent(resumo.texto)}`;
 
-    // Abre o WhatsApp na hora, dentro do próprio clique do usuário —
-    // isso evita o travamento em navegadores de celular.
-    window.open(url, '_blank');
+    if (janelaZap) {
+        janelaZap.location.href = url;
+    } else {
+        // Caso o navegador tenha bloqueado a abertura em branco, tenta abrir
+        // diretamente agora (ainda funciona na maioria dos navegadores).
+        window.open(url, '_blank');
+    }
+
+    btnZap.disabled = false;
+    btnZap.innerText = textoOriginalBtn;
 
     // Salva o pedido no Firebase por trás dos panos, sem atrasar o cliente.
     if (window.salvarPedidoFirebase) {
@@ -1871,7 +1896,7 @@ function limparCarrinhoCompleto() {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBwU6G-T2V_Z3F8H4N9M1L0-X7K5J2W8V1",
@@ -1894,6 +1919,21 @@ window.salvarPedidoFirebase = async function(pedido) {
   } catch (erro) {
     console.error("Erro ao salvar pedido:", erro);
   }
+};
+
+// Gera o próximo número de pedido de forma sequencial e ÚNICA para toda a
+// loja, usando uma transação atômica no Firebase (o contador fica salvo em
+// "contadores/pedidos" no banco). Isso evita que cada cliente/celular tenha
+// sua própria contagem separada (o que acontecia com o localStorage).
+window.obterProximoNumeroPedidoFirebase = async function() {
+  const contadorRef = ref(db, "contadores/pedidos");
+  const resultado = await runTransaction(contadorRef, (valorAtual) => {
+    return (typeof valorAtual === "number" ? valorAtual : 3500) + 1;
+  });
+  if (!resultado.committed) {
+    throw new Error("Não foi possível confirmar a transação do contador.");
+  }
+  return resultado.snapshot.val();
 };
 </script>
 
