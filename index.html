@@ -21,7 +21,7 @@
                         https://firebaseinstallations.googleapis.com
                         wss://*.firebaseio.com
                         https://*.googleapis.com
-                        https://generativelanguage.googleapis.com;
+                        https://api.groq.com;
             frame-ancestors 'none';
         ">
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -2020,7 +2020,8 @@ Instruções de Comportamento da IA:
 - Incentive gentilmente o cliente a escolher e adicionar os itens diretamente nas caixinhas de quantidade do site para montar o carrinho.
 - Se perguntarem coisas muito fora do assunto de confeitaria, mude de assunto ou decline educadamente dizendo que foca em adoçar a vida deles.`;
 
-const GEMINI_API_KEY = "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0";
+const GROQ_API_KEY = "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";
+const GROQ_MODELO = "llama-3.3-70b-versatile";
 
 async function enviarMensagemIa() {
     const input = document.getElementById('chatInput');
@@ -2056,29 +2057,28 @@ async function enviarMensagemIa() {
     container.scrollTop = container.scrollHeight;
 
     try {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent`;
+        const url = `https://api.groq.com/openai/v1/chat/completions`;
 
         const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'x-goog-api-key': GEMINI_API_KEY
+                'Authorization': `Bearer ${GROQ_API_KEY}`
             },
             body: JSON.stringify({
-                contents: [{
-                    parts: [{
-                        text: `${CONTEXTO_PROMPT_JOSI}\n\nPergunta do cliente: ${texto}`
-                    }]
-                }]
+                model: GROQ_MODELO,
+                messages: [
+                    { role: 'system', content: CONTEXTO_PROMPT_JOSI },
+                    { role: 'user', content: texto }
+                ]
             })
         });
 
         const dados = await response.json();
         msgDigitando.remove();
 
-        const respostaIa = dados && dados.candidates && dados.candidates[0] &&
-                            dados.candidates[0].content && dados.candidates[0].content.parts &&
-                            dados.candidates[0].content.parts[0] && dados.candidates[0].content.parts[0].text;
+        const respostaIa = dados && dados.choices && dados.choices[0] &&
+                            dados.choices[0].message && dados.choices[0].message.content;
 
         if (respostaIa) {
             const msgIa = document.createElement('div');
@@ -2087,8 +2087,6 @@ async function enviarMensagemIa() {
             container.appendChild(msgIa);
         } else if (dados && dados.error) {
             throw new Error(dados.error.message || 'Erro na API');
-        } else if (dados && dados.candidates && dados.candidates[0] && dados.candidates[0].finishReason) {
-            throw new Error('Resposta bloqueada: ' + dados.candidates[0].finishReason);
         } else {
             throw new Error('Formato de resposta inesperado');
         }
