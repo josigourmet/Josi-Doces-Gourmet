@@ -1824,6 +1824,26 @@ async function finalizarZap() {
     // Abre a aba em branco já no clique (gesto do usuário), para o navegador
     // não bloquear o pop-up enquanto esperamos o número do pedido no Firebase.
     const novaJanela = window.open('', '_blank');
+    if (novaJanela && !novaJanela.closed) {
+        novaJanela.document.write(`
+            <!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8">
+            <title>Preparando seu pedido...</title>
+            <style>
+                body{margin:0;height:100vh;display:flex;align-items:center;justify-content:center;
+                     background:linear-gradient(155deg,#3e2723 0%,#5d4037 55%,#8d6e63 100%);
+                     font-family:Arial,sans-serif;color:#fff;text-align:center;}
+                .caixa{padding:20px;}
+                .spinner{width:44px;height:44px;margin:0 auto 18px;border:4px solid rgba(255,255,255,0.25);
+                         border-top-color:#c8860a;border-radius:50%;animation:girar 0.8s linear infinite;}
+                @keyframes girar{to{transform:rotate(360deg);}}
+                p{font-size:15px;opacity:0.9;}
+            </style></head>
+            <body><div class="caixa"><div class="spinner"></div>
+            <p>🍰 Preparando seu pedido...<br>Já te levamos para o WhatsApp!</p>
+            </div></body></html>
+        `);
+        novaJanela.document.close();
+    }
 
     btnZap.disabled = true;
     const textoOriginalBtn = btnZap.innerText;
@@ -1843,7 +1863,7 @@ async function finalizarZap() {
         let numeroPedido = null;
         if (window.obterProximoNumeroPedido) {
             try {
-                numeroPedido = await comTimeout(window.obterProximoNumeroPedido(), 6000);
+                numeroPedido = await comTimeout(window.obterProximoNumeroPedido(), 3000);
             } catch (erroNumero) {
                 console.error("Erro ao obter número do pedido:", erroNumero);
             }
