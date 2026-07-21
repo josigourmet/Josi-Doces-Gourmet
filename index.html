@@ -901,6 +901,34 @@
             background: #e74c3c; border: 2px solid #fff;
             animation: pulse 1.5s infinite;
         }
+
+        /* ===== Toast de status do pedido (salvo/erro) ===== */
+        #toastPedido {
+            position: fixed;
+            left: 50%;
+            bottom: 90px;
+            transform: translateX(-50%) translateY(20px);
+            max-width: 90%;
+            width: 340px;
+            background: var(--marrom-escuro);
+            color: #fff;
+            padding: 13px 16px;
+            border-radius: 14px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            font-weight: 700;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            z-index: 10002;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        #toastPedido.mostrar {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        #toastPedido.toast-ok { background: linear-gradient(135deg, #1da851, #178f45); }
+        #toastPedido.toast-erro { background: linear-gradient(135deg, #c0392b, #922019); }
     </style>
 </head>
 <body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados(); agendarChatAutomatico(); reservarProximoNumeroPedido();">
@@ -1127,6 +1155,8 @@
         <button id="btnWhatsapp" onclick="finalizarZap()" class="btn-finalizar" disabled>⚠️ Preencha os dados no formulário</button>
     </div>
 </div>
+
+<div id="toastPedido"></div>
 
 <!-- Interface Visual do Chatbot Flutuante IA -->
 <div class="chatbot-flutuante">
@@ -1742,11 +1772,6 @@ function _proximoNumeroPedidoLocal() {
     return contador;
 }
 
-// Número de pedido reservado com antecedência no Firebase (contador único e
-// sequencial para toda a loja). É buscado em segundo plano assim que a
-// página carrega, para já estar pronto quando o cliente clicar em enviar —
-// isso é essencial para o WhatsApp abrir instantaneamente no celular, sem
-// nenhuma espera de rede no momento do clique.
 let _numeroPedidoReservado = null;
 let _reservandoNumero = false;
 
@@ -1838,12 +1863,19 @@ function montarTextoPedido(numeroPedido) {
     return { texto, total, nome, telefone, bairroTexto, bairroValor, endereco, data, hora, pagamento, subtotal, desconto, frete, numeroPedido };
 }
 
-// ✅ Abre o WhatsApp IMEDIATAMENTE no clique (sem nenhum await antes do
-// window.open), para funcionar de forma confiável em navegadores de
-// celular. O número do pedido usado aqui já foi reservado no Firebase com
-// antecedência (veja reservarProximoNumeroPedido) — por isso não precisa
-// esperar a rede agora. O pedido em si é salvo no Firebase em segundo
-// plano, sem travar o envio.
+/* ===== Toast visível de status do pedido (não depende do console) ===== */
+let _timeoutToast = null;
+function mostrarToastPedido(mensagem, tipo) {
+    const toast = document.getElementById('toastPedido');
+    if (!toast) return;
+    if (_timeoutToast) clearTimeout(_timeoutToast);
+    toast.textContent = mensagem;
+    toast.className = 'mostrar ' + (tipo === 'ok' ? 'toast-ok' : 'toast-erro');
+    _timeoutToast = setTimeout(function() {
+        toast.classList.remove('mostrar');
+    }, tipo === 'ok' ? 4000 : 9000);
+}
+
 function finalizarZap() {
     const btnZap = document.getElementById("btnWhatsapp");
     if (btnZap.disabled) return;
@@ -1864,39 +1896,40 @@ function finalizarZap() {
     // isso evita o travamento em navegadores de celular.
     window.open(url, '_blank');
 
-    // Já reserva o próximo número em segundo plano, para deixá-lo pronto
-    // caso o cliente (ou outro cliente) finalize outro pedido em seguida.
+    // Já reserva o próximo número em segundo plano.
     reservarProximoNumeroPedido();
 
-    // Salva o pedido no Firebase por trás dos panos, sem atrasar o cliente.
+    // Salva o pedido no Firebase e mostra um aviso visível na tela
+    // (toast) confirmando se deu certo ou não — sem depender do console,
+    // que não dá pra ver facilmente no celular.
     if (window.salvarPedidoFirebase) {
-        try {
-            window.salvarPedidoFirebase({
-                nome: resumo.nome,
-                telefone: resumo.telefone,
-                itens: carrinho,
-                subtotal: resumo.subtotal,
-                desconto: resumo.desconto,
-                frete: resumo.frete,
-                total: resumo.total,
-                enderecoTexto: resumo.bairroTexto,
-                endereco: resumo.endereco,
-                numeroPedido: resumo.numeroPedido,
-                data: resumo.data,
-                hora: resumo.hora,
-                pagamento: resumo.pagamento,
-                tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
-                status: 'recebido',
-                statusAtualizadoEm: Date.now(),
-                criadoEm: new Date().toISOString()
-            }).catch(function(erroSalvar) {
-                console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
-            });
-        } catch (erroSalvar) {
+        window.salvarPedidoFirebase({
+            nome: resumo.nome,
+            telefone: resumo.telefone,
+            itens: carrinho,
+            subtotal: resumo.subtotal,
+            desconto: resumo.desconto,
+            frete: resumo.frete,
+            total: resumo.total,
+            enderecoTexto: resumo.bairroTexto,
+            endereco: resumo.endereco,
+            numeroPedido: resumo.numeroPedido,
+            data: resumo.data,
+            hora: resumo.hora,
+            pagamento: resumo.pagamento,
+            tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
+            status: 'recebido',
+            statusAtualizadoEm: Date.now(),
+            criadoEm: new Date().toISOString()
+        }).then(function() {
+            mostrarToastPedido('✅ Pedido #' + resumo.numeroPedido + ' registrado no sistema.', 'ok');
+        }).catch(function(erroSalvar) {
             console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
-        }
+            const detalhe = (erroSalvar && erroSalvar.code) ? (' (' + erroSalvar.code + ')') : '';
+            mostrarToastPedido('⚠️ Pedido enviado no WhatsApp, mas NÃO foi registrado no sistema' + detalhe + '. Avise a loja para conferir manualmente.', 'erro');
+        });
     } else {
-        console.error("window.salvarPedidoFirebase não está disponível — o pedido NÃO foi salvo no banco.");
+        mostrarToastPedido('⚠️ Sistema de pedidos indisponível — o pedido foi só pelo WhatsApp, não foi registrado no painel.', 'erro');
     }
 }
 
@@ -1926,19 +1959,9 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
 window.salvarPedidoFirebase = async function(pedido) {
-  try {
-    await set(push(ref(db, "pedidos")), pedido);
-    console.log("Pedido salvo com sucesso!");
-  } catch (erro) {
-    console.error("Erro ao salvar pedido:", erro);
-    throw erro;
-  }
+  await set(push(ref(db, "pedidos")), pedido);
 };
 
-// Gera o próximo número de pedido de forma sequencial e ÚNICA para toda a
-// loja, usando uma transação atômica no Firebase (o contador fica salvo em
-// "contadores/pedidos" no banco). Isso evita que cada cliente/celular tenha
-// sua própria contagem separada (o que acontecia com o localStorage).
 window.obterProximoNumeroPedidoFirebase = async function() {
   const contadorRef = ref(db, "contadores/pedidos");
   const resultado = await runTransaction(contadorRef, (valorAtual) => {
