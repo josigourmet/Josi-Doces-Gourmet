@@ -1889,10 +1889,14 @@ function finalizarZap() {
                 status: 'recebido',
                 statusAtualizadoEm: Date.now(),
                 criadoEm: new Date().toISOString()
+            }).catch(function(erroSalvar) {
+                console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
             });
         } catch (erroSalvar) {
             console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
         }
+    } else {
+        console.error("window.salvarPedidoFirebase não está disponível — o pedido NÃO foi salvo no banco.");
     }
 }
 
@@ -1908,7 +1912,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBwU6G-T2V_Z3F8H4N9M1L0-X7K5J2W8V1",
+  apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
   authDomain: "josigourmet-af3ff.firebaseapp.com",
   databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
   projectId: "josigourmet-af3ff",
@@ -1927,6 +1931,7 @@ window.salvarPedidoFirebase = async function(pedido) {
     console.log("Pedido salvo com sucesso!");
   } catch (erro) {
     console.error("Erro ao salvar pedido:", erro);
+    throw erro;
   }
 };
 
