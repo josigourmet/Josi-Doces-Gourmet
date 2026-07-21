@@ -15,8 +15,8 @@
     ">
 <meta http-equiv="X-Frame-Options" content="DENY">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
-<title>Painel Admin - Josi Doces Gourmet</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<title>Painel Admin · Josi Doces Gourmet</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
     :root {
         --marrom-escuro: #3e2723;
@@ -28,76 +28,111 @@
         --verde-whats: #25D366;
         --destaque: #c8860a;
         --azul: #009ee3;
+        --vermelho: #c0392b;
     }
-    * { box-sizing: border-box; }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
         font-family: 'Lato', Arial, sans-serif;
         margin: 0;
         background: var(--creme-fundo);
         color: var(--marrom-escuro);
     }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+
+    /* ===== Header ===== */
     header {
         background: linear-gradient(135deg, var(--marrom-escuro), var(--marrom-medio));
         color: #fff;
-        padding: 16px 20px;
+        padding: 14px 18px;
         display: flex;
         align-items: center;
         justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 20;
     }
+    .header-titulo { display: flex; align-items: center; gap: 10px; }
+    .bolinha-status {
+        width: 9px; height: 9px; border-radius: 50%;
+        background: #999; flex-shrink: 0;
+        box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
+        transition: background 0.3s;
+    }
+    .bolinha-status.ok { background: var(--verde-whats); }
+    .bolinha-status.erro { background: #ff6b5e; }
+    .bolinha-status.carregando { background: var(--destaque); animation: pulse 1.4s infinite; }
     header h1 {
         font-family: 'Playfair Display', serif;
-        font-size: 18px;
+        font-size: 17px;
         margin: 0;
+        letter-spacing: 0.2px;
     }
-    .header-botoes {
-        display: flex;
-        gap: 8px;
-        align-items: center;
+    .header-sub {
+        font-size: 10.5px;
+        color: rgba(255,255,255,0.6);
+        margin-top: 1px;
+        letter-spacing: 0.3px;
     }
+    .header-botoes { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
     header button {
-        background: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.14);
         color: #fff;
-        border: 1px solid rgba(255,255,255,0.3);
-        padding: 8px 14px;
+        border: 1px solid rgba(255,255,255,0.25);
+        padding: 7px 12px;
         border-radius: 10px;
         cursor: pointer;
         font-weight: 700;
-        font-size: 13px;
+        font-size: 12px;
         white-space: nowrap;
     }
-    #btnToggleSom.som-desligado {
-        background: rgba(231,76,60,0.35);
-        border-color: rgba(231,76,60,0.6);
-    }
+    header button:active { background: rgba(255,255,255,0.28); }
 
     /* ===== Login ===== */
     #telaLogin {
         max-width: 360px;
         margin: 60px auto;
         background: #fff;
-        padding: 28px 24px;
-        border-radius: 20px;
+        padding: 30px 24px;
+        border-radius: 22px;
         box-shadow: 0 6px 25px rgba(62,39,35,0.15);
         text-align: center;
     }
+    #telaLogin .selo {
+        width: 56px; height: 56px; border-radius: 50%;
+        margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
+        background: linear-gradient(135deg, var(--creme-medio), var(--creme-escuro));
+        font-size: 26px;
+        border: 1px solid var(--creme-escuro);
+    }
     #telaLogin h2 {
         font-family: 'Playfair Display', serif;
-        color: var(--marrom-medio);
-        margin-top: 0;
+        color: var(--marrom-escuro);
+        margin: 0 0 2px;
+        font-size: 21px;
+    }
+    #telaLogin .subtitulo-login {
+        font-size: 12.5px;
+        color: var(--marrom-claro);
+        margin-bottom: 6px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
     }
     #telaLogin input {
         width: 100%;
-        padding: 12px 14px;
+        padding: 13px 14px;
         margin-top: 10px;
-        border-radius: 10px;
+        border-radius: 12px;
         border: 1.5px solid var(--creme-escuro);
         font-size: 15px;
+        font-family: 'Lato', sans-serif;
+        background: var(--creme-fundo);
     }
-    #telaLogin button {
+    #telaLogin input:focus { outline: none; border-color: var(--marrom-claro); }
+    #telaLogin button.btn-principal {
         width: 100%;
         margin-top: 16px;
-        padding: 12px;
-        border-radius: 10px;
+        padding: 13px;
+        border-radius: 12px;
         border: none;
         background: linear-gradient(135deg, var(--marrom-medio), var(--marrom-escuro));
         color: #fff;
@@ -105,23 +140,26 @@
         font-size: 15px;
         cursor: pointer;
     }
+    #telaLogin button.btn-principal:active { filter: brightness(1.1); }
     #erroLogin {
-        color: #e74c3c;
-        font-size: 13px;
+        color: var(--vermelho);
+        background: #fdeeea;
+        border: 1px solid #f5c6bc;
+        border-radius: 10px;
+        padding: 9px 11px;
+        font-size: 12.5px;
         font-weight: 700;
-        margin-top: 10px;
+        margin-top: 12px;
         display: none;
-        word-break: break-all;
+        text-align: left;
+        word-break: break-word;
     }
-    #areaBiometria {
-        display: none;
-        margin-top: 14px;
-    }
+    #areaBiometria { display: none; margin-top: 12px; }
     #btnEntrarBiometria {
         background: linear-gradient(135deg, var(--azul), #0077b3) !important;
         width: 100%;
         padding: 12px;
-        border-radius: 10px;
+        border-radius: 12px;
         border: none;
         color: #fff;
         font-weight: 700;
@@ -130,7 +168,7 @@
     }
     #linkEsqueciSenha {
         display: block;
-        margin-top: 14px;
+        margin-top: 16px;
         font-size: 12.5px;
         color: var(--marrom-claro);
         font-weight: 700;
@@ -149,6 +187,31 @@
     /* ===== Dashboard ===== */
     #telaDashboard { display: none; }
 
+    /* Banner de diagnóstico — só aparece quando há um problema real */
+    #bannerDiagnostico {
+        display: none;
+        margin: 12px 16px 0;
+        max-width: 700px;
+        margin-left: auto; margin-right: auto;
+        background: #fdeeea;
+        border: 1.5px solid #f0a99a;
+        color: #7a2418;
+        border-radius: 14px;
+        padding: 13px 15px;
+        font-size: 13px;
+        line-height: 1.55;
+    }
+    #bannerDiagnostico b { display: block; margin-bottom: 3px; font-size: 13.5px; }
+    #bannerDiagnostico code {
+        display: block;
+        margin-top: 6px;
+        background: rgba(255,255,255,0.6);
+        border-radius: 8px;
+        padding: 6px 8px;
+        font-size: 11px;
+        word-break: break-all;
+    }
+
     .filtros {
         display: flex;
         gap: 8px;
@@ -156,7 +219,9 @@
         padding: 14px 16px;
         background: #fff;
         border-bottom: 1px solid var(--creme-escuro);
+        scrollbar-width: none;
     }
+    .filtros::-webkit-scrollbar { display: none; }
     .filtro-btn {
         white-space: nowrap;
         padding: 8px 14px;
@@ -165,8 +230,9 @@
         background: var(--creme-medio);
         color: var(--marrom-medio);
         font-weight: 700;
-        font-size: 13px;
+        font-size: 12.5px;
         cursor: pointer;
+        flex-shrink: 0;
     }
     .filtro-btn.ativo {
         background: var(--marrom-medio);
@@ -178,77 +244,90 @@
         padding: 10px 16px;
         background: #fff;
         border-bottom: 1px solid var(--creme-escuro);
+        display: flex;
+        gap: 8px;
     }
     .busca-area input {
-        width: 100%;
+        flex: 1;
         padding: 10px 14px;
         border-radius: 10px;
         border: 1.5px solid var(--creme-escuro);
         font-size: 14px;
+        font-family: 'Lato', sans-serif;
+    }
+    .busca-area input:focus { outline: none; border-color: var(--marrom-claro); }
+
+    #contadorResultado {
+        font-size: 11.5px;
+        color: var(--marrom-claro);
+        font-weight: 700;
+        padding: 10px 20px 0;
+        max-width: 700px;
+        margin: 0 auto;
+        letter-spacing: 0.3px;
     }
 
     #listaPedidos {
         max-width: 700px;
         margin: 0 auto;
-        padding: 16px;
+        padding: 14px 16px 40px;
     }
 
+    /* ===== Card "comanda" ===== */
     .pedido-card {
         background: #fff;
-        border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 14px;
+        border-radius: 4px 4px 16px 16px;
+        padding: 18px 16px 16px;
+        margin-bottom: 22px;
         box-shadow: 0 3px 14px rgba(62,39,35,0.08);
-        border: 1px solid rgba(215,204,200,0.5);
+        border: 1px solid rgba(215,204,200,0.6);
+        border-top: none;
+        position: relative;
     }
-    .pedido-card.pedido-novo {
-        border: 2px solid var(--destaque);
-        animation: piscarNovo 1.1s ease-in-out 4;
-    }
-    @keyframes piscarNovo {
-        0%, 100% { box-shadow: 0 3px 14px rgba(62,39,35,0.08); background: #fff; }
-        50% { box-shadow: 0 0 0 8px rgba(200,134,10,0.30); background: #fff8e1; }
+    .pedido-card::before {
+        content: '';
+        position: absolute;
+        top: -1px; left: 0; right: 0; height: 9px;
+        background:
+            linear-gradient(135deg, var(--creme-fundo) 50%, transparent 50%) 0 0,
+            linear-gradient(225deg, var(--creme-fundo) 50%, transparent 50%) 0 0;
+        background-size: 13px 13px;
+        background-repeat: repeat-x;
+        background-position: bottom;
     }
     .pedido-topo {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
         margin-bottom: 8px;
+        gap: 10px;
     }
     .pedido-numero {
-        font-family: 'Playfair Display', serif;
-        font-size: 17px;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 15px;
         color: var(--marrom-escuro);
         font-weight: 700;
+        letter-spacing: 0.3px;
     }
-    .tag-novo-pedido {
-        display: inline-block;
-        background: var(--destaque);
-        color: #fff;
-        font-size: 10px;
-        font-weight: 700;
-        padding: 2px 8px;
-        border-radius: 10px;
-        margin-left: 6px;
-        vertical-align: middle;
-        letter-spacing: 0.4px;
-    }
-    .pedido-data { font-size: 11px; color: var(--marrom-claro); }
+    .pedido-numero span { color: var(--marrom-claro); font-weight: 500; }
+    .pedido-data { font-size: 11px; color: var(--marrom-claro); margin-top: 2px; }
     .status-badge {
         display: inline-block;
-        padding: 4px 10px;
+        padding: 4px 11px;
         border-radius: 12px;
-        font-size: 11px;
+        font-size: 10.5px;
         font-weight: 700;
         color: #fff;
-        margin-top: 4px;
+        white-space: nowrap;
+        letter-spacing: 0.2px;
     }
-    .pedido-info { font-size: 13.5px; line-height: 1.6; margin: 8px 0; }
+    .pedido-info { font-size: 13.5px; line-height: 1.65; margin: 10px 0; }
     .pedido-info b { color: var(--marrom-medio); }
+    .campo-ausente { color: #b25a00; font-style: italic; }
     .pedido-itens {
         background: var(--creme-medio);
         border-radius: 10px;
-        padding: 8px 12px;
+        padding: 9px 12px;
         font-size: 13px;
         margin: 8px 0;
     }
@@ -263,18 +342,20 @@
         display: flex;
         flex-wrap: wrap;
         gap: 6px;
-        margin-top: 12px;
+        margin-top: 13px;
+        padding-top: 12px;
+        border-top: 1px dashed var(--creme-escuro);
     }
     .botoes-status button {
         flex: 1;
-        min-width: 120px;
+        min-width: 118px;
         padding: 9px 8px;
         border-radius: 10px;
         border: 1.5px solid var(--creme-escuro);
         background: var(--creme-medio);
         color: var(--marrom-escuro);
         font-weight: 700;
-        font-size: 12px;
+        font-size: 11.5px;
         cursor: pointer;
     }
     .botoes-status button.ativo {
@@ -297,19 +378,29 @@
     .vazio {
         text-align: center;
         color: var(--marrom-claro);
-        padding: 40px 20px;
+        padding: 50px 24px;
         font-size: 14px;
+        line-height: 1.6;
+        max-width: 340px;
+        margin: 0 auto;
+    }
+    .vazio .vazio-emoji { font-size: 34px; display: block; margin-bottom: 10px; }
+    .vazio b { color: var(--marrom-medio); display: block; margin-bottom: 4px; font-size: 15px; }
+
+    @keyframes pulse {
+        0% { opacity: 1; } 50% { opacity: 0.35; } 100% { opacity: 1; }
     }
 </style>
 </head>
 <body>
 
 <div id="telaLogin">
-    <h2>🍰 Painel Admin</h2>
-    <p style="font-size:13px; color:#777;">Josi Doces Gourmet</p>
+    <div class="selo">🍰</div>
+    <h2>Painel Admin</h2>
+    <p class="subtitulo-login">Josi Doces Gourmet</p>
     <input type="email" id="loginEmail" placeholder="E-mail" autocomplete="username">
     <input type="password" id="loginSenha" placeholder="Senha" autocomplete="current-password">
-    <button onclick="fazerLogin()">Entrar</button>
+    <button class="btn-principal" onclick="fazerLogin()">Entrar</button>
     <div id="erroLogin"></div>
 
     <div id="areaBiometria">
@@ -322,13 +413,20 @@
 
 <div id="telaDashboard">
     <header>
-        <h1>🍰 Pedidos - Josi Doces</h1>
+        <div class="header-titulo">
+            <span class="bolinha-status" id="bolinhaStatus"></span>
+            <div>
+                <h1>🍰 Pedidos</h1>
+                <div class="header-sub" id="headerSub">conectando…</div>
+            </div>
+        </div>
         <div class="header-botoes">
-            <button id="btnToggleSom" onclick="alternarSom()" title="Ligar/desligar som de novo pedido">🔔 Som</button>
-            <button id="btnToggleBiometria" onclick="alternarBiometria()" style="display:none;">🔐 Ativar Digital</button>
+            <button id="btnToggleBiometria" onclick="alternarBiometria()" style="display:none;">🔐 Digital</button>
             <button onclick="fazerLogout()">Sair</button>
         </div>
     </header>
+
+    <div id="bannerDiagnostico"></div>
 
     <div class="filtros" id="filtros">
         <button class="filtro-btn ativo" data-filtro="todos">Todos</button>
@@ -343,6 +441,7 @@
         <input type="text" id="buscaPedido" placeholder="🔍 Buscar por nome ou número do pedido..." oninput="renderizarPedidos()">
     </div>
 
+    <div id="contadorResultado"></div>
     <div id="listaPedidos"></div>
 </div>
 
@@ -366,79 +465,60 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
-let todosOsPedidos = {};
+let pedidosBrutos = {};
 let filtroAtual = 'todos';
 
-/* ===== Notificação de pedido novo (som + destaque + título) ===== */
-const CHAVE_SOM = 'josiAdminSomAtivo';
-let somAtivo = localStorage.getItem(CHAVE_SOM) !== '0';
-let idsConhecidos = null; // null = ainda não carregou nada
-let idsRecemChegados = new Set();
-let tituloOriginal = document.title;
-let intervaloPiscarTitulo = null;
+/* ============================================================
+   NORMALIZAÇÃO DE PEDIDOS
+   O site de pedidos já teve mais de uma versão em produção, e
+   cada uma gravou os campos com nomes um pouco diferentes
+   (ex: "nome" vs "cliente", "enderecoTexto" vs "bairro").
+   Esta função tenta todos os nomes conhecidos, para que pedidos
+   antigos e novos apareçam corretamente no painel.
+   ============================================================ */
+function normalizarPedido(bruto) {
+    if (!bruto || typeof bruto !== 'object') bruto = {};
 
-function tocarBipNotificacao() {
-    if (!somAtivo) return;
-    try {
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        [0, 0.22].forEach(function(atraso) {
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.type = 'sine';
-            const inicio = ctx.currentTime + atraso;
-            osc.frequency.setValueAtTime(880, inicio);
-            gain.gain.setValueAtTime(0.001, inicio);
-            gain.gain.exponentialRampToValueAtTime(0.35, inicio + 0.02);
-            gain.gain.exponentialRampToValueAtTime(0.001, inicio + 0.32);
-            osc.start(inicio);
-            osc.stop(inicio + 0.35);
-        });
-    } catch (e) {
-        console.error("Erro ao tocar som de notificação:", e);
+    const itensRaw = bruto.itens;
+    let itens = [];
+    if (Array.isArray(itensRaw)) itens = itensRaw;
+    else if (itensRaw && typeof itensRaw === 'object') itens = Object.values(itensRaw);
+
+    const bairroCru = bruto.bairro || '';
+    const pareceRetiradaPorTexto = typeof bairroCru === 'string' && /retirar/i.test(bairroCru);
+
+    const totalCalculado = itens.reduce(function (acc, item) {
+        const preco = (item && typeof item.preco === 'number') ? item.preco : 0;
+        const qtd = (item && typeof item.qtd === 'number') ? item.qtd : 1;
+        return acc + preco * qtd;
+    }, 0);
+
+    const criadoEmBruto = bruto.criadoEm || bruto.statusAtualizadoEm || null;
+    let criadoEmMs = null;
+    if (criadoEmBruto) {
+        const t = new Date(criadoEmBruto).getTime();
+        criadoEmMs = isNaN(t) ? null : t;
     }
+
+    return {
+        nome: bruto.nome || bruto.cliente || '',
+        telefone: bruto.telefone || bruto.whatsapp || bruto.fone || '',
+        numeroPedido: bruto.numeroPedido || bruto.numero || '',
+        status: bruto.status || 'recebido',
+        tipoEntrega: bruto.tipoEntrega || (bruto.bairro === 'retirada' || pareceRetiradaPorTexto ? 'retirada' : 'entrega'),
+        enderecoTexto: bruto.enderecoTexto || (typeof bairroCru === 'string' ? bairroCru : ''),
+        endereco: bruto.endereco || '',
+        data: bruto.data || '',
+        hora: bruto.hora || '',
+        pagamento: bruto.pagamento || '',
+        itens: itens,
+        total: (typeof bruto.total === 'number') ? bruto.total : totalCalculado,
+        criadoEmMs: criadoEmMs,
+        criadoEmBruto: criadoEmBruto
+    };
 }
 
-function piscarTituloAba(qtdNovos) {
-    if (intervaloPiscarTitulo) clearInterval(intervaloPiscarTitulo);
-    let ligado = true;
-    intervaloPiscarTitulo = setInterval(function() {
-        document.title = ligado ? `🔔 ${qtdNovos} novo(s) pedido(s)!` : tituloOriginal;
-        ligado = !ligado;
-    }, 1000);
-    setTimeout(function() {
-        clearInterval(intervaloPiscarTitulo);
-        intervaloPiscarTitulo = null;
-        document.title = tituloOriginal;
-    }, 10000);
-}
-
-function notificarNavegador(qtdNovos) {
-    if (!("Notification" in window)) return;
-    if (Notification.permission === "granted") {
-        new Notification("🍰 Josi Doces - Novo pedido!", {
-            body: qtdNovos === 1 ? "Chegou 1 novo pedido." : `Chegaram ${qtdNovos} novos pedidos.`
-        });
-    } else if (Notification.permission !== "denied") {
-        Notification.requestPermission();
-    }
-}
-
-window.alternarSom = function() {
-    somAtivo = !somAtivo;
-    localStorage.setItem(CHAVE_SOM, somAtivo ? '1' : '0');
-    atualizarBotaoSom();
-    if (somAtivo) tocarBipNotificacao();
-};
-
-function atualizarBotaoSom() {
-    const btn = document.getElementById('btnToggleSom');
-    if (!btn) return;
-    btn.textContent = somAtivo ? '🔔 Som Ligado' : '🔕 Som Desligado';
-    btn.classList.toggle('som-desligado', !somAtivo);
-}
-
+/* ===== Biometria (WebAuthn) ===== */
 function _bufParaBase64(buf) {
     return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
 }
@@ -560,12 +640,13 @@ window.alternarBiometria = async function() {
     atualizarUiBiometria();
 };
 
+/* ===== Login / logout / reset ===== */
 window.solicitarResetSenha = function() {
     const email = document.getElementById('loginEmail').value.trim();
     const msgDiv = document.getElementById('msgReset');
 
     if (!email) {
-        msgDiv.style.color = '#e74c3c';
+        msgDiv.style.color = '#c0392b';
         msgDiv.textContent = "Digite seu e-mail no campo acima e clique em \"Esqueci minha senha\" de novo.";
         msgDiv.style.display = 'block';
         return;
@@ -600,43 +681,65 @@ window.fazerLogout = function() {
     signOut(auth);
 };
 
+let pararDeEscutar = null;
+
 onAuthStateChanged(auth, function(usuario) {
     if (usuario) {
         document.getElementById('telaLogin').style.display = 'none';
         document.getElementById('telaDashboard').style.display = 'block';
         verificarSuporteBiometria();
-        atualizarBotaoSom();
-        if ("Notification" in window && Notification.permission === "default") {
-            Notification.requestPermission();
-        }
         escutarPedidos();
     } else {
         document.getElementById('telaLogin').style.display = 'block';
         document.getElementById('telaDashboard').style.display = 'none';
         atualizarUiBiometria();
+        if (pararDeEscutar) { pararDeEscutar(); pararDeEscutar = null; }
     }
 });
 
+/* ===== Status de conexão (diagnóstico visível na tela) ===== */
+function definirStatusConexao(estado, detalhe) {
+    const bolinha = document.getElementById('bolinhaStatus');
+    const sub = document.getElementById('headerSub');
+    const banner = document.getElementById('bannerDiagnostico');
+
+    bolinha.className = 'bolinha-status';
+    banner.style.display = 'none';
+
+    if (estado === 'carregando') {
+        bolinha.classList.add('carregando');
+        sub.textContent = 'conectando…';
+    } else if (estado === 'ok') {
+        bolinha.classList.add('ok');
+        const n = Object.keys(pedidosBrutos || {}).length;
+        sub.textContent = n === 1 ? '1 pedido carregado' : n + ' pedidos carregados';
+    } else if (estado === 'erro') {
+        bolinha.classList.add('erro');
+        sub.textContent = 'erro de conexão';
+        banner.style.display = 'block';
+        banner.innerHTML = '<b>⚠️ Não foi possível carregar os pedidos</b>'
+            + 'O painel conectou, mas o banco de dados recusou a leitura. Isso normalmente é causado pelas Regras (Rules) do Realtime Database no Firebase Console — verifique se a leitura em <code>pedidos</code> está liberada para usuários autenticados.'
+            + '<code>' + (detalhe || 'erro desconhecido') + '</code>';
+    }
+}
+
 function escutarPedidos() {
+    definirStatusConexao('carregando');
     const pedidosRef = ref(db, 'pedidos');
-    onValue(pedidosRef, function(snapshot) {
-        const novosDados = snapshot.val() || {};
-        const idsAgora = Object.keys(novosDados);
-
-        if (idsConhecidos !== null) {
-            const chegaramAgora = idsAgora.filter(function(id) { return !idsConhecidos.has(id); });
-            if (chegaramAgora.length > 0) {
-                idsRecemChegados = new Set(chegaramAgora);
-                tocarBipNotificacao();
-                piscarTituloAba(chegaramAgora.length);
-                notificarNavegador(chegaramAgora.length);
-            }
+    pararDeEscutar = onValue(
+        pedidosRef,
+        function(snapshot) {
+            pedidosBrutos = snapshot.val() || {};
+            definirStatusConexao('ok');
+            window.renderizarPedidos();
+        },
+        function(erro) {
+            console.error("Erro ao ler pedidos do Firebase:", erro);
+            pedidosBrutos = {};
+            definirStatusConexao('erro', erro.code + ': ' + erro.message);
+            window.renderizarPedidos();
         }
-
-        idsConhecidos = new Set(idsAgora);
-        todosOsPedidos = novosDados;
-        window.renderizarPedidos();
-    });
+    );
 }
 
 document.getElementById('filtros').addEventListener('click', function(e) {
@@ -684,8 +787,9 @@ function mensagemParaStatus(status, pedido) {
 }
 
 window.atualizarStatus = function(pedidoId, novoStatus) {
-    const pedido = todosOsPedidos[pedidoId];
-    if (!pedido) return;
+    const bruto = pedidosBrutos[pedidoId];
+    if (!bruto) return;
+    const pedido = normalizarPedido(bruto);
 
     update(ref(db, 'pedidos/' + pedidoId), {
         status: novoStatus,
@@ -699,36 +803,56 @@ window.atualizarStatus = function(pedidoId, novoStatus) {
 };
 
 window.enviarMensagemAvulsa = function(pedidoId) {
-    const pedido = todosOsPedidos[pedidoId];
-    if (!pedido) return;
+    const bruto = pedidosBrutos[pedidoId];
+    if (!bruto) return;
+    const pedido = normalizarPedido(bruto);
     const numeroWhats = formatarTelefoneWhats(pedido.telefone);
     window.open(`https://wa.me/${numeroWhats}`, '_blank');
 };
 
 window.renderizarPedidos = function() {
     const lista = document.getElementById('listaPedidos');
+    const contador = document.getElementById('contadorResultado');
     const busca = (document.getElementById('buscaPedido').value || '').toLowerCase().trim();
 
-    let entradas = Object.entries(todosOsPedidos || {});
-    
+    const totalNoBanco = Object.keys(pedidosBrutos || {}).length;
+
+    let entradas = Object.entries(pedidosBrutos || {}).map(function(entrada) {
+        return [entrada[0], normalizarPedido(entrada[1])];
+    });
+
     entradas.sort(function(a, b) {
-        return (b[1].criadoEm || 0) - (a[1].criadoEm || 0);
+        return (b[1].criadoEmMs || 0) - (a[1].criadoEmMs || 0);
     });
 
     entradas = entradas.filter(function(entrada) {
         const pedido = entrada[1];
-        if (!pedido) return false;
-        const status = pedido.status || 'recebido';
-        if (filtroAtual !== 'todos' && status !== filtroAtual) return false;
+        if (filtroAtual !== 'todos' && pedido.status !== filtroAtual) return false;
         if (busca) {
-            const alvo = `${pedido.nome || ''} ${pedido.numeroPedido || ''}`.toLowerCase();
+            const alvo = `${pedido.nome} ${pedido.numeroPedido}`.toLowerCase();
             if (!alvo.includes(busca)) return false;
         }
         return true;
     });
 
+    contador.textContent = totalNoBanco === 0 ? '' :
+        entradas.length + ' de ' + totalNoBanco + ' pedido' + (totalNoBanco === 1 ? '' : 's');
+
+    if (totalNoBanco === 0) {
+        lista.innerHTML = '';
+        const vazio = document.createElement('div');
+        vazio.className = 'vazio';
+        vazio.innerHTML = '<span class="vazio-emoji">📭</span><b>Nenhum pedido no banco ainda</b>Assim que um cliente finalizar um pedido pelo site, ele aparece aqui automaticamente — não precisa atualizar a página.';
+        lista.appendChild(vazio);
+        return;
+    }
+
     if (entradas.length === 0) {
-        lista.innerHTML = '<div class="vazio">Nenhum pedido encontrado 🍰</div>';
+        lista.innerHTML = '';
+        const vazio = document.createElement('div');
+        vazio.className = 'vazio';
+        vazio.innerHTML = '<span class="vazio-emoji">🔍</span><b>Nada encontrado</b>Nenhum pedido bate com esse filtro ou termo de busca. Tente limpar a busca ou escolher "Todos".';
+        lista.appendChild(vazio);
         return;
     }
 
@@ -738,47 +862,53 @@ window.renderizarPedidos = function() {
         const pedido = entrada[1];
         lista.appendChild(criarCardPedido(id, pedido));
     });
-
-    // Limpa o destaque de "novo" depois de renderizado (evita repetir a animação
-    // toda vez que a lista é redesenhada por outro motivo, tipo busca/filtro).
-    if (idsRecemChegados.size > 0) {
-        setTimeout(function() { idsRecemChegados = new Set(); }, 50);
-    }
 };
 
+function formatarDataHoraCriacao(ms) {
+    if (!ms) return '';
+    try { return new Date(ms).toLocaleString('pt-BR'); } catch(e) { return ''; }
+}
+
 function criarCardPedido(id, pedido) {
-    const status = pedido.status || 'recebido';
-    const info = STATUS_INFO[status] || STATUS_INFO.recebido;
-    const tipoEntrega = pedido.tipoEntrega || 'entrega';
-    const ehNovo = idsRecemChegados.has(id);
+    const info = STATUS_INFO[pedido.status] || STATUS_INFO.recebido;
+    const tipoEntrega = pedido.tipoEntrega;
 
     const card = document.createElement('div');
-    card.className = 'pedido-card' + (ehNovo ? ' pedido-novo' : '');
+    card.className = 'pedido-card';
 
-    const itensHtml = (pedido.itens || []).map(function(item) {
-        return `<div>${item.qtd}x ${item.nome} — R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}</div>`;
-    }).join('');
+    const itensHtml = pedido.itens.length
+        ? pedido.itens.map(function(item) {
+            const nomeItem = (item && item.nome) ? item.nome : 'Item';
+            const qtd = (item && typeof item.qtd === 'number') ? item.qtd : 1;
+            const preco = (item && typeof item.preco === 'number') ? item.preco : 0;
+            return `<div>${qtd}x ${nomeItem} — R$ ${(preco * qtd).toFixed(2).replace('.', ',')}</div>`;
+        }).join('')
+        : '<div class="campo-ausente">Itens não identificados neste pedido</div>';
 
     const enderecoLinha = tipoEntrega === 'retirada'
         ? 'Retirada no local'
-        : (pedido.enderecoTexto || '') + (pedido.endereco ? ' — ' + pedido.endereco : '');
+        : ((pedido.enderecoTexto || '') + (pedido.endereco ? ' — ' + pedido.endereco : '')) || '<span class="campo-ausente">endereço não informado</span>';
+
+    const nomeExibido = pedido.nome || '<span class="campo-ausente">nome não informado</span>';
+    const telExibido = pedido.telefone || '<span class="campo-ausente">sem telefone</span>';
+    const numeroExibido = pedido.numeroPedido || '<span class="campo-ausente">s/n°</span>';
 
     card.innerHTML = `
         <div class="pedido-topo">
             <div>
-                <div class="pedido-numero">#${pedido.numeroPedido || '-'}${ehNovo ? '<span class="tag-novo-pedido">NOVO</span>' : ''}</div>
-                <div class="pedido-data">${pedido.criadoEm ? new Date(pedido.criadoEm).toLocaleString('pt-BR') : ''}</div>
+                <div class="pedido-numero"><span>#</span>${numeroExibido}</div>
+                <div class="pedido-data">${formatarDataHoraCriacao(pedido.criadoEmMs)}</div>
             </div>
             <span class="status-badge" style="background:${info.cor}">${info.label}</span>
         </div>
         <div class="pedido-info">
-            <div>👤 <b>${pedido.nome || ''}</b> — 📱 ${pedido.telefone || ''}</div>
+            <div>👤 <b>${nomeExibido}</b> — 📱 ${telExibido}</div>
             <div>📍 ${enderecoLinha}</div>
-            <div>⏰ ${pedido.data || ''} às ${pedido.hora || ''}</div>
-            <div>💳 ${pedido.pagamento || ''}</div>
+            <div>⏰ ${pedido.data || '—'} às ${pedido.hora || '—'}</div>
+            <div>💳 ${pedido.pagamento || '<span class="campo-ausente">não informado</span>'}</div>
         </div>
         <div class="pedido-itens">${itensHtml}</div>
-        <div class="pedido-total">Total: R$ ${(pedido.total || 0).toFixed(2).replace('.', ',')}</div>
+        <div class="pedido-total">Total: R$ ${pedido.total.toFixed(2).replace('.', ',')}</div>
         <div class="botoes-status" data-id="${id}" data-tipo="${tipoEntrega}"></div>
         <button class="btn-whats-mini" data-acao="conversar" data-id="${id}">💬 Falar no WhatsApp</button>
     `;
@@ -791,7 +921,7 @@ function criarCardPedido(id, pedido) {
     etapas.forEach(function(etapa) {
         const btn = document.createElement('button');
         btn.textContent = etapa[1];
-        if (status === etapa[0]) btn.classList.add('ativo');
+        if (pedido.status === etapa[0]) btn.classList.add('ativo');
         btn.onclick = function() { window.atualizarStatus(id, etapa[0]); };
         botoesDiv.appendChild(btn);
     });
