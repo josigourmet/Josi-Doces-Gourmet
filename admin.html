@@ -107,6 +107,7 @@
         font-weight: 700;
         margin-top: 10px;
         display: none;
+        word-break: break-all;
     }
     #areaBiometria {
         display: none;
@@ -326,7 +327,7 @@ import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/fireb
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBwU6G-T2V_Z3F8H4N9M1L0-X7K5J2W8V1",
+  apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
   authDomain: "josigourmet-af3ff.firebaseapp.com",
   databaseURL: "https://josigourmet-af3ff-default-rtdb.firebaseio.com",
   projectId: "josigourmet-af3ff",
@@ -342,20 +343,6 @@ const auth = getAuth(app);
 
 let todosOsPedidos = {};
 let filtroAtual = 'todos';
-
-/* ===================================================================
-   LOGIN COM DIGITAL / FACE ID (WebAuthn como trava local do aparelho)
-   -------------------------------------------------------------------
-   Importante entender o que isso é e o que NÃO é:
-   - Não existe um cadastro de "biometria" guardado na nuvem/Firebase.
-   - O que acontece é: o leitor de digital/Face ID do PRÓPRIO celular
-     é usado para "desbloquear" um login salvo NESTE aparelho.
-   - O e-mail e a senha ficam guardados no localStorage deste navegador
-     (levemente ofuscados em base64 — não é criptografia forte). Por
-     isso, só ative isso no seu celular pessoal, nunca em aparelho
-     compartilhado ou público.
-   - Cada aparelho precisa ativar essa opção separadamente.
-=================================================================== */
 
 function _bufParaBase64(buf) {
     return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
@@ -424,7 +411,7 @@ async function ativarBiometriaNoAparelho(email, senha) {
         return true;
     } catch (erro) {
         console.error("Erro ao ativar biometria:", erro);
-        alert("Não foi possível ativar a digital neste aparelho. Verifique se ele tem leitor de digital/Face ID configurado.");
+        alert("Não foi possível ativar a digital neste aparelho.");
         return false;
     }
 }
@@ -452,7 +439,7 @@ window.entrarComBiometria = async function() {
         await signInWithEmailAndPassword(auth, dados.email, dados.senha);
     } catch (erro) {
         console.error("Erro na autenticação por digital:", erro);
-        erroDiv.textContent = "Não foi possível entrar com a digital. Use e-mail e senha.";
+        erroDiv.textContent = "Erro biometria: " + erro.code;
         erroDiv.style.display = 'block';
     }
 };
@@ -474,11 +461,9 @@ window.alternarBiometria = async function() {
     if (!senha) return;
 
     const sucesso = await ativarBiometriaNoAparelho(auth.currentUser.email, senha);
-    if (sucesso) alert("Digital ativada neste aparelho! 🎉 Da próxima vez você pode entrar direto pela digital.");
+    if (sucesso) alert("Digital ativada neste aparelho! 🎉");
     atualizarUiBiometria();
 };
-
-/* ===================== Esqueci minha senha ===================== */
 
 window.solicitarResetSenha = function() {
     const email = document.getElementById('loginEmail').value.trim();
@@ -493,17 +478,15 @@ window.solicitarResetSenha = function() {
 
     sendPasswordResetEmail(auth, email).then(function() {
         msgDiv.style.color = '#2e7d32';
-        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha. Confira também a caixa de spam.";
+        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha.";
         msgDiv.style.display = 'block';
     }).catch(function(erro) {
         console.error("Erro ao enviar e-mail de redefinição:", erro);
         msgDiv.style.color = '#2e7d32';
-        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha. Confira também a caixa de spam.";
+        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha.";
         msgDiv.style.display = 'block';
     });
 };
-
-/* ===================== Login / Logout normais ===================== */
 
 window.fazerLogin = function() {
     const email = document.getElementById('loginEmail').value.trim();
@@ -512,7 +495,8 @@ window.fazerLogin = function() {
     erroDiv.style.display = 'none';
 
     signInWithEmailAndPassword(auth, email, senha).catch(function(erro) {
-        erroDiv.textContent = "E-mail ou senha incorretos.";
+        console.error("Erro detalhado do Firebase:", erro.code, erro.message);
+        erroDiv.textContent = "Erro: " + erro.code;
         erroDiv.style.display = 'block';
     });
 };
