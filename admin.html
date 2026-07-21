@@ -596,11 +596,15 @@ window.renderizarPedidos = function() {
     const lista = document.getElementById('listaPedidos');
     const busca = (document.getElementById('buscaPedido').value || '').toLowerCase().trim();
 
-    let entradas = Object.entries(todosOsPedidos);
-    entradas.sort(function(a, b) { return b[0].localeCompare(a[0]); });
+    let entradas = Object.entries(todosOsPedidos || {});
+    
+    entradas.sort(function(a, b) {
+        return (b[1].criadoEm || 0) - (a[1].criadoEm || 0);
+    });
 
     entradas = entradas.filter(function(entrada) {
         const pedido = entrada[1];
+        if (!pedido) return false;
         const status = pedido.status || 'recebido';
         if (filtroAtual !== 'todos' && status !== filtroAtual) return false;
         if (busca) {
