@@ -223,6 +223,7 @@
     }
     .filtros::-webkit-scrollbar { display: none; }
     .filtro-btn {
+        position: relative;
         white-space: nowrap;
         padding: 8px 14px;
         border-radius: 20px;
@@ -239,6 +240,23 @@
         color: #fff;
         border-color: var(--marrom-medio);
     }
+    .filtro-badge {
+        position: absolute;
+        top: -6px; right: -6px;
+        background: var(--vermelho);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        min-width: 17px;
+        height: 17px;
+        border-radius: 9px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 4px;
+        box-shadow: 0 0 0 2px #fff;
+    }
+    .filtro-badge.piscando { animation: pulse 1.6s infinite; }
 
     .busca-area {
         padding: 10px 16px;
@@ -827,7 +845,43 @@ window.enviarMensagemAvulsa = function(pedidoId) {
     window.open(`https://wa.me/${numeroWhats}`, '_blank');
 };
 
+/* ============================================================
+   BADGES DE PENDENTES NAS ABAS
+   Conta quantos pedidos existem em cada status (exceto
+   "finalizado") e exibe uma bolinha vermelha em cima de cada
+   aba de filtro. A aba "Recebidos" pisca, para chamar atenção
+   imediata de um pedido novo chegando.
+   ============================================================ */
+function atualizarBadgesFiltros() {
+    const contagens = { recebido: 0, preparo: 0, saiu_entrega: 0, pronto_retirada: 0, finalizado: 0 };
+    Object.values(pedidosBrutos || {}).forEach(function(bruto) {
+        const pedido = normalizarPedido(bruto);
+        if (contagens.hasOwnProperty(pedido.status)) contagens[pedido.status]++;
+    });
+    const pendentesTotal = contagens.recebido + contagens.preparo + contagens.saiu_entrega + contagens.pronto_retirada;
+
+    document.querySelectorAll('.filtro-btn').forEach(function(btn) {
+        const chave = btn.dataset.filtro;
+        const valor = chave === 'todos' ? pendentesTotal : (contagens[chave] || 0);
+        let badge = btn.querySelector('.filtro-badge');
+
+        if (valor > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'filtro-badge';
+                btn.appendChild(badge);
+            }
+            badge.textContent = valor;
+            badge.classList.toggle('piscando', chave === 'recebido');
+        } else if (badge) {
+            badge.remove();
+        }
+    });
+}
+
 window.renderizarPedidos = function() {
+    atualizarBadgesFiltros();
+
     const lista = document.getElementById('listaPedidos');
     const contador = document.getElementById('contadorResultado');
     const busca = (document.getElementById('buscaPedido').value || '').toLowerCase().trim();
