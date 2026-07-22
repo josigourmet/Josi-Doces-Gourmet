@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -1732,24 +1731,25 @@ function gerarPixReal() {
 function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
 
-function _proximoNumeroPedidoLocal() {
-    let contador = 3500;
-    try {
-        const salvo = localStorage.getItem('josiPedidoContador');
-        if (salvo) contador = parseInt(salvo, 10) || 3500;
-    } catch(e) {}
-    contador += 1;
-    try { localStorage.setItem('josiPedidoContador', String(contador)); } catch(e) {}
-    return contador;
-}
-
-// Número de pedido reservado com antecedência no Firebase (contador único e
-// sequencial para toda a loja). É buscado em segundo plano assim que a
-// página carrega, para já estar pronto quando o cliente clicar em enviar —
-// isso é essencial para o WhatsApp abrir instantaneamente no celular, sem
-// nenhuma espera de rede no momento do clique.
+// Gera o próximo número de pedido de forma sequencial usando o Firebase
+// (contador único e sequencial para toda a loja). É buscado em segundo
+// plano assim que a página carrega, para já estar pronto quando o cliente
+// clicar em enviar — isso é essencial para o WhatsApp abrir instantaneamente
+// no celular, sem nenhuma espera de rede no momento do clique.
 let _numeroPedidoReservado = null;
 let _reservandoNumero = false;
+
+// Fallback usado SOMENTE se a reserva sequencial do Firebase não chegou a
+// tempo (rede lenta ou instável). Diferente de um contador salvo no
+// localStorage — que reinicia em cada celular e causava números repetidos
+// entre clientes diferentes — este método junta o horário exato em
+// milissegundos com um trecho aleatório, então a chance de dois celulares
+// gerarem o mesmo valor é praticamente nula, mesmo sem depender de rede.
+function _proximoNumeroPedidoLocal() {
+    const agora = Date.now().toString(36).toUpperCase();
+    const aleatorio = Math.random().toString(36).slice(2, 6).toUpperCase();
+    return `${agora}-${aleatorio}`;
+}
 
 async function reservarProximoNumeroPedido() {
     if (_reservandoNumero || _numeroPedidoReservado !== null) return;
@@ -1940,7 +1940,7 @@ window.salvarPedidoFirebase = async function(pedido) {
 // Gera o próximo número de pedido de forma sequencial e ÚNICA para toda a
 // loja, usando uma transação atômica no Firebase (o contador fica salvo em
 // "contadores/pedidos" no banco). Isso evita que cada cliente/celular tenha
-// sua própria contagem separada (o que acontecia com o localStorage).
+// sua própria contagem separada.
 window.obterProximoNumeroPedidoFirebase = async function() {
   const contadorRef = ref(db, "contadores/pedidos");
   const resultado = await runTransaction(contadorRef, (valorAtual) => {
@@ -2099,4 +2099,4 @@ async function enviarMensagemIa() {
 }
 </script>
 </body>
-            </html>
+</html>
