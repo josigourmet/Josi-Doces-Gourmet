@@ -1775,24 +1775,41 @@ function montarTextoPedido(numeroPedido) {
     const { subtotal, desconto, total } = _recalcularTotalSeguro(carrinho, frete);
 
     const dataFormatada = data ? new Date(data + "T00:00:00").toLocaleDateString('pt-BR') : '';
+    const agora = new Date();
+    const dataHoraCriacao = `${agora.toLocaleDateString('pt-BR')}, ${agora.toLocaleTimeString('pt-BR')}`;
+    const qtdTotalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
+    const SEPARADOR = '➖➖➖➖➖➖➖➖➖➖➖➖';
 
-    let texto = `🍰 *NOVO PEDIDO - JOSI DOCES* 🍰\n\n`;
-    texto += `*Nº do Pedido:* ${numeroPedido}\n\n`;
-    texto += `*Cliente:* ${nome}\n`;
-    texto += `*Telefone:* ${telefone}\n\n`;
-    texto += `*Itens:*\n`;
+    let texto = `🍰 *NOVO PEDIDO - JOSI DOCES GOURMET* 🍰\n\n`;
+    texto += `📝 *Pedido N°:* #${numeroPedido}\n`;
+    texto += `🕐 *Pedido realizado em:* ${dataHoraCriacao}\n\n`;
+    texto += `${SEPARADOR}\n\n`;
+
+    texto += `👤 *CLIENTE*\n`;
+    texto += `🙍 *Nome:* ${nome}\n`;
+    texto += `📱 *WhatsApp:* ${telefone}\n\n`;
+    texto += `${SEPARADOR}\n\n`;
+
+    texto += `🛒 *ITENS DO PEDIDO*\n`;
     carrinho.forEach(item => {
-        texto += `▪ ${item.qtd}x ${item.nome} - R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n`;
+        texto += `🍰 ${item.qtd}x ${item.nome}\n💵 R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n`;
     });
-    texto += `\n*Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    if (desconto > 0) texto += `*Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
-    texto += `*Frete:* ${frete === 0 ? 'Grátis' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
-    texto += `*Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    texto += `\n${SEPARADOR}\n\n`;
+
+    texto += `📦 *RESUMO DO PEDIDO*\n`;
+    texto += `🧁 *Itens:* ${qtdTotalItens}\n`;
+    texto += `💰 *Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    if (desconto > 0) texto += `🏷️ *Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
+    texto += `🚚 *Frete:* ${frete === 0 ? 'GRÁTIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
+    texto += `💳 *Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    texto += `${SEPARADOR}\n\n`;
+
+    texto += `📍 *ENTREGA*\n`;
     texto += bairroValor === "retirada"
-        ? `*Entrega:* Retirada no local (${ENDERECO_RETIRADA})\n`
-        : `*Entrega:* ${bairroTexto}\n*Endereço:* ${endereco}\n`;
-    texto += `*Data/Hora:* ${dataFormatada} às ${hora}\n`;
-    texto += `*Pagamento:* ${pagamento}\n`;
+        ? `🏠 Retirada no local (${ENDERECO_RETIRADA})\n`
+        : `🚚 ${bairroTexto}\n🏡 *Endereço:* ${endereco}\n`;
+    texto += `📅 *Data/Hora:* ${dataFormatada} às ${hora}\n`;
+    texto += `💳 *Pagamento:* ${pagamento}\n`;
 
     return {
         texto, nome, telefone, subtotal, desconto, frete, total,
