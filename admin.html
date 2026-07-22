@@ -284,6 +284,23 @@
         border-top: none;
         position: relative;
     }
+    .pedido-card.pendente {
+        border-left: 4px solid var(--destaque);
+        box-shadow: 0 3px 16px rgba(200,134,10,0.22);
+    }
+    .selo-pendente {
+        display: inline-block;
+        background: var(--destaque);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        padding: 3px 9px;
+        border-radius: 10px;
+        margin-left: 8px;
+        vertical-align: middle;
+        white-space: nowrap;
+    }
     .pedido-card::before {
         content: '';
         position: absolute;
@@ -874,7 +891,8 @@ function criarCardPedido(id, pedido) {
     const tipoEntrega = pedido.tipoEntrega;
 
     const card = document.createElement('div');
-    card.className = 'pedido-card';
+    const ehPendente = pedido.status !== 'finalizado';
+    card.className = 'pedido-card' + (ehPendente ? ' pendente' : '');
 
     const itensHtml = pedido.itens.length
         ? pedido.itens.map(function(item) {
@@ -896,7 +914,7 @@ function criarCardPedido(id, pedido) {
     card.innerHTML = `
         <div class="pedido-topo">
             <div>
-                <div class="pedido-numero"><span>#</span>${numeroExibido}</div>
+                <div class="pedido-numero"><span>#</span>${numeroExibido}${ehPendente ? '<span class="selo-pendente">PENDENTE</span>' : ''}</div>
                 <div class="pedido-data">${formatarDataHoraCriacao(pedido.criadoEmMs)}</div>
             </div>
             <span class="status-badge" style="background:${info.cor}">${info.label}</span>
