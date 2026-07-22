@@ -1903,7 +1903,10 @@ const db = getDatabase(app);
 window.criarPedidoComNumero = function() {
     const novaRef = push(ref(db, "pedidos"));
     const chave = novaRef.key;
-    const numero = chave.slice(-6).toUpperCase();
+    // Número 100% numérico (sem letras), gerado na hora a partir do
+    // horário do pedido — não precisa de nenhuma resposta de rede
+    // nem de contador sequencial no banco.
+    const numero = Date.now().toString().slice(-6);
     return { chave, numero };
 };
 
