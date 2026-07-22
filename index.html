@@ -903,7 +903,7 @@
         }
     </style>
 </head>
-<body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados(); agendarChatAutomatico(); reservarProximoNumeroPedido();">
+<body onload="mostrarSplashBoasVindas(); carregarBannerDinamico(); carregarDados(); agendarChatAutomatico(); reenviarPedidosPendentes();">
 
 <div id="splashBoasVindas" class="splash-boas-vindas" aria-hidden="true">
     <div class="splash-conteudo">
@@ -1254,17 +1254,6 @@ function _recalcularTotalSeguro(carrinhoLocal, frete) {
     const desconto = subtotal >= 50 ? subtotal * 0.05 : 0;
     return { subtotal, desconto, total: subtotal - desconto + frete };
 }
-
-let _tokenPedido = null;
-function _novoToken() {
-    _tokenPedido = Math.random().toString(36).slice(2) + Date.now().toString(36);
-    return _tokenPedido;
-}
-function _consumirToken(t) {
-    if (t && t === _tokenPedido) { _tokenPedido = null; return true; }
-    return false;
-}
-_novoToken();
 
 const ENDERECO_RETIRADA = "Rua Marechal Floriano, 3197,  Coronel Brito ";
 
@@ -1731,121 +1720,49 @@ function gerarPixReal() {
 function copyPix() { const brcode = document.getElementById("brcode"); brcode.select(); document.execCommand("copy"); alert("Código Pix copiado!"); }
 function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josidocesgoumert"); }
 
-// Gera o próximo número de pedido de forma sequencial usando o Firebase
-// (contador único e sequencial para toda a loja). É buscado em segundo
-// plano assim que a página carrega, para já estar pronto quando o cliente
-// clicar em enviar — isso é essencial para o WhatsApp abrir instantaneamente
-// no celular, sem nenhuma espera de rede no momento do clique.
-let _numeroPedidoReservado = null;
-let _reservandoNumero = false;
+/* ============================================================
+   FILA DE PEDIDOS PENDENTES
+   Se por qualquer motivo a gravação no Firebase falhar (rede
+   instável, regra bloqueando etc.), o pedido NÃO é perdido:
+   ele fica guardado no localStorage e o site tenta salvar de
+   novo sozinho na próxima vez que a página carregar, ou a cada
+   tentativa manual do cliente. Isso resolve o problema de
+   "pedido sumiu e não apareceu no painel".
+   ============================================================ */
+const CHAVE_FILA_PENDENTES = 'pedidosPendentesJosi';
 
-// Fallback usado SOMENTE se a reserva sequencial do Firebase não chegou a
-// tempo (rede lenta ou instável). Diferente de um contador salvo no
-// localStorage — que reinicia em cada celular e causava números repetidos
-// entre clientes diferentes — este método junta o horário exato em
-// milissegundos com um trecho aleatório, então a chance de dois celulares
-// gerarem o mesmo valor é praticamente nula, mesmo sem depender de rede.
-function _proximoNumeroPedidoLocal() {
-    const agora = Date.now().toString(36).toUpperCase();
-    const aleatorio = Math.random().toString(36).slice(2, 6).toUpperCase();
-    return `${agora}-${aleatorio}`;
+function _guardarPedidoPendente(chave, pedido) {
+    const fila = _lsGet(CHAVE_FILA_PENDENTES) || [];
+    fila.push({ chave, pedido });
+    _lsSet(CHAVE_FILA_PENDENTES, fila);
 }
 
-async function reservarProximoNumeroPedido() {
-    if (_reservandoNumero || _numeroPedidoReservado !== null) return;
-    _reservandoNumero = true;
-    for (let tentativa = 0; tentativa < 10; tentativa++) {
-        if (typeof window.obterProximoNumeroPedidoFirebase === 'function') {
-            try {
-                _numeroPedidoReservado = await window.obterProximoNumeroPedidoFirebase();
-            } catch (erro) {
-                console.error("Erro ao reservar número sequencial no Firebase:", erro);
-            }
-            break;
+function _removerDaFilaPendente(chave) {
+    const fila = (_lsGet(CHAVE_FILA_PENDENTES) || []).filter(item => item.chave !== chave);
+    _lsSet(CHAVE_FILA_PENDENTES, fila);
+}
+
+async function reenviarPedidosPendentes() {
+    if (typeof window.salvarPedidoDireto !== 'function') return;
+    const fila = _lsGet(CHAVE_FILA_PENDENTES) || [];
+    for (const item of fila) {
+        try {
+            await window.salvarPedidoDireto(item.chave, item.pedido);
+            _removerDaFilaPendente(item.chave);
+            console.log("Pedido pendente reenviado com sucesso:", item.chave);
+        } catch (erro) {
+            console.error("Ainda não foi possível reenviar o pedido pendente:", item.chave, erro);
         }
-        await new Promise(resolve => setTimeout(resolve, 400));
     }
-    _reservandoNumero = false;
-}
-
-function montarTextoPedido(numeroPedido) {
-    const nome = document.getElementById("nome").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-    const bairroSelect = document.getElementById("bairro");
-    const bairroTexto = bairroSelect.options[bairroSelect.selectedIndex].text;
-    const bairroValor = bairroSelect.value;
-    const endereco = document.getElementById("endereco").value.trim();
-    const data = document.getElementById("dataAgendamento").value;
-    const hora = document.getElementById("horaAgendamento").value;
-    const pagamento = document.getElementById("pagamento").value;
-
-    const subtotal = carrinho.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
-    const desconto = subtotal >= 50 ? subtotal * 0.05 : 0;
-    const frete = (subtotal >= 50 || promoAtiva || bairroValor === "retirada") ? 0 : parseFloat(bairroValor);
-    const total = subtotal - desconto + frete;
-    const qtdTotalItens = carrinho.reduce((acc, item) => acc + item.qtd, 0);
-
-    const agora = new Date();
-    const pad = n => String(n).padStart(2, '0');
-    const dataPedidoFormatada = `${pad(agora.getDate())}/${pad(agora.getMonth() + 1)}/${agora.getFullYear()}, ${pad(agora.getHours())}:${pad(agora.getMinutes())}:${pad(agora.getSeconds())}`;
-
-    const linha = "\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D";
-
-    let texto = "\u{1F370} *NOVO PEDIDO JOSI DOCES GOURMET* \u{1F370}\n\n";
-    texto += `\u{1F4DD} *Pedido N\u00B0:* #${numeroPedido}\n`;
-    texto += `\u{1F550} *Pedido realizado em:* ${dataPedidoFormatada}\n\n`;
-    texto += `${linha}\n\n`;
-
-    texto += "\u{1F464} *CLIENTE*\n";
-    texto += `\u{1F9D1} *Nome:* ${nome}\n`;
-    texto += `\u260E\uFE0F *WhatsApp:* ${telefone}\n\n`;
-    texto += `${linha}\n\n`;
-
-    texto += "\u{1F6D2} *ITENS DO PEDIDO*\n";
-    carrinho.forEach(item => {
-        texto += `\u{1F370} ${item.qtd}x ${item.nome}\n\u{1F4B5} R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n\n`;
-    });
-    texto += `${linha}\n\n`;
-
-    texto += "\u{1F4E6} *RESUMO DO PEDIDO*\n";
-    texto += `\u{1F9C1} *Itens:* ${qtdTotalItens}\n`;
-    texto += `\u{1F4B0} *Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    if (desconto > 0) texto += `\u{1F3F7}\uFE0F *Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
-    texto += `\u{1F69A} *Frete:* ${frete === 0 ? 'GR\u00C1TIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
-    texto += `\u{1F4B5} *TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
-    texto += `${linha}\n\n`;
-
-    texto += "\u{1F69A} *ENTREGA / RETIRADA*\n";
-    if (bairroValor === "retirada") {
-        texto += "\u{1F4CD} *Local:* Vou retirar no local (R$ 0,00)\n";
-        texto += `\u{1F3E0} *Endere\u00E7o de Retirada:* ${ENDERECO_RETIRADA}\n\n`;
-    } else {
-        texto += `\u{1F4CD} *Local:* ${bairroTexto}\n`;
-        texto += `\u{1F3E0} *Endere\u00E7o de Entrega:* ${endereco}\n\n`;
-    }
-    texto += `${linha}\n\n`;
-
-    texto += "\u23F0 *AGENDAMENTO*\n";
-    texto += `\u{1F4C5} *Data:* ${data}\n`;
-    texto += `\u{1F550} *Hor\u00E1rio:* ${hora}\n\n`;
-    texto += `${linha}\n\n`;
-
-    texto += "\u{1F4B3} *PAGAMENTO*\n";
-    texto += `\u{1F4B0} *Forma:* ${pagamento}${(pagamento === 'Pix' && pixGerado) ? ' (PIX já gerado)' : ''}\n\n`;
-
-    texto += "\u23F3 *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n";
-    texto += "\u2764\uFE0F Obrigado pela preferência!";
-
-
-    return { texto, total, nome, telefone, bairroTexto, bairroValor, endereco, data, hora, pagamento, subtotal, desconto, frete, numeroPedido };
 }
 
 // ✅ Abre o WhatsApp IMEDIATAMENTE no clique (sem nenhum await antes do
 // window.open), para funcionar de forma confiável em navegadores de
-// celular. O número do pedido usado aqui já foi reservado no Firebase com
-// antecedência (veja reservarProximoNumeroPedido) — por isso não precisa
-// esperar a rede agora. O pedido em si é salvo no Firebase em segundo
-// plano, sem travar o envio.
+// celular. A "chave" do pedido (usada como número curto) é gerada na
+// hora, localmente, com window.criarPedidoComNumero — sem precisar de
+// nenhuma resposta de rede antes de abrir o WhatsApp. O pedido em si é
+// salvo no Firebase em segundo plano; se falhar, entra na fila de
+// pendentes acima e é reenviado automaticamente depois.
 function finalizarZap() {
     const btnZap = document.getElementById("btnWhatsapp");
     if (btnZap.disabled) return;
@@ -1853,10 +1770,12 @@ function finalizarZap() {
         alert("⚠️ Seu carrinho está vazio! Adicione itens antes de enviar o pedido.");
         return;
     }
+    if (typeof window.criarPedidoComNumero !== 'function') {
+        alert("⚠️ O sistema de pedidos ainda está carregando. Aguarde 2 segundos e tente novamente.");
+        return;
+    }
 
-    const numeroPedido = (_numeroPedidoReservado !== null) ? _numeroPedidoReservado : _proximoNumeroPedidoLocal();
-    _numeroPedidoReservado = null;
-
+    const { chave, numero: numeroPedido } = window.criarPedidoComNumero();
     const resumo = montarTextoPedido(numeroPedido);
 
     const numeroWhatsLoja = "5551985803243";
@@ -1866,39 +1785,39 @@ function finalizarZap() {
     // isso evita o travamento em navegadores de celular.
     window.open(url, '_blank');
 
-    // Já reserva o próximo número em segundo plano, para deixá-lo pronto
-    // caso o cliente (ou outro cliente) finalize outro pedido em seguida.
-    reservarProximoNumeroPedido();
+    const dadosPedido = {
+        nome: resumo.nome,
+        telefone: resumo.telefone,
+        itens: carrinho,
+        subtotal: resumo.subtotal,
+        desconto: resumo.desconto,
+        frete: resumo.frete,
+        total: resumo.total,
+        enderecoTexto: resumo.bairroTexto,
+        endereco: resumo.endereco,
+        numeroPedido: resumo.numeroPedido,
+        data: resumo.data,
+        hora: resumo.hora,
+        pagamento: resumo.pagamento,
+        tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
+        status: 'recebido',
+        statusAtualizadoEm: Date.now(),
+        criadoEm: new Date().toISOString()
+    };
 
     // Salva o pedido no Firebase por trás dos panos, sem atrasar o cliente.
-    if (window.salvarPedidoFirebase) {
-        try {
-            window.salvarPedidoFirebase({
-                nome: resumo.nome,
-                telefone: resumo.telefone,
-                itens: carrinho,
-                subtotal: resumo.subtotal,
-                desconto: resumo.desconto,
-                frete: resumo.frete,
-                total: resumo.total,
-                enderecoTexto: resumo.bairroTexto,
-                endereco: resumo.endereco,
-                numeroPedido: resumo.numeroPedido,
-                data: resumo.data,
-                hora: resumo.hora,
-                pagamento: resumo.pagamento,
-                tipoEntrega: resumo.bairroValor === 'retirada' ? 'retirada' : 'entrega',
-                status: 'recebido',
-                statusAtualizadoEm: Date.now(),
-                criadoEm: new Date().toISOString()
-            }).catch(function(erroSalvar) {
-                console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
+    if (window.salvarPedidoDireto) {
+        window.salvarPedidoDireto(chave, dadosPedido)
+            .then(function() {
+                console.log("Pedido salvo com sucesso:", chave);
+            })
+            .catch(function(erroSalvar) {
+                console.error("Erro ao salvar pedido no Firebase — guardando na fila para reenviar:", erroSalvar);
+                _guardarPedidoPendente(chave, dadosPedido);
             });
-        } catch (erroSalvar) {
-            console.error("Erro ao salvar pedido no Firebase:", erroSalvar);
-        }
     } else {
-        console.error("window.salvarPedidoFirebase não está disponível — o pedido NÃO foi salvo no banco.");
+        console.error("window.salvarPedidoDireto não está disponível — guardando na fila para reenviar.");
+        _guardarPedidoPendente(chave, dadosPedido);
     }
 }
 
@@ -1911,7 +1830,7 @@ function limparCarrinhoCompleto() {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set, runTransaction } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
@@ -1927,29 +1846,25 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-window.salvarPedidoFirebase = async function(pedido) {
-  try {
-    await set(push(ref(db, "pedidos")), pedido);
-    console.log("Pedido salvo com sucesso!");
-  } catch (erro) {
-    console.error("Erro ao salvar pedido:", erro);
-    throw erro;
-  }
+/* ============================================================
+   NUMERAÇÃO DE PEDIDOS — SEM SEQUÊNCIA, SEM ESPERA DE REDE
+   Não precisamos mais de um contador sequencial (que exigia uma
+   transação no banco ANTES de poder enviar o pedido, e podia
+   falhar/demorar). Em vez disso, cada pedido usa a própria
+   chave única que o Firebase já gera localmente com push()
+   — isso não repete NUNCA, mesmo com vários clientes pedindo ao
+   mesmo tempo, e não depende de nenhuma resposta de rede para
+   ficar pronto: o número já existe no instante do clique.
+   ============================================================ */
+window.criarPedidoComNumero = function() {
+    const novaRef = push(ref(db, "pedidos"));
+    const chave = novaRef.key;
+    const numero = chave.slice(-6).toUpperCase();
+    return { chave, numero };
 };
 
-// Gera o próximo número de pedido de forma sequencial e ÚNICA para toda a
-// loja, usando uma transação atômica no Firebase (o contador fica salvo em
-// "contadores/pedidos" no banco). Isso evita que cada cliente/celular tenha
-// sua própria contagem separada.
-window.obterProximoNumeroPedidoFirebase = async function() {
-  const contadorRef = ref(db, "contadores/pedidos");
-  const resultado = await runTransaction(contadorRef, (valorAtual) => {
-    return (typeof valorAtual === "number" ? valorAtual : 3500) + 1;
-  });
-  if (!resultado.committed) {
-    throw new Error("Não foi possível confirmar a transação do contador.");
-  }
-  return resultado.snapshot.val();
+window.salvarPedidoDireto = function(chave, pedido) {
+    return set(ref(db, "pedidos/" + chave), pedido);
 };
 </script>
 
