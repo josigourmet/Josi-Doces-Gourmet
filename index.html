@@ -952,8 +952,8 @@
         <h2>⚠️ Horários de Funcionamento</h2>
         <p>Confira nossos horários para pedidos e agendamentos:</p>
         <ul style="text-align: left; font-size: 14px; color: #555;">
-            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos para entrega/retirada das 08h às 17h.</li>
-            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos para entrega/retirada das 08h às 17h.</li>
+            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos para entrega/retirada das 10h às 23h.</li>
+            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos para entrega/retirada das 10h às 17h.</li>
             <li>⏰ <b>Atenção:</b> Agendamentos fora desses horários serão validados em horário comercial .</li>
         </ul>
         <a href="https://wa.me/5551985803243?text=Olá Josi! Tenho uma dúvida sobre agendamentos." target="_blank" class="btn-duvida">💬 Dúvidas no WhatsApp</a>
@@ -1756,6 +1756,50 @@ async function reenviarPedidosPendentes() {
     }
 }
 
+/* ============================================================
+   MONTAGEM DO TEXTO DO PEDIDO (usado pelo botão do WhatsApp)
+   ============================================================ */
+function montarTextoPedido(numeroPedido) {
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const bairroSelect = document.getElementById("bairro");
+    const bairroValor = bairroSelect.value;
+    const bairroTexto = bairroSelect.options[bairroSelect.selectedIndex].text;
+    const endereco = document.getElementById("endereco").value.trim();
+    const data = document.getElementById("dataAgendamento").value;
+    const hora = document.getElementById("horaAgendamento").value;
+    const pagamento = document.getElementById("pagamento").value;
+
+    const subtotalBruto = carrinho.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+    const frete = (subtotalBruto >= 50 || promoAtiva || bairroValor === "retirada") ? 0 : parseFloat(bairroValor);
+    const { subtotal, desconto, total } = _recalcularTotalSeguro(carrinho, frete);
+
+    const dataFormatada = data ? new Date(data + "T00:00:00").toLocaleDateString('pt-BR') : '';
+
+    let texto = `🍰 *NOVO PEDIDO - JOSI DOCES* 🍰\n\n`;
+    texto += `*Nº do Pedido:* ${numeroPedido}\n\n`;
+    texto += `*Cliente:* ${nome}\n`;
+    texto += `*Telefone:* ${telefone}\n\n`;
+    texto += `*Itens:*\n`;
+    carrinho.forEach(item => {
+        texto += `▪ ${item.qtd}x ${item.nome} - R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n`;
+    });
+    texto += `\n*Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    if (desconto > 0) texto += `*Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
+    texto += `*Frete:* ${frete === 0 ? 'Grátis' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
+    texto += `*Total:* R$ ${total.toFixed(2).replace('.', ',')}\n\n`;
+    texto += bairroValor === "retirada"
+        ? `*Entrega:* Retirada no local (${ENDERECO_RETIRADA})\n`
+        : `*Entrega:* ${bairroTexto}\n*Endereço:* ${endereco}\n`;
+    texto += `*Data/Hora:* ${dataFormatada} às ${hora}\n`;
+    texto += `*Pagamento:* ${pagamento}\n`;
+
+    return {
+        texto, nome, telefone, subtotal, desconto, frete, total,
+        bairroTexto, endereco, numeroPedido, data, hora, pagamento, bairroValor
+    };
+}
+
 // ✅ Abre o WhatsApp IMEDIATAMENTE no clique (sem nenhum await antes do
 // window.open), para funcionar de forma confiável em navegadores de
 // celular. A "chave" do pedido (usada como número curto) é gerada na
@@ -1920,7 +1964,7 @@ Nossos produtos e preços oficiais listados no site são:
 
 Regras Importantes da Loja:
 - Oferecemos Frete Grátis + 5% de desconto automático para qualquer compra a partir de R$ 50,00.
-- Atendimento e Entregas: Segunda a Sexta das 08h às 23h. Sábados, Domingos e Feriados das 08h às 17h.
+- Atendimento e Entregas: Segunda a Sexta das 10h às 23h. Sábados, Domingos e Feriados das 10h às 17h.
 - Endereço físico para retirada no local: Rua Marechal Floriano, 3197, bairro Coronel Brito.
 - O prazo estimado para o preparo e entrega/retirada após a confirmação do pedido é de 40 a 60 minutos (solicitamos agendamento com pelo menos 1 hora de antecedência no site).
 
