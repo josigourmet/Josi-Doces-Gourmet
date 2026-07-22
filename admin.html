@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -344,8 +345,10 @@ function iniciarEscuta(){
     if (typeof window.renderizar === 'function') window.renderizar();
   }, (erro) => {
     console.error('Erro Firebase:', erro);
-    document.getElementById('statusConexao').textContent = '🔴 Sem conexão';
-    document.getElementById('statusConexao').className = 'offline';
+    const elStatus = document.getElementById('statusConexao');
+    elStatus.textContent = '🔴 Sem conexão — ' + (erro.code || erro.message || 'erro desconhecido');
+    elStatus.className = 'offline';
+    elStatus.title = erro.message || '';
   });
 }
 window.iniciarEscutaPedidos = iniciarEscuta;
@@ -559,9 +562,12 @@ function telefoneParaWhats(telefone){
     return null;
 }
 
-function tempoDecorrido(timestampMs){
-    if (!timestampMs) return '';
-    const diffMin = Math.floor((Date.now() - timestampMs) / 60000);
+function tempoDecorrido(criadoEm){
+    if (!criadoEm) return '';
+    const momento = new Date(criadoEm).getTime();
+    if (isNaN(momento)) return '';
+    const diffMin = Math.floor((Date.now() - momento) / 60000);
+    if (diffMin < 0) return 'agora mesmo';
     if (diffMin < 1) return 'agora mesmo';
     if (diffMin < 60) return `há ${diffMin} min`;
     const h = Math.floor(diffMin / 60);
