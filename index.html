@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -1788,52 +1789,53 @@ function montarTextoPedido(numeroPedido) {
     const pad = n => String(n).padStart(2, '0');
     const dataPedidoFormatada = `${pad(agora.getDate())}/${pad(agora.getMonth() + 1)}/${agora.getFullYear()}, ${pad(agora.getHours())}:${pad(agora.getMinutes())}:${pad(agora.getSeconds())}`;
 
-    const linha = "-----------------------------";
+    const linha = "\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D\u002D";
 
-    let texto = "🍰 *NOVO PEDIDO JOSI DOCES GOURMET* 🍰\n\n";
-    texto += `📝 *Pedido N°:* #${numeroPedido}\n`;
-    texto += `🕐 *Pedido realizado em:* ${dataPedidoFormatada}\n\n`;
+    let texto = "\u{1F370} *NOVO PEDIDO JOSI DOCES GOURMET* \u{1F370}\n\n";
+    texto += `\u{1F4DD} *Pedido N\u00B0:* #${numeroPedido}\n`;
+    texto += `\u{1F550} *Pedido realizado em:* ${dataPedidoFormatada}\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "👤 *CLIENTE*\n";
-    texto += `🧑 *Nome:* ${nome}\n`;
-    texto += `☎️ *WhatsApp:* ${telefone}\n\n`;
+    texto += "\u{1F464} *CLIENTE*\n";
+    texto += `\u{1F9D1} *Nome:* ${nome}\n`;
+    texto += `\u260E\uFE0F *WhatsApp:* ${telefone}\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "🛒 *ITENS DO PEDIDO*\n";
+    texto += "\u{1F6D2} *ITENS DO PEDIDO*\n";
     carrinho.forEach(item => {
-        texto += `🍰 ${item.qtd}x ${item.nome}\n💵 R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n\n`;
+        texto += `\u{1F370} ${item.qtd}x ${item.nome}\n\u{1F4B5} R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n\n`;
     });
     texto += `${linha}\n\n`;
 
-    texto += "📦 *RESUMO DO PEDIDO*\n";
-    texto += `🧁 *Itens:* ${qtdTotalItens}\n`;
-    texto += `💰 *Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
-    if (desconto > 0) texto += `🏷️ *Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
-    texto += `🚚 *Frete:* ${frete === 0 ? 'GRÁTIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
-    texto += `💵 *TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
+    texto += "\u{1F4E6} *RESUMO DO PEDIDO*\n";
+    texto += `\u{1F9C1} *Itens:* ${qtdTotalItens}\n`;
+    texto += `\u{1F4B0} *Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}\n`;
+    if (desconto > 0) texto += `\u{1F3F7}\uFE0F *Desconto (5%):* -R$ ${desconto.toFixed(2).replace('.', ',')}\n`;
+    texto += `\u{1F69A} *Frete:* ${frete === 0 ? 'GR\u00C1TIS' : 'R$ ' + frete.toFixed(2).replace('.', ',')}\n`;
+    texto += `\u{1F4B5} *TOTAL: R$ ${total.toFixed(2).replace('.', ',')}*\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "🚚 *ENTREGA / RETIRADA*\n";
+    texto += "\u{1F69A} *ENTREGA / RETIRADA*\n";
     if (bairroValor === "retirada") {
-        texto += "📍 *Local:* Vou retirar no local (R$ 0,00)\n";
-        texto += `🏠 *Endereço de Retirada:* ${ENDERECO_RETIRADA}\n\n`;
+        texto += "\u{1F4CD} *Local:* Vou retirar no local (R$ 0,00)\n";
+        texto += `\u{1F3E0} *Endere\u00E7o de Retirada:* ${ENDERECO_RETIRADA}\n\n`;
     } else {
-        texto += `📍 *Local:* ${bairroTexto}\n`;
-        texto += `🏠 *Endereço de Entrega:* ${endereco}\n\n`;
+        texto += `\u{1F4CD} *Local:* ${bairroTexto}\n`;
+        texto += `\u{1F3E0} *Endere\u00E7o de Entrega:* ${endereco}\n\n`;
     }
     texto += `${linha}\n\n`;
 
-    texto += "⏰ *AGENDAMENTO*\n";
-    texto += `📅 *Data:* ${data}\n`;
-    texto += `🕐 *Horário:* ${hora}\n\n`;
+    texto += "\u23F0 *AGENDAMENTO*\n";
+    texto += `\u{1F4C5} *Data:* ${data}\n`;
+    texto += `\u{1F550} *Hor\u00E1rio:* ${hora}\n\n`;
     texto += `${linha}\n\n`;
 
-    texto += "💳 *PAGAMENTO*\n";
-    texto += `💰 *Forma:* ${pagamento}${(pagamento === 'Pix' && pixGerado) ? ' (PIX já gerado)' : ''}\n\n`;
+    texto += "\u{1F4B3} *PAGAMENTO*\n";
+    texto += `\u{1F4B0} *Forma:* ${pagamento}${(pagamento === 'Pix' && pixGerado) ? ' (PIX já gerado)' : ''}\n\n`;
 
-    texto += "⏳ *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n";
-    texto += "❤️ Obrigado pela preferência!";
+    texto += "\u23F3 *Aviso:* O prazo estimado para preparo e entrega dos pedidos é de *40 a 60 minutos*.\n\n";
+    texto += "\u2764\uFE0F Obrigado pela preferência!";
+
 
     return { texto, total, nome, telefone, bairroTexto, bairroValor, endereco, data, hora, pagamento, subtotal, desconto, frete, numeroPedido };
 }
