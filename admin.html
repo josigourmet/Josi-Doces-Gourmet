@@ -3,487 +3,303 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy"
-    content="
-        default-src 'self';
-        script-src  'self' 'unsafe-inline' https://www.gstatic.com;
-        style-src   'self' 'unsafe-inline' https://fonts.googleapis.com;
-        font-src    https://fonts.gstatic.com;
-        img-src     'self' data:;
-        connect-src 'self' https://*.firebaseio.com wss://*.firebaseio.com https://*.googleapis.com;
-        frame-ancestors 'none';
-    ">
-<meta http-equiv="X-Frame-Options" content="DENY">
-<meta http-equiv="X-Content-Type-Options" content="nosniff">
-<title>Painel Admin · Josi Doces Gourmet</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<title>Painel Josi Doces — Pedidos</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-    :root {
-        --marrom-escuro: #3e2723;
-        --marrom-medio: #5d4037;
-        --marrom-claro: #8d6e63;
-        --creme-escuro: #d7ccc8;
-        --creme-medio: #efebe9;
-        --creme-fundo: #fdf5e6;
-        --verde-whats: #25D366;
-        --destaque: #c8860a;
-        --azul: #009ee3;
-        --vermelho: #c0392b;
-    }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body {
-        font-family: 'Lato', Arial, sans-serif;
-        margin: 0;
-        background: var(--creme-fundo);
-        color: var(--marrom-escuro);
-    }
-    .mono { font-family: 'JetBrains Mono', monospace; }
+:root{
+  --marrom-escuro:#3e2723;
+  --marrom-medio:#5d4037;
+  --marrom-claro:#8d6e63;
+  --creme-escuro:#d7ccc8;
+  --creme-medio:#efebe9;
+  --creme-fundo:#fdf5e6;
+  --destaque:#c8860a;
+  --verde:#25D366;
+  --azul:#0088c7;
+  --vermelho:#d64545;
+  --roxo:#7c5cbf;
+  --sombra:0 4px 20px rgba(62,39,35,.12);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:'Lato',sans-serif;background:var(--creme-fundo);color:var(--marrom-escuro);
+}
 
-    /* ===== Header ===== */
-    header {
-        background: linear-gradient(135deg, var(--marrom-escuro), var(--marrom-medio));
-        color: #fff;
-        padding: 14px 18px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        position: sticky;
-        top: 0;
-        z-index: 20;
-    }
-    .header-titulo { display: flex; align-items: center; gap: 10px; }
-    .bolinha-status {
-        width: 9px; height: 9px; border-radius: 50%;
-        background: #999; flex-shrink: 0;
-        box-shadow: 0 0 0 3px rgba(255,255,255,0.08);
-        transition: background 0.3s;
-    }
-    .bolinha-status.ok { background: var(--verde-whats); }
-    .bolinha-status.erro { background: #ff6b5e; }
-    .bolinha-status.carregando { background: var(--destaque); animation: pulse 1.4s infinite; }
-    header h1 {
-        font-family: 'Playfair Display', serif;
-        font-size: 17px;
-        margin: 0;
-        letter-spacing: 0.2px;
-    }
-    .header-sub {
-        font-size: 10.5px;
-        color: rgba(255,255,255,0.6);
-        margin-top: 1px;
-        letter-spacing: 0.3px;
-    }
-    .header-botoes { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
-    header button {
-        background: rgba(255,255,255,0.14);
-        color: #fff;
-        border: 1px solid rgba(255,255,255,0.25);
-        padding: 7px 12px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-weight: 700;
-        font-size: 12px;
-        white-space: nowrap;
-    }
-    header button:active { background: rgba(255,255,255,0.28); }
+/* ---------- LOGIN ---------- */
+#telaLogin{
+  position:fixed;inset:0;z-index:5000;
+  background:linear-gradient(155deg,var(--marrom-escuro),var(--marrom-medio) 60%,var(--marrom-claro));
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.login-box{
+  background:#fff;border-radius:22px;padding:34px 28px;max-width:340px;width:100%;
+  text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.35);
+}
+.login-box h1{font-family:'Playfair Display',serif;font-size:22px;margin:6px 0 4px;color:var(--marrom-escuro)}
+.login-box p{font-size:13px;color:var(--marrom-claro);margin:0 0 18px}
+.login-box input{
+  width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--creme-escuro);
+  font-size:16px;letter-spacing:3px;text-align:center;margin-bottom:12px;
+}
+.login-box button{
+  width:100%;padding:13px;border:none;border-radius:12px;background:linear-gradient(135deg,var(--marrom-medio),var(--marrom-escuro));
+  color:#fff;font-weight:700;font-size:15px;cursor:pointer;
+}
+.login-erro{color:var(--vermelho);font-size:12px;font-weight:700;height:16px;margin-top:8px}
 
-    /* ===== Login ===== */
-    #telaLogin {
-        max-width: 360px;
-        margin: 60px auto;
-        background: #fff;
-        padding: 30px 24px;
-        border-radius: 22px;
-        box-shadow: 0 6px 25px rgba(62,39,35,0.15);
-        text-align: center;
-    }
-    #telaLogin .selo {
-        width: 56px; height: 56px; border-radius: 50%;
-        margin: 0 auto 14px; display: flex; align-items: center; justify-content: center;
-        background: linear-gradient(135deg, var(--creme-medio), var(--creme-escuro));
-        font-size: 26px;
-        border: 1px solid var(--creme-escuro);
-    }
-    #telaLogin h2 {
-        font-family: 'Playfair Display', serif;
-        color: var(--marrom-escuro);
-        margin: 0 0 2px;
-        font-size: 21px;
-    }
-    #telaLogin .subtitulo-login {
-        font-size: 12.5px;
-        color: var(--marrom-claro);
-        margin-bottom: 6px;
-        font-weight: 700;
-        letter-spacing: 0.3px;
-    }
-    #telaLogin input {
-        width: 100%;
-        padding: 13px 14px;
-        margin-top: 10px;
-        border-radius: 12px;
-        border: 1.5px solid var(--creme-escuro);
-        font-size: 15px;
-        font-family: 'Lato', sans-serif;
-        background: var(--creme-fundo);
-    }
-    #telaLogin input:focus { outline: none; border-color: var(--marrom-claro); }
-    #telaLogin button.btn-principal {
-        width: 100%;
-        margin-top: 16px;
-        padding: 13px;
-        border-radius: 12px;
-        border: none;
-        background: linear-gradient(135deg, var(--marrom-medio), var(--marrom-escuro));
-        color: #fff;
-        font-weight: 700;
-        font-size: 15px;
-        cursor: pointer;
-    }
-    #telaLogin button.btn-principal:active { filter: brightness(1.1); }
-    #erroLogin {
-        color: var(--vermelho);
-        background: #fdeeea;
-        border: 1px solid #f5c6bc;
-        border-radius: 10px;
-        padding: 9px 11px;
-        font-size: 12.5px;
-        font-weight: 700;
-        margin-top: 12px;
-        display: none;
-        text-align: left;
-        word-break: break-word;
-    }
-    #areaBiometria { display: none; margin-top: 12px; }
-    #btnEntrarBiometria {
-        background: linear-gradient(135deg, var(--azul), #0077b3) !important;
-        width: 100%;
-        padding: 12px;
-        border-radius: 12px;
-        border: none;
-        color: #fff;
-        font-weight: 700;
-        font-size: 14px;
-        cursor: pointer;
-    }
-    #linkEsqueciSenha {
-        display: block;
-        margin-top: 16px;
-        font-size: 12.5px;
-        color: var(--marrom-claro);
-        font-weight: 700;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    #linkEsqueciSenha:hover { text-decoration: underline; }
-    #msgReset {
-        font-size: 12.5px;
-        margin-top: 10px;
-        display: none;
-        font-weight: 700;
-        line-height: 1.5;
-    }
+.btn-biometria{
+  width:100%;padding:15px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--destaque),#a06810);
+  color:#fff;font-weight:700;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-bottom:14px;box-shadow:0 6px 18px rgba(200,134,10,.35);
+}
+.btn-biometria i{font-size:19px}
+.btn-biometria:active{transform:scale(.97)}
+.separador-login{
+  display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--marrom-claro);font-size:11px;font-weight:700;text-transform:uppercase;
+}
+.separador-login::before,.separador-login::after{content:'';flex:1;height:1px;background:var(--creme-escuro)}
+.link-usar-pin{
+  background:none;border:none;color:var(--marrom-claro);font-size:12.5px;font-weight:700;
+  text-decoration:underline;cursor:pointer;margin-top:8px;padding:6px;width:auto;
+}
+.aviso-cadastrar-digital{
+  background:linear-gradient(135deg,#fff8e1,#fff3cd);border:1.5px dashed var(--destaque);
+  border-radius:14px;padding:14px;margin-top:16px;text-align:left;
+}
+.aviso-cadastrar-digital p{margin:0 0 10px;font-size:12.5px;color:#7a5800;font-weight:600;text-align:left}
+.btn-cadastrar-digital{
+  width:100%;padding:11px;border:none;border-radius:10px;background:linear-gradient(135deg,var(--marrom-medio),var(--marrom-escuro));
+  color:#fff;font-weight:700;font-size:13px;cursor:pointer;
+}
+.btn-agora-nao{
+  width:100%;padding:9px;border:none;border-radius:10px;background:transparent;
+  color:var(--marrom-claro);font-weight:700;font-size:12px;cursor:pointer;margin-top:4px;
+}
 
-    /* ===== Dashboard ===== */
-    #telaDashboard { display: none; }
+/* ---------- HEADER ---------- */
+header{
+  background:linear-gradient(155deg,var(--marrom-escuro),var(--marrom-medio) 65%,var(--marrom-claro));
+  color:#fff;padding:18px 16px;position:sticky;top:0;z-index:200;box-shadow:var(--sombra);
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;gap:10px;max-width:1100px;margin:0 auto}
+.header-titulo{display:flex;align-items:center;gap:10px}
+.header-titulo h1{font-family:'Playfair Display',serif;font-size:19px;margin:0}
+.header-titulo span{font-size:11px;opacity:.75;display:block}
+.header-acoes{display:flex;align-items:center;gap:10px}
+#statusConexao{font-size:11px;font-weight:700;padding:5px 10px;border-radius:20px;background:rgba(255,255,255,.12)}
+#statusConexao.online{background:rgba(37,211,102,.25)}
+#statusConexao.offline{background:rgba(214,69,69,.35)}
+.btn-som,.btn-sair{
+  background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);color:#fff;
+  width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:14px;
+  display:flex;align-items:center;justify-content:center;
+}
 
-    /* Banner de diagnóstico — só aparece quando há um problema real */
-    #bannerDiagnostico {
-        display: none;
-        margin: 12px 16px 0;
-        max-width: 700px;
-        margin-left: auto; margin-right: auto;
-        background: #fdeeea;
-        border: 1.5px solid #f0a99a;
-        color: #7a2418;
-        border-radius: 14px;
-        padding: 13px 15px;
-        font-size: 13px;
-        line-height: 1.55;
-    }
-    #bannerDiagnostico b { display: block; margin-bottom: 3px; font-size: 13.5px; }
-    #bannerDiagnostico code {
-        display: block;
-        margin-top: 6px;
-        background: rgba(255,255,255,0.6);
-        border-radius: 8px;
-        padding: 6px 8px;
-        font-size: 11px;
-        word-break: break-all;
-    }
+.filtros-wrap{max-width:1100px;margin:14px auto 0;padding:0 16px}
+.busca{
+  width:100%;padding:11px 14px;border-radius:12px;border:none;font-size:14px;
+  background:rgba(255,255,255,.15);color:#fff;
+}
+.busca::placeholder{color:rgba(255,255,255,.65)}
+.abas{display:flex;gap:8px;overflow-x:auto;margin-top:12px;padding-bottom:14px;scrollbar-width:none}
+.abas::-webkit-scrollbar{display:none}
+.aba{
+  flex-shrink:0;padding:8px 14px;border-radius:20px;background:rgba(255,255,255,.1);
+  color:rgba(255,255,255,.85);font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;
+  border:1.5px solid transparent;transition:.2s;
+}
+.aba .contagem{
+  display:inline-block;margin-left:6px;background:rgba(255,255,255,.25);border-radius:10px;
+  padding:1px 7px;font-size:11px;
+}
+.aba.ativa{background:#fff;color:var(--marrom-escuro);border-color:#fff}
+.aba.ativa .contagem{background:var(--destaque);color:#fff}
 
-    .filtros {
-        display: flex;
-        gap: 8px;
-        overflow-x: auto;
-        padding: 14px 16px;
-        background: #fff;
-        border-bottom: 1px solid var(--creme-escuro);
-        scrollbar-width: none;
-    }
-    .filtros::-webkit-scrollbar { display: none; }
-    .filtro-btn {
-        position: relative;
-        white-space: nowrap;
-        padding: 8px 14px;
-        border-radius: 20px;
-        border: 1.5px solid var(--creme-escuro);
-        background: var(--creme-medio);
-        color: var(--marrom-medio);
-        font-weight: 700;
-        font-size: 12.5px;
-        cursor: pointer;
-        flex-shrink: 0;
-    }
-    .filtro-btn.ativo {
-        background: var(--marrom-medio);
-        color: #fff;
-        border-color: var(--marrom-medio);
-    }
-    .filtro-badge {
-        position: absolute;
-        top: -6px; right: -6px;
-        background: var(--vermelho);
-        color: #fff;
-        font-size: 10px;
-        font-weight: 700;
-        min-width: 17px;
-        height: 17px;
-        border-radius: 9px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 4px;
-        box-shadow: 0 0 0 2px #fff;
-    }
-    .filtro-badge.piscando { animation: pulse 1.6s infinite; }
+/* ---------- LISTA ---------- */
+.container{max-width:1100px;margin:18px auto;padding:0 16px 60px}
+.grid-pedidos{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.vazio{
+  text-align:center;padding:60px 20px;color:var(--marrom-claro);
+}
+.vazio i{font-size:38px;opacity:.4;margin-bottom:10px;display:block}
 
-    .busca-area {
-        padding: 10px 16px;
-        background: #fff;
-        border-bottom: 1px solid var(--creme-escuro);
-        display: flex;
-        gap: 8px;
-    }
-    .busca-area input {
-        flex: 1;
-        padding: 10px 14px;
-        border-radius: 10px;
-        border: 1.5px solid var(--creme-escuro);
-        font-size: 14px;
-        font-family: 'Lato', sans-serif;
-    }
-    .busca-area input:focus { outline: none; border-color: var(--marrom-claro); }
+.pedido-card{
+  background:#fff;border-radius:18px;box-shadow:var(--sombra);border:1px solid rgba(215,204,200,.5);
+  overflow:hidden;position:relative;animation:entrar .3s ease;
+}
+@keyframes entrar{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.pedido-card.novo{border:2px solid var(--destaque);box-shadow:0 0 0 4px rgba(200,134,10,.15),var(--sombra)}
+.pedido-faixa{height:6px;width:100%}
+.pedido-head{padding:14px 16px 10px;display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.pedido-num{font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:var(--marrom-escuro)}
+.pedido-hora{font-size:11px;color:var(--marrom-claro);font-weight:700}
+.badge-status{
+  font-size:10.5px;font-weight:800;padding:5px 10px;border-radius:20px;color:#fff;
+  text-transform:uppercase;letter-spacing:.3px;white-space:nowrap;
+}
+.pedido-corpo{padding:0 16px 8px;font-size:13.5px}
+.linha-info{display:flex;gap:8px;margin-bottom:6px;line-height:1.4}
+.linha-info i{width:16px;color:var(--marrom-claro);margin-top:2px}
+.linha-info b{color:var(--marrom-escuro)}
+.itens-lista{
+  background:var(--creme-medio);border-radius:12px;padding:10px 12px;margin:10px 0;font-size:13px;
+}
+.itens-lista .item-linha{display:flex;justify-content:space-between;padding:3px 0}
+.itens-lista .item-linha span:first-child{max-width:70%}
+.total-linha{
+  display:flex;justify-content:space-between;font-weight:800;font-size:15px;padding-top:10px;
+  border-top:1.5px dashed var(--creme-escuro);margin-top:4px;color:var(--marrom-escuro);
+}
+.total-linha b{color:var(--destaque)}
+.tag-pagamento{
+  display:inline-block;font-size:11px;font-weight:700;background:var(--creme-medio);
+  padding:3px 9px;border-radius:10px;color:var(--marrom-medio);margin-top:4px;
+}
+.pedido-acoes{padding:12px 16px 16px;display:flex;flex-direction:column;gap:8px}
+.linha-btns{display:flex;gap:8px}
+.btn-acao{
+  flex:1;border:none;padding:11px 8px;border-radius:11px;font-weight:700;font-size:12.5px;
+  cursor:pointer;color:#fff;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.btn-acao:active{transform:scale(.96)}
+.btn-avancar{background:linear-gradient(135deg,var(--verde),#1da851)}
+.btn-rejeitar{background:linear-gradient(135deg,var(--vermelho),#a83232)}
+.btn-whats{background:linear-gradient(135deg,#128c4a,#0e6b38)}
+.btn-secundario{background:linear-gradient(135deg,var(--marrom-claro),var(--marrom-medio))}
+.motivo-rejeicao{
+  margin-top:6px;font-size:12px;font-weight:700;color:var(--vermelho);
+  background:#fdecea;padding:8px 10px;border-radius:10px;border:1px dashed var(--vermelho);
+}
+.historico-mini{font-size:10.5px;color:var(--marrom-claro);margin-top:6px;font-weight:600}
 
-    #contadorResultado {
-        font-size: 11.5px;
-        color: var(--marrom-claro);
-        font-weight: 700;
-        padding: 10px 20px 0;
-        max-width: 700px;
-        margin: 0 auto;
-        letter-spacing: 0.3px;
-    }
+/* ---------- MODAL REJEITAR ---------- */
+.modal{
+  display:none;position:fixed;inset:0;background:rgba(30,15,10,.85);z-index:3000;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal.aberto{display:flex}
+.modal-box{
+  background:#fff;border-radius:20px;padding:24px 22px;max-width:380px;width:100%;
+  animation:entrar .3s ease;
+}
+.modal-box h3{font-family:'Playfair Display',serif;margin-top:0;font-size:18px;color:var(--marrom-escuro)}
+.opcao-motivo{
+  display:block;width:100%;text-align:left;padding:13px 14px;border-radius:12px;
+  border:1.5px solid var(--creme-escuro);background:var(--creme-medio);margin-bottom:10px;
+  font-weight:700;font-size:13.5px;cursor:pointer;color:var(--marrom-escuro);
+}
+.opcao-motivo:active{transform:scale(.98)}
+.opcao-motivo small{display:block;font-weight:400;color:var(--marrom-claro);margin-top:3px}
+.modal-cancelar{
+  width:100%;padding:11px;border-radius:10px;border:none;background:var(--creme-escuro);
+  color:var(--marrom-escuro);font-weight:700;cursor:pointer;margin-top:4px;
+}
 
-    #listaPedidos {
-        max-width: 700px;
-        margin: 0 auto;
-        padding: 14px 16px 40px;
-    }
+/* ---------- TOAST ---------- */
+#toastNovoPedido{
+  position:fixed;top:-100px;left:50%;transform:translateX(-50%);z-index:4000;
+  background:linear-gradient(135deg,var(--destaque),#a06810);color:#fff;padding:14px 20px;
+  border-radius:14px;font-weight:700;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);
+  transition:top .4s cubic-bezier(.34,1.56,.64,1);display:flex;align-items:center;gap:10px;
+}
+#toastNovoPedido.mostrar{top:16px}
 
-    /* ===== Card "comanda" ===== */
-    .pedido-card {
-        background: #fff;
-        border-radius: 4px 4px 16px 16px;
-        padding: 18px 16px 16px;
-        margin-bottom: 22px;
-        box-shadow: 0 3px 14px rgba(62,39,35,0.08);
-        border: 1px solid rgba(215,204,200,0.6);
-        border-top: none;
-        position: relative;
-    }
-    .pedido-card.pendente {
-        border-left: 4px solid var(--destaque);
-        box-shadow: 0 3px 16px rgba(200,134,10,0.22);
-    }
-    .selo-pendente {
-        display: inline-block;
-        background: var(--destaque);
-        color: #fff;
-        font-size: 10px;
-        font-weight: 700;
-        letter-spacing: 0.4px;
-        padding: 3px 9px;
-        border-radius: 10px;
-        margin-left: 8px;
-        vertical-align: middle;
-        white-space: nowrap;
-    }
-    .pedido-card::before {
-        content: '';
-        position: absolute;
-        top: -1px; left: 0; right: 0; height: 9px;
-        background:
-            linear-gradient(135deg, var(--creme-fundo) 50%, transparent 50%) 0 0,
-            linear-gradient(225deg, var(--creme-fundo) 50%, transparent 50%) 0 0;
-        background-size: 13px 13px;
-        background-repeat: repeat-x;
-        background-position: bottom;
-    }
-    .pedido-topo {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 8px;
-        gap: 10px;
-    }
-    .pedido-numero {
-        font-family: 'JetBrains Mono', monospace;
-        font-size: 15px;
-        color: var(--marrom-escuro);
-        font-weight: 700;
-        letter-spacing: 0.3px;
-    }
-    .pedido-numero span { color: var(--marrom-claro); font-weight: 500; }
-    .pedido-data { font-size: 11px; color: var(--marrom-claro); margin-top: 2px; }
-    .status-badge {
-        display: inline-block;
-        padding: 4px 11px;
-        border-radius: 12px;
-        font-size: 10.5px;
-        font-weight: 700;
-        color: #fff;
-        white-space: nowrap;
-        letter-spacing: 0.2px;
-    }
-    .pedido-info { font-size: 13.5px; line-height: 1.65; margin: 10px 0; }
-    .pedido-info b { color: var(--marrom-medio); }
-    .campo-ausente { color: #b25a00; font-style: italic; }
-    .pedido-itens {
-        background: var(--creme-medio);
-        border-radius: 10px;
-        padding: 9px 12px;
-        font-size: 13px;
-        margin: 8px 0;
-    }
-    .pedido-itens div { padding: 2px 0; }
-    .pedido-total {
-        font-weight: 700;
-        font-size: 15px;
-        color: var(--destaque);
-        margin-top: 6px;
-    }
-    .botoes-status {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
-        margin-top: 13px;
-        padding-top: 12px;
-        border-top: 1px dashed var(--creme-escuro);
-    }
-    .botoes-status button {
-        flex: 1;
-        min-width: 118px;
-        padding: 9px 8px;
-        border-radius: 10px;
-        border: 1.5px solid var(--creme-escuro);
-        background: var(--creme-medio);
-        color: var(--marrom-escuro);
-        font-weight: 700;
-        font-size: 11.5px;
-        cursor: pointer;
-    }
-    .botoes-status button.ativo {
-        background: var(--verde-whats);
-        color: #fff;
-        border-color: var(--verde-whats);
-    }
-    .btn-whats-mini {
-        background: var(--verde-whats) !important;
-        color: #fff !important;
-        border: none !important;
-        width: 100%;
-        margin-top: 8px;
-        padding: 10px;
-        border-radius: 10px;
-        font-weight: 700;
-        font-size: 13px;
-        cursor: pointer;
-    }
-    .vazio {
-        text-align: center;
-        color: var(--marrom-claro);
-        padding: 50px 24px;
-        font-size: 14px;
-        line-height: 1.6;
-        max-width: 340px;
-        margin: 0 auto;
-    }
-    .vazio .vazio-emoji { font-size: 34px; display: block; margin-bottom: 10px; }
-    .vazio b { color: var(--marrom-medio); display: block; margin-bottom: 4px; font-size: 15px; }
-
-    @keyframes pulse {
-        0% { opacity: 1; } 50% { opacity: 0.35; } 100% { opacity: 1; }
-    }
+@media(max-width:480px){
+  .grid-pedidos{grid-template-columns:1fr}
+  .header-titulo h1{font-size:16px}
+}
 </style>
 </head>
 <body>
 
+<!-- LOGIN SIMPLES -->
 <div id="telaLogin">
-    <div class="selo">🍰</div>
-    <h2>Painel Admin</h2>
-    <p class="subtitulo-login">Josi Doces Gourmet</p>
-    <input type="email" id="loginEmail" placeholder="E-mail" autocomplete="username">
-    <input type="password" id="loginSenha" placeholder="Senha" autocomplete="current-password">
-    <button class="btn-principal" onclick="fazerLogin()">Entrar</button>
-    <div id="erroLogin"></div>
+  <div class="login-box">
+    <div style="font-size:38px;">🍰</div>
+    <h1>Painel Josi Doces</h1>
 
-    <div id="areaBiometria">
-        <button type="button" id="btnEntrarBiometria" onclick="entrarComBiometria()">🔐 Entrar com Digital</button>
+    <div id="blocoBiometria" style="display:none;">
+      <p>Use sua digital para entrar</p>
+      <button class="btn-biometria" id="btnEntrarDigital" onclick="loginComBiometria()">
+        <i class="fas fa-fingerprint"></i> Entrar com digital
+      </button>
+      <div class="separador-login">ou</div>
+      <button class="link-usar-pin" onclick="mostrarBlocoPin()">Usar código de acesso</button>
     </div>
 
-    <a href="#" id="linkEsqueciSenha" onclick="solicitarResetSenha(); return false;">Esqueci minha senha</a>
-    <div id="msgReset"></div>
+    <div id="blocoPin" style="display:none;">
+      <p>Digite o código de acesso da loja</p>
+      <input type="password" id="inputPin" inputmode="numeric" maxlength="6" placeholder="••••" onkeypress="if(event.key==='Enter')tentarLogin()">
+      <button onclick="tentarLogin()">Entrar</button>
+    </div>
+
+    <div class="login-erro" id="loginErro"></div>
+
+    <div id="avisoCadastrarDigital" class="aviso-cadastrar-digital" style="display:none;">
+      <p>👆 Seu aparelho tem leitor de digital. Quer ativar a entrada por digital para as próximas vezes?</p>
+      <button class="btn-cadastrar-digital" onclick="registrarBiometria()">Ativar entrada por digital</button>
+      <button class="btn-agora-nao" onclick="fecharAvisoDigital()">Agora não</button>
+    </div>
+  </div>
 </div>
 
-<div id="telaDashboard">
-    <header>
-        <div class="header-titulo">
-            <span class="bolinha-status" id="bolinhaStatus"></span>
-            <div>
-                <h1>🍰 Pedidos</h1>
-                <div class="header-sub" id="headerSub">conectando…</div>
-            </div>
-        </div>
-        <div class="header-botoes">
-            <button id="btnToggleBiometria" onclick="alternarBiometria()" style="display:none;">🔐 Digital</button>
-            <button onclick="fazerLogout()">Sair</button>
-        </div>
-    </header>
+<div id="toastNovoPedido">🔔 <span id="toastTexto">Novo pedido recebido!</span></div>
 
-    <div id="bannerDiagnostico"></div>
-
-    <div class="filtros" id="filtros">
-        <button class="filtro-btn ativo" data-filtro="todos">Todos</button>
-        <button class="filtro-btn" data-filtro="recebido">Recebidos</button>
-        <button class="filtro-btn" data-filtro="preparo">Em Preparo</button>
-        <button class="filtro-btn" data-filtro="saiu_entrega">Saiu p/ Entrega</button>
-        <button class="filtro-btn" data-filtro="pronto_retirada">Pronto p/ Retirada</button>
-        <button class="filtro-btn" data-filtro="finalizado">Finalizados</button>
+<header>
+  <div class="header-top">
+    <div class="header-titulo">
+      <span style="font-size:26px;">🍰</span>
+      <div>
+        <h1>Josi Doces — Pedidos</h1>
+        <span id="statusConexao" class="offline">Conectando…</span>
+      </div>
     </div>
-
-    <div class="busca-area">
-        <input type="text" id="buscaPedido" placeholder="🔍 Buscar por nome ou número do pedido..." oninput="renderizarPedidos()">
+    <div class="header-acoes">
+      <button class="btn-som" id="btnSom" onclick="alternarSom()" title="Som de notificação"><i class="fas fa-volume-up"></i></button>
+      <button class="btn-sair" onclick="sair()" title="Sair"><i class="fas fa-sign-out-alt"></i></button>
     </div>
+  </div>
+  <div class="filtros-wrap">
+    <input type="text" class="busca" id="busca" placeholder="🔍 Buscar por nome, telefone ou nº do pedido..." oninput="renderizar()">
+    <div class="abas" id="abasFiltro"></div>
+  </div>
+</header>
 
-    <div id="contadorResultado"></div>
-    <div id="listaPedidos"></div>
+<div class="container">
+  <div id="gridPedidos" class="grid-pedidos"></div>
+  <div id="vazioMsg" class="vazio" style="display:none">
+    <i class="fas fa-mug-hot"></i>
+    Nenhum pedido por aqui ainda.
+  </div>
+</div>
+
+<!-- MODAL REJEIÇÃO -->
+<div class="modal" id="modalRejeitar">
+  <div class="modal-box">
+    <h3>❌ Rejeitar pedido</h3>
+    <p style="font-size:13px;color:var(--marrom-claro);margin-top:-8px;">Escolha o motivo — o cliente poderá ser avisado pelo WhatsApp.</p>
+    <button class="opcao-motivo" onclick="confirmarRejeicao('fora_horario')">
+      ⏰ Fora do horário de atendimento
+      <small>Pedido feito ou agendado fora do horário de funcionamento</small>
+    </button>
+    <button class="opcao-motivo" onclick="confirmarRejeicao('sem_capacidade')">
+      📦 Sem capacidade no momento
+      <small>Volume de pedidos muito alto para este horário</small>
+    </button>
+    <button class="opcao-motivo" onclick="confirmarRejeicao('outro')">
+      ✏️ Outro motivo
+      <small>Você poderá digitar o motivo</small>
+    </button>
+    <button class="modal-cancelar" onclick="fecharModalRejeitar()">Cancelar</button>
+  </div>
 </div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, onValue, update, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
@@ -498,514 +314,519 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-const auth = getAuth(app);
+const pedidosRef = ref(db, "pedidos");
 
-let pedidosBrutos = {};
-let filtroAtual = 'todos';
+window._pedidos = {};
+window._primeiraCarga = true;
 
-/* ============================================================
-   NORMALIZAÇÃO DE PEDIDOS
-   O site de pedidos já teve mais de uma versão em produção, e
-   cada uma gravou os campos com nomes um pouco diferentes
-   (ex: "nome" vs "cliente", "enderecoTexto" vs "bairro").
-   Esta função tenta todos os nomes conhecidos, para que pedidos
-   antigos e novos apareçam corretamente no painel.
-   ============================================================ */
-function normalizarPedido(bruto) {
-    if (!bruto || typeof bruto !== 'object') bruto = {};
+function iniciarEscuta(){
+  document.getElementById('statusConexao').textContent = 'Conectando…';
+  onValue(pedidosRef, (snapshot) => {
+    const dados = snapshot.val() || {};
+    const chavesAntigas = new Set(Object.keys(window._pedidos));
+    const chavesNovas = [];
 
-    const itensRaw = bruto.itens;
-    let itens = [];
-    if (Array.isArray(itensRaw)) itens = itensRaw;
-    else if (itensRaw && typeof itensRaw === 'object') itens = Object.values(itensRaw);
+    Object.entries(dados).forEach(([chave, pedido]) => {
+      if (!window._primeiraCarga && !chavesAntigas.has(chave) && pedido.status !== undefined) {
+        chavesNovas.push(chave);
+      }
+    });
 
-    const bairroCru = bruto.bairro || '';
-    const pareceRetiradaPorTexto = typeof bairroCru === 'string' && /retirar/i.test(bairroCru);
+    window._pedidos = dados;
+    window._primeiraCarga = false;
 
-    const totalCalculado = itens.reduce(function (acc, item) {
-        const preco = (item && typeof item.preco === 'number') ? item.preco : 0;
-        const qtd = (item && typeof item.qtd === 'number') ? item.qtd : 1;
-        return acc + preco * qtd;
-    }, 0);
+    document.getElementById('statusConexao').textContent = '🟢 Conectado em tempo real';
+    document.getElementById('statusConexao').className = 'online';
 
-    const criadoEmBruto = bruto.criadoEm || bruto.statusAtualizadoEm || null;
-    let criadoEmMs = null;
-    if (criadoEmBruto) {
-        const t = new Date(criadoEmBruto).getTime();
-        criadoEmMs = isNaN(t) ? null : t;
+    if (chavesNovas.length > 0 && typeof window.notificarNovoPedido === 'function') {
+      chavesNovas.forEach(ch => window.notificarNovoPedido(dados[ch]));
     }
+    if (typeof window.renderizar === 'function') window.renderizar();
+  }, (erro) => {
+    console.error('Erro Firebase:', erro);
+    document.getElementById('statusConexao').textContent = '🔴 Sem conexão';
+    document.getElementById('statusConexao').className = 'offline';
+  });
+}
+window.iniciarEscutaPedidos = iniciarEscuta;
 
-    return {
-        nome: bruto.nome || bruto.cliente || '',
-        telefone: bruto.telefone || bruto.whatsapp || bruto.fone || '',
-        numeroPedido: bruto.numeroPedido || bruto.numero || '',
-        status: bruto.status || 'recebido',
-        tipoEntrega: bruto.tipoEntrega || (bruto.bairro === 'retirada' || pareceRetiradaPorTexto ? 'retirada' : 'entrega'),
-        enderecoTexto: bruto.enderecoTexto || (typeof bairroCru === 'string' ? bairroCru : ''),
-        endereco: bruto.endereco || '',
-        data: bruto.data || '',
-        hora: bruto.hora || '',
-        pagamento: bruto.pagamento || '',
-        itens: itens,
-        total: (typeof bruto.total === 'number') ? bruto.total : totalCalculado,
-        criadoEmMs: criadoEmMs,
-        criadoEmBruto: criadoEmBruto
-    };
-}
+window.atualizarStatusPedido = function(chave, novoStatus, extras){
+  const payload = Object.assign({ status: novoStatus, statusAtualizadoEm: Date.now() }, extras || {});
+  return update(ref(db, "pedidos/" + chave), payload);
+};
+</script>
 
-/* ===== Biometria (WebAuthn) ===== */
-function _bufParaBase64(buf) {
-    return btoa(String.fromCharCode.apply(null, new Uint8Array(buf)));
-}
-function _base64ParaBuf(b64) {
-    const bin = atob(b64);
-    const arr = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return arr.buffer;
-}
-function _ofuscar(obj) {
-    return btoa(unescape(encodeURIComponent(JSON.stringify(obj))));
-}
-function _desofuscar(str) {
-    return JSON.parse(decodeURIComponent(escape(atob(str))));
-}
+<script>
+/* ==================== LOGIN — PIN + DIGITAL (WebAuthn) ====================
+   Proteção de acesso local. Isso NÃO substitui regras de
+   segurança no Firebase — apenas evita que qualquer pessoa com
+   o link abra o painel sem querer. Para segurança real,
+   configure Firebase Authentication + Regras de acesso no banco.
 
-const CHAVE_BIO_ID = 'josiAdminBiometriaId';
-const CHAVE_BIO_CRED = 'josiAdminBiometriaCred';
+   A entrada por digital usa a API padrão do navegador (WebAuthn),
+   que aciona o leitor de digital/Face real do aparelho através
+   do próprio sistema operacional — nem o site nem este código
+   têm acesso à digital em si, apenas recebem "sim, a pessoa dona
+   deste aparelho confirmou". Por isso ela só funciona:
+   - servida por HTTPS (não funciona em preview local tipo Acode/file://)
+   - em um navegador/aparelho com leitor de digital configurado
+======================================================== */
+const PIN_ACESSO = "1985"; // troque este código quando quiser
+const CHAVE_CRED_BIOMETRIA = "josiAdminCredId";
 
-function atualizarUiBiometria() {
-    const jaAtivo = !!localStorage.getItem(CHAVE_BIO_ID);
-    const areaLogin = document.getElementById('areaBiometria');
-    if (areaLogin) areaLogin.style.display = jaAtivo ? 'block' : 'none';
-    const btnDash = document.getElementById('btnToggleBiometria');
-    if (btnDash) btnDash.textContent = jaAtivo ? '🔓 Remover Digital' : '🔐 Ativar Digital';
+function mostrarBlocoPin(){
+    document.getElementById('blocoBiometria').style.display = 'none';
+    document.getElementById('blocoPin').style.display = 'block';
+    document.getElementById('loginErro').textContent = '';
 }
 
-async function verificarSuporteBiometria() {
-    const btnDash = document.getElementById('btnToggleBiometria');
-    if (!window.PublicKeyCredential) { if (btnDash) btnDash.style.display = 'none'; return; }
+function mostrarBlocoBiometria(){
+    document.getElementById('blocoBiometria').style.display = 'block';
+    document.getElementById('blocoPin').style.display = 'none';
+    document.getElementById('loginErro').textContent = '';
+}
+
+function biometriaCadastrada(){
+    try { return !!localStorage.getItem(CHAVE_CRED_BIOMETRIA); } catch(e){ return false; }
+}
+
+async function biometriaDisponivelNoAparelho(){
+    if (!window.PublicKeyCredential || !navigator.credentials) return false;
     try {
-        const suportado = await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
-        if (btnDash) btnDash.style.display = suportado ? 'inline-block' : 'none';
-    } catch (e) {
-        if (btnDash) btnDash.style.display = 'none';
-    }
-    atualizarUiBiometria();
+        return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+    } catch(e){ return false; }
 }
 
-async function ativarBiometriaNoAparelho(email, senha) {
+function base64UrlParaBuffer(base64Url){
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const raw = atob(base64);
+    const buffer = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) buffer[i] = raw.charCodeAt(i);
+    return buffer;
+}
+function bufferParaBase64Url(buffer){
+    let binario = '';
+    const bytes = new Uint8Array(buffer);
+    for (let i = 0; i < bytes.byteLength; i++) binario += String.fromCharCode(bytes[i]);
+    return btoa(binario).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+async function registrarBiometria(){
     if (!window.PublicKeyCredential) {
-        alert("Esse navegador não tem suporte a login por digital/Face ID.");
-        return false;
+        alert('Seu navegador não é compatível com login por digital.');
+        return;
     }
     try {
         const desafio = crypto.getRandomValues(new Uint8Array(32));
-        const idUsuario = crypto.getRandomValues(new Uint8Array(16));
+        const userId = crypto.getRandomValues(new Uint8Array(16));
+
         const credencial = await navigator.credentials.create({
             publicKey: {
                 challenge: desafio,
-                rp: { name: "Josi Doces Gourmet - Admin" },
-                user: { id: idUsuario, name: email, displayName: email },
-                pubKeyCredParams: [
-                    { type: "public-key", alg: -7 },
-                    { type: "public-key", alg: -257 }
-                ],
+                rp: { name: "Painel Josi Doces" },
+                user: { id: userId, name: "admin-josi", displayName: "Admin Josi Doces" },
+                pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
                 authenticatorSelection: { authenticatorAttachment: "platform", userVerification: "required" },
                 timeout: 60000,
                 attestation: "none"
             }
         });
-        if (!credencial) return false;
-        localStorage.setItem(CHAVE_BIO_ID, _bufParaBase64(credencial.rawId));
-        localStorage.setItem(CHAVE_BIO_CRED, _ofuscar({ email: email, senha: senha }));
-        return true;
-    } catch (erro) {
-        console.error("Erro ao ativar biometria:", erro);
-        alert("Não foi possível ativar a digital neste aparelho.");
-        return false;
+
+        if (credencial) {
+            try { localStorage.setItem(CHAVE_CRED_BIOMETRIA, bufferParaBase64Url(credencial.rawId)); } catch(e){}
+            fecharAvisoDigital();
+            alert('✅ Digital cadastrada! Da próxima vez você já pode entrar direto com a digital.');
+        }
+    } catch(erro){
+        console.error('Erro ao cadastrar digital:', erro);
+        alert('Não foi possível cadastrar a digital. Verifique se seu aparelho tem leitor configurado e se o site está em HTTPS.');
     }
 }
 
-window.entrarComBiometria = async function() {
-    const idSalvo = localStorage.getItem(CHAVE_BIO_ID);
-    const credSalva = localStorage.getItem(CHAVE_BIO_CRED);
-    const erroDiv = document.getElementById('erroLogin');
-    erroDiv.style.display = 'none';
-    if (!idSalvo || !credSalva) return;
-
+async function loginComBiometria(){
+    const credIdSalvo = localStorage.getItem(CHAVE_CRED_BIOMETRIA);
+    if (!credIdSalvo) { mostrarBlocoPin(); return; }
+    const erroEl = document.getElementById('loginErro');
+    erroEl.textContent = '';
     try {
         const desafio = crypto.getRandomValues(new Uint8Array(32));
         const asserção = await navigator.credentials.get({
             publicKey: {
                 challenge: desafio,
-                allowCredentials: [{ id: _base64ParaBuf(idSalvo), type: "public-key" }],
+                allowCredentials: [{ id: base64UrlParaBuffer(credIdSalvo), type: "public-key" }],
                 userVerification: "required",
                 timeout: 60000
             }
         });
-        if (!asserção) throw new Error("Sem resposta do leitor de digital.");
-
-        const dados = _desofuscar(credSalva);
-        await signInWithEmailAndPassword(auth, dados.email, dados.senha);
-    } catch (erro) {
-        console.error("Erro na autenticação por digital:", erro);
-        erroDiv.textContent = "Erro biometria: " + erro.code;
-        erroDiv.style.display = 'block';
-    }
-};
-
-window.alternarBiometria = async function() {
-    const jaAtivo = !!localStorage.getItem(CHAVE_BIO_ID);
-
-    if (jaAtivo) {
-        if (confirm("Remover o login por digital deste aparelho?")) {
-            localStorage.removeItem(CHAVE_BIO_ID);
-            localStorage.removeItem(CHAVE_BIO_CRED);
-            atualizarUiBiometria();
+        if (asserção) {
+            try { sessionStorage.setItem('josiAdminOk', '1'); } catch(e){}
+            document.getElementById('telaLogin').style.display = 'none';
+            iniciarPainel();
         }
-        return;
+    } catch(erro){
+        console.error('Erro na autenticação por digital:', erro);
+        erroEl.textContent = 'Não reconhecemos sua digital. Tente novamente ou use o código.';
     }
+}
 
-    if (!auth.currentUser) return;
-    const senha = prompt("Para ativar a digital neste aparelho, confirme sua senha atual:");
-    if (!senha) return;
-
-    const sucesso = await ativarBiometriaNoAparelho(auth.currentUser.email, senha);
-    if (sucesso) alert("Digital ativada neste aparelho! 🎉");
-    atualizarUiBiometria();
-};
-
-/* ===== Login / logout / reset ===== */
-window.solicitarResetSenha = function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const msgDiv = document.getElementById('msgReset');
-
-    if (!email) {
-        msgDiv.style.color = '#c0392b';
-        msgDiv.textContent = "Digite seu e-mail no campo acima e clique em \"Esqueci minha senha\" de novo.";
-        msgDiv.style.display = 'block';
-        return;
-    }
-
-    sendPasswordResetEmail(auth, email).then(function() {
-        msgDiv.style.color = '#2e7d32';
-        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha.";
-        msgDiv.style.display = 'block';
-    }).catch(function(erro) {
-        console.error("Erro ao enviar e-mail de redefinição:", erro);
-        msgDiv.style.color = '#2e7d32';
-        msgDiv.textContent = "Se esse e-mail estiver cadastrado, enviamos um link para redefinir a senha.";
-        msgDiv.style.display = 'block';
-    });
-};
-
-window.fazerLogin = function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const senha = document.getElementById('loginSenha').value;
-    const erroDiv = document.getElementById('erroLogin');
-    erroDiv.style.display = 'none';
-
-    signInWithEmailAndPassword(auth, email, senha).catch(function(erro) {
-        console.error("Erro detalhado do Firebase:", erro.code, erro.message);
-        erroDiv.textContent = "Erro: " + erro.code;
-        erroDiv.style.display = 'block';
-    });
-};
-
-window.fazerLogout = function() {
-    signOut(auth);
-};
-
-let pararDeEscutar = null;
-
-onAuthStateChanged(auth, function(usuario) {
-    if (usuario) {
+function tentarLogin(){
+    const valor = document.getElementById('inputPin').value.trim();
+    const erroEl = document.getElementById('loginErro');
+    if (valor === PIN_ACESSO) {
+        try { sessionStorage.setItem('josiAdminOk', '1'); } catch(e){}
         document.getElementById('telaLogin').style.display = 'none';
-        document.getElementById('telaDashboard').style.display = 'block';
-        verificarSuporteBiometria();
-        escutarPedidos();
+        iniciarPainel();
+        setTimeout(ofertarCadastroDigital, 500);
     } else {
-        document.getElementById('telaLogin').style.display = 'block';
-        document.getElementById('telaDashboard').style.display = 'none';
-        atualizarUiBiometria();
-        if (pararDeEscutar) { pararDeEscutar(); pararDeEscutar = null; }
-    }
-});
-
-/* ===== Status de conexão (diagnóstico visível na tela) ===== */
-function definirStatusConexao(estado, detalhe) {
-    const bolinha = document.getElementById('bolinhaStatus');
-    const sub = document.getElementById('headerSub');
-    const banner = document.getElementById('bannerDiagnostico');
-
-    bolinha.className = 'bolinha-status';
-    banner.style.display = 'none';
-
-    if (estado === 'carregando') {
-        bolinha.classList.add('carregando');
-        sub.textContent = 'conectando…';
-    } else if (estado === 'ok') {
-        bolinha.classList.add('ok');
-        const n = Object.keys(pedidosBrutos || {}).length;
-        sub.textContent = n === 1 ? '1 pedido carregado' : n + ' pedidos carregados';
-    } else if (estado === 'erro') {
-        bolinha.classList.add('erro');
-        sub.textContent = 'erro de conexão';
-        banner.style.display = 'block';
-        banner.innerHTML = '<b>⚠️ Não foi possível carregar os pedidos</b>'
-            + 'O painel conectou, mas o banco de dados recusou a leitura. Isso normalmente é causado pelas Regras (Rules) do Realtime Database no Firebase Console — verifique se a leitura em <code>pedidos</code> está liberada para usuários autenticados.'
-            + '<code>' + (detalhe || 'erro desconhecido') + '</code>';
+        erroEl.textContent = 'Código incorreto. Tente novamente.';
+        document.getElementById('inputPin').value = '';
     }
 }
 
-function escutarPedidos() {
-    definirStatusConexao('carregando');
-    const pedidosRef = ref(db, 'pedidos');
-    pararDeEscutar = onValue(
-        pedidosRef,
-        function(snapshot) {
-            pedidosBrutos = snapshot.val() || {};
-            definirStatusConexao('ok');
-            window.renderizarPedidos();
-        },
-        function(erro) {
-            console.error("Erro ao ler pedidos do Firebase:", erro);
-            pedidosBrutos = {};
-            definirStatusConexao('erro', erro.code + ': ' + erro.message);
-            window.renderizarPedidos();
-        }
-    );
+async function ofertarCadastroDigital(){
+    if (biometriaCadastrada()) return;
+    const disponivel = await biometriaDisponivelNoAparelho();
+    if (!disponivel) return;
+    document.getElementById('telaLogin').style.display = 'flex';
+    document.getElementById('blocoBiometria').style.display = 'none';
+    document.getElementById('blocoPin').style.display = 'none';
+    document.getElementById('avisoCadastrarDigital').style.display = 'block';
+}
+function fecharAvisoDigital(){
+    document.getElementById('telaLogin').style.display = 'none';
+    document.getElementById('avisoCadastrarDigital').style.display = 'none';
 }
 
-document.getElementById('filtros').addEventListener('click', function(e) {
-    const btn = e.target.closest('.filtro-btn');
-    if (!btn) return;
-    document.querySelectorAll('.filtro-btn').forEach(b => b.classList.remove('ativo'));
-    btn.classList.add('ativo');
-    filtroAtual = btn.dataset.filtro;
-    window.renderizarPedidos();
-});
+function sair(){
+    try { sessionStorage.removeItem('josiAdminOk'); } catch(e){}
+    location.reload();
+}
 
+/* ==================== CONFIG DE STATUS ==================== */
 const STATUS_INFO = {
-    recebido:         { label: 'Recebido',            cor: '#8d6e63' },
-    preparo:          { label: 'Em Preparo',          cor: '#c8860a' },
-    saiu_entrega:      { label: 'Saiu p/ Entrega',      cor: '#009ee3' },
-    pronto_retirada:   { label: 'Pronto p/ Retirada',   cor: '#009ee3' },
-    finalizado:        { label: 'Finalizado',           cor: '#25D366' }
+    recebido:      { label: 'Recebido',            cor: '#c8860a', faixa: '#c8860a' },
+    preparando:    { label: 'Em preparação',        cor: '#7c5cbf', faixa: '#7c5cbf' },
+    pronto:        { label: 'Pronto p/ retirada',   cor: '#0088c7', faixa: '#0088c7' },
+    saiu_entrega:  { label: 'Saiu para entrega',    cor: '#0088c7', faixa: '#0088c7' },
+    entregue:      { label: 'Entregue',             cor: '#25D366', faixa: '#25D366' },
+    rejeitado:     { label: 'Rejeitado',            cor: '#d64545', faixa: '#d64545' }
 };
 
-function formatarTelefoneWhats(tel) {
-    const digitos = (tel || '').replace(/\D/g, '');
-    if (digitos.length === 11 || digitos.length === 10) return '55' + digitos;
-    return digitos;
+const MOTIVOS_REJEICAO = {
+    fora_horario: 'Infelizmente seu pedido foi feito/agendado fora do nosso horário de atendimento.',
+    sem_capacidade: 'Infelizmente estamos com um volume muito grande de pedidos e não conseguiremos atender neste horário.',
+    outro: ''
+};
+
+const ABAS = [
+    { chave: 'todos', label: 'Todos' },
+    { chave: 'recebido', label: 'Recebidos' },
+    { chave: 'preparando', label: 'Em preparo' },
+    { chave: 'pronto_ou_saiu', label: 'Pronto/Saiu' },
+    { chave: 'entregue', label: 'Entregues' },
+    { chave: 'rejeitado', label: 'Rejeitados' }
+];
+
+let abaAtiva = 'todos';
+let somAtivo = true;
+let chaveEmRejeicao = null;
+
+/* ==================== RENDERIZAÇÃO DAS ABAS ==================== */
+function contarPorAba(chaveAba, lista){
+    if (chaveAba === 'todos') return lista.length;
+    if (chaveAba === 'pronto_ou_saiu') return lista.filter(p => p.status === 'pronto' || p.status === 'saiu_entrega').length;
+    return lista.filter(p => p.status === chaveAba).length;
 }
 
-function mensagemParaStatus(status, pedido) {
-    const nome = pedido.nome || 'Cliente';
-    const numero = pedido.numeroPedido || '';
-    switch (status) {
-        case 'recebido':
-            return `Oi ${nome}! 🍰 Recebemos seu pedido #${numero} com sucesso! Já vamos começar a preparar tudo com muito carinho. Obrigada pela confiança! 🤎✨`;
-        case 'preparo':
-            return `Oi ${nome}! 👩‍🍳 Seu pedido #${numero} já está sendo preparado! Em breve fica pronto. 🍰✨`;
+function renderizarAbas(lista){
+    const wrap = document.getElementById('abasFiltro');
+    wrap.innerHTML = '';
+    ABAS.forEach(aba => {
+        const el = document.createElement('div');
+        el.className = 'aba' + (aba.chave === abaAtiva ? ' ativa' : '');
+        el.innerHTML = `${aba.label} <span class="contagem">${contarPorAba(aba.chave, lista)}</span>`;
+        el.onclick = () => { abaAtiva = aba.chave; renderizar(); };
+        wrap.appendChild(el);
+    });
+}
+
+/* ==================== HELPERS ==================== */
+function formatarMoeda(v){ return 'R$ ' + Number(v || 0).toFixed(2).replace('.', ','); }
+
+function telefoneParaWhats(telefone){
+    const digits = (telefone || '').replace(/\D/g, '');
+    if (digits.length >= 10) return '55' + digits;
+    return null;
+}
+
+function tempoDecorrido(timestampMs){
+    if (!timestampMs) return '';
+    const diffMin = Math.floor((Date.now() - timestampMs) / 60000);
+    if (diffMin < 1) return 'agora mesmo';
+    if (diffMin < 60) return `há ${diffMin} min`;
+    const h = Math.floor(diffMin / 60);
+    return `há ${h}h${diffMin % 60 ? ' ' + (diffMin % 60) + 'min' : ''}`;
+}
+
+function horaCriacao(pedido){
+    if (pedido.criadoEm) {
+        try { return new Date(pedido.criadoEm).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); } catch(e){}
+    }
+    return '';
+}
+
+/* ==================== NOTIFICAÇÃO SONORA ==================== */
+let audioCtx = null;
+function tocarBeep(){
+    if (!somAtivo) return;
+    try {
+        audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+        [0, 0.18].forEach(delay => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.001, audioCtx.currentTime + delay);
+            gain.gain.exponentialRampToValueAtTime(0.3, audioCtx.currentTime + delay + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + delay + 0.3);
+            osc.connect(gain).connect(audioCtx.destination);
+            osc.start(audioCtx.currentTime + delay);
+            osc.stop(audioCtx.currentTime + delay + 0.32);
+        });
+    } catch(e) { console.warn('Áudio não disponível:', e); }
+}
+function alternarSom(){
+    somAtivo = !somAtivo;
+    document.getElementById('btnSom').innerHTML = somAtivo
+        ? '<i class="fas fa-volume-up"></i>' : '<i class="fas fa-volume-mute"></i>';
+}
+
+window.notificarNovoPedido = function(pedido){
+    tocarBeep();
+    const toast = document.getElementById('toastNovoPedido');
+    document.getElementById('toastTexto').textContent = `Novo pedido de ${pedido.nome || 'cliente'} — ${formatarMoeda(pedido.total)}`;
+    toast.classList.add('mostrar');
+    setTimeout(() => toast.classList.remove('mostrar'), 4500);
+    document.title = '🔔 Novo pedido! — Painel Josi Doces';
+    setTimeout(() => { document.title = 'Painel Josi Doces'; }, 6000);
+};
+
+/* ==================== WHATSAPP ==================== */
+function mensagemStatus(pedido, status, motivoTexto){
+    const nome = pedido.nome || '';
+    const num = pedido.numeroPedido || '';
+    switch(status){
+        case 'preparando':
+            return `Oi ${nome}! 🍰 Seu pedido #${num} foi confirmado e já está em preparação na cozinha da Josi Doces. Assim que estiver pronto te aviso! 🤎`;
+        case 'pronto':
+            return `Oi ${nome}! ✅ Seu pedido #${num} está pronto para retirada! Pode vir buscar quando quiser. Endereço: Rua Marechal Floriano, 3197, Coronel Brito. 🍰`;
         case 'saiu_entrega':
-            return `Oi ${nome}! 🚚 Seu pedido #${numero} saiu para entrega! Chega bem quentinho até você. 🤎`;
-        case 'pronto_retirada':
-            return `Oi ${nome}! 📦 Seu pedido #${numero} está pronto para retirada! Pode vir buscar quando quiser, estamos te esperando. 🍰`;
-        case 'finalizado':
-            return pedido.tipoEntrega === 'retirada'
-                ? `Oi ${nome}! ✅ Confirmamos que seu pedido #${numero} foi retirado! Esperamos que aproveite muito. Obrigada pela preferência, volte sempre! ❤️`
-                : `Oi ${nome}! ✅ Seu pedido #${numero} foi entregue! Esperamos que aproveite muito. Obrigada pela preferência, volte sempre! ❤️`;
+            return `Oi ${nome}! 🚀 Seu pedido #${num} acabou de sair para entrega! Já já chega até você. 🤎`;
+        case 'entregue':
+            return `Oi ${nome}! 🎉 Seu pedido #${num} foi entregue/retirado. Esperamos que aproveite muito! Obrigada por escolher a Josi Doces Gourmet 🍰🤎`;
+        case 'rejeitado':
+            return `Oi ${nome}, tudo bem? 😊 Infelizmente não conseguiremos atender seu pedido #${num}. ${motivoTexto || ''} Sinta-se à vontade para fazer um novo pedido dentro do nosso horário de atendimento. Desculpe o transtorno! 🤎`;
         default:
-            return `Oi ${nome}! Atualização sobre o seu pedido #${numero}. 🍰`;
+            return `Oi ${nome}! Atualização sobre seu pedido #${num} na Josi Doces Gourmet. 🍰`;
     }
 }
 
-window.atualizarStatus = function(pedidoId, novoStatus) {
-    const bruto = pedidosBrutos[pedidoId];
-    if (!bruto) return;
-    const pedido = normalizarPedido(bruto);
+function abrirWhatsCliente(pedido, status, motivoTexto){
+    const numero = telefoneParaWhats(pedido.telefone);
+    if (!numero) { alert('Telefone do cliente inválido ou não informado.'); return; }
+    const texto = mensagemStatus(pedido, status, motivoTexto);
+    window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, '_blank');
+}
 
-    update(ref(db, 'pedidos/' + pedidoId), {
-        status: novoStatus,
-        statusAtualizadoEm: Date.now()
-    });
+/* ==================== AÇÕES DE STATUS ==================== */
+function avancarStatus(chave, statusAtual, tipoEntrega){
+    let proximo;
+    if (statusAtual === 'recebido') proximo = 'preparando';
+    else if (statusAtual === 'preparando') proximo = (tipoEntrega === 'entrega') ? 'saiu_entrega' : 'pronto';
+    else if (statusAtual === 'pronto' || statusAtual === 'saiu_entrega') proximo = 'entregue';
+    else return;
 
-    const texto = mensagemParaStatus(novoStatus, pedido);
-    const numeroWhats = formatarTelefoneWhats(pedido.telefone);
-    const url = `https://wa.me/${numeroWhats}?text=${encodeURIComponent(texto)}`;
-    window.open(url, '_blank');
-};
+    window.atualizarStatusPedido(chave, proximo).then(() => {
+        const pedido = window._pedidos[chave];
+        if (pedido && confirm('Status atualizado! Deseja avisar o cliente pelo WhatsApp?')) {
+            abrirWhatsCliente(pedido, proximo, '');
+        }
+    }).catch(err => alert('Erro ao atualizar pedido: ' + err.message));
+}
 
-window.enviarMensagemAvulsa = function(pedidoId) {
-    const bruto = pedidosBrutos[pedidoId];
-    if (!bruto) return;
-    const pedido = normalizarPedido(bruto);
-    const numeroWhats = formatarTelefoneWhats(pedido.telefone);
-    window.open(`https://wa.me/${numeroWhats}`, '_blank');
-};
-
-/* ============================================================
-   BADGES DE PENDENTES NAS ABAS
-   Conta quantos pedidos existem em cada status (exceto
-   "finalizado") e exibe uma bolinha vermelha em cima de cada
-   aba de filtro. A aba "Recebidos" pisca, para chamar atenção
-   imediata de um pedido novo chegando.
-   ============================================================ */
-function atualizarBadgesFiltros() {
-    const contagens = { recebido: 0, preparo: 0, saiu_entrega: 0, pronto_retirada: 0, finalizado: 0 };
-    Object.values(pedidosBrutos || {}).forEach(function(bruto) {
-        const pedido = normalizarPedido(bruto);
-        if (contagens.hasOwnProperty(pedido.status)) contagens[pedido.status]++;
-    });
-    const pendentesTotal = contagens.recebido + contagens.preparo + contagens.saiu_entrega + contagens.pronto_retirada;
-
-    document.querySelectorAll('.filtro-btn').forEach(function(btn) {
-        const chave = btn.dataset.filtro;
-        const valor = chave === 'todos' ? pendentesTotal : (contagens[chave] || 0);
-        let badge = btn.querySelector('.filtro-badge');
-
-        if (valor > 0) {
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.className = 'filtro-badge';
-                btn.appendChild(badge);
+function abrirModalRejeitar(chave){
+    chaveEmRejeicao = chave;
+    document.getElementById('modalRejeitar').classList.add('aberto');
+}
+function fecharModalRejeitar(){
+    document.getElementById('modalRejeitar').classList.remove('aberto');
+    chaveEmRejeicao = null;
+}
+function confirmarRejeicao(motivoChave){
+    if (!chaveEmRejeicao) return;
+    let motivoTexto = MOTIVOS_REJEICAO[motivoChave];
+    if (motivoChave === 'outro') {
+        motivoTexto = prompt('Digite o motivo da rejeição:', '') || '';
+    }
+    const chave = chaveEmRejeicao;
+    window.atualizarStatusPedido(chave, 'rejeitado', { motivoRejeicao: motivoTexto, motivoRejeicaoTipo: motivoChave })
+        .then(() => {
+            const pedido = window._pedidos[chave];
+            fecharModalRejeitar();
+            if (pedido && confirm('Pedido rejeitado. Deseja avisar o cliente pelo WhatsApp?')) {
+                abrirWhatsCliente(pedido, 'rejeitado', motivoTexto);
             }
-            badge.textContent = valor;
-            badge.classList.toggle('piscando', chave === 'recebido');
-        } else if (badge) {
-            badge.remove();
-        }
-    });
+        })
+        .catch(err => alert('Erro ao rejeitar pedido: ' + err.message));
 }
 
-window.renderizarPedidos = function() {
-    atualizarBadgesFiltros();
-
-    const lista = document.getElementById('listaPedidos');
-    const contador = document.getElementById('contadorResultado');
-    const busca = (document.getElementById('buscaPedido').value || '').toLowerCase().trim();
-
-    const totalNoBanco = Object.keys(pedidosBrutos || {}).length;
-
-    let entradas = Object.entries(pedidosBrutos || {}).map(function(entrada) {
-        return [entrada[0], normalizarPedido(entrada[1])];
-    });
-
-    entradas.sort(function(a, b) {
-        return (b[1].criadoEmMs || 0) - (a[1].criadoEmMs || 0);
-    });
-
-    entradas = entradas.filter(function(entrada) {
-        const pedido = entrada[1];
-        if (filtroAtual !== 'todos' && pedido.status !== filtroAtual) return false;
-        if (busca) {
-            const alvo = `${pedido.nome} ${pedido.numeroPedido}`.toLowerCase();
-            if (!alvo.includes(busca)) return false;
-        }
-        return true;
-    });
-
-    contador.textContent = totalNoBanco === 0 ? '' :
-        entradas.length + ' de ' + totalNoBanco + ' pedido' + (totalNoBanco === 1 ? '' : 's');
-
-    if (totalNoBanco === 0) {
-        lista.innerHTML = '';
-        const vazio = document.createElement('div');
-        vazio.className = 'vazio';
-        vazio.innerHTML = '<span class="vazio-emoji">📭</span><b>Nenhum pedido no banco ainda</b>Assim que um cliente finalizar um pedido pelo site, ele aparece aqui automaticamente — não precisa atualizar a página.';
-        lista.appendChild(vazio);
-        return;
-    }
-
-    if (entradas.length === 0) {
-        lista.innerHTML = '';
-        const vazio = document.createElement('div');
-        vazio.className = 'vazio';
-        vazio.innerHTML = '<span class="vazio-emoji">🔍</span><b>Nada encontrado</b>Nenhum pedido bate com esse filtro ou termo de busca. Tente limpar a busca ou escolher "Todos".';
-        lista.appendChild(vazio);
-        return;
-    }
-
-    lista.innerHTML = '';
-    entradas.forEach(function(entrada) {
-        const id = entrada[0];
-        const pedido = entrada[1];
-        lista.appendChild(criarCardPedido(id, pedido));
-    });
-};
-
-function formatarDataHoraCriacao(ms) {
-    if (!ms) return '';
-    try { return new Date(ms).toLocaleString('pt-BR'); } catch(e) { return ''; }
+/* ==================== RENDERIZAÇÃO PRINCIPAL ==================== */
+function pedidoPassaFiltro(pedido, termoBusca){
+    if (!termoBusca) return true;
+    const alvo = `${pedido.nome || ''} ${pedido.telefone || ''} ${pedido.numeroPedido || ''}`.toLowerCase();
+    return alvo.includes(termoBusca.toLowerCase());
 }
 
-function criarCardPedido(id, pedido) {
-    const info = STATUS_INFO[pedido.status] || STATUS_INFO.recebido;
-    const tipoEntrega = pedido.tipoEntrega;
+function pedidoPassaAba(pedido){
+    if (abaAtiva === 'todos') return true;
+    if (abaAtiva === 'pronto_ou_saiu') return pedido.status === 'pronto' || pedido.status === 'saiu_entrega';
+    return pedido.status === abaAtiva;
+}
 
+function criarCardPedido(chave, pedido){
+    const status = pedido.status || 'recebido';
+    const info = STATUS_INFO[status] || STATUS_INFO.recebido;
     const card = document.createElement('div');
-    const ehPendente = pedido.status !== 'finalizado';
-    card.className = 'pedido-card' + (ehPendente ? ' pendente' : '');
+    card.className = 'pedido-card';
 
-    const itensHtml = pedido.itens.length
-        ? pedido.itens.map(function(item) {
-            const nomeItem = (item && item.nome) ? item.nome : 'Item';
-            const qtd = (item && typeof item.qtd === 'number') ? item.qtd : 1;
-            const preco = (item && typeof item.preco === 'number') ? item.preco : 0;
-            return `<div>${qtd}x ${nomeItem} — R$ ${(preco * qtd).toFixed(2).replace('.', ',')}</div>`;
-        }).join('')
-        : '<div class="campo-ausente">Itens não identificados neste pedido</div>';
+    const faixa = document.createElement('div');
+    faixa.className = 'pedido-faixa';
+    faixa.style.background = info.faixa;
+    card.appendChild(faixa);
 
-    const enderecoLinha = tipoEntrega === 'retirada'
-        ? 'Retirada no local'
-        : ((pedido.enderecoTexto || '') + (pedido.endereco ? ' — ' + pedido.endereco : '')) || '<span class="campo-ausente">endereço não informado</span>';
-
-    const nomeExibido = pedido.nome || '<span class="campo-ausente">nome não informado</span>';
-    const telExibido = pedido.telefone || '<span class="campo-ausente">sem telefone</span>';
-    const numeroExibido = pedido.numeroPedido || '<span class="campo-ausente">s/n°</span>';
-
-    card.innerHTML = `
-        <div class="pedido-topo">
-            <div>
-                <div class="pedido-numero"><span>#</span>${numeroExibido}${ehPendente ? '<span class="selo-pendente">PENDENTE</span>' : ''}</div>
-                <div class="pedido-data">${formatarDataHoraCriacao(pedido.criadoEmMs)}</div>
-            </div>
-            <span class="status-badge" style="background:${info.cor}">${info.label}</span>
+    const head = document.createElement('div');
+    head.className = 'pedido-head';
+    head.innerHTML = `
+        <div>
+            <div class="pedido-num">#${pedido.numeroPedido || '—'}</div>
+            <div class="pedido-hora">${horaCriacao(pedido)} · ${tempoDecorrido(pedido.criadoEm)}</div>
         </div>
-        <div class="pedido-info">
-            <div>👤 <b>${nomeExibido}</b> — 📱 ${telExibido}</div>
-            <div>📍 ${enderecoLinha}</div>
-            <div>⏰ ${pedido.data || '—'} às ${pedido.hora || '—'}</div>
-            <div>💳 ${pedido.pagamento || '<span class="campo-ausente">não informado</span>'}</div>
-        </div>
-        <div class="pedido-itens">${itensHtml}</div>
-        <div class="pedido-total">Total: R$ ${pedido.total.toFixed(2).replace('.', ',')}</div>
-        <div class="botoes-status" data-id="${id}" data-tipo="${tipoEntrega}"></div>
-        <button class="btn-whats-mini" data-acao="conversar" data-id="${id}">💬 Falar no WhatsApp</button>
+        <span class="badge-status" style="background:${info.cor}">${info.label}</span>
+    `;
+    card.appendChild(head);
+
+    const corpo = document.createElement('div');
+    corpo.className = 'pedido-corpo';
+
+    let htmlCorpo = `
+        <div class="linha-info"><i class="fas fa-user"></i><span><b>${pedido.nome || '—'}</b></span></div>
+        <div class="linha-info"><i class="fas fa-phone"></i><span>${pedido.telefone || '—'}</span></div>
+        <div class="linha-info"><i class="fas fa-${pedido.tipoEntrega === 'entrega' ? 'motorcycle' : 'store'}"></i>
+            <span>${pedido.tipoEntrega === 'entrega' ? (pedido.enderecoTexto || 'Entrega') + ' — ' + (pedido.endereco || '') : 'Retirada no local'}</span></div>
+        <div class="linha-info"><i class="fas fa-calendar"></i><span>${pedido.data ? new Date(pedido.data+'T00:00:00').toLocaleDateString('pt-BR') : '—'} às ${pedido.hora || '—'}</span></div>
     `;
 
-    const botoesDiv = card.querySelector('.botoes-status');
-    const etapas = tipoEntrega === 'retirada'
-        ? [['recebido','Recebido'], ['preparo','Em Preparo'], ['pronto_retirada','Pronto p/ Retirada'], ['finalizado','Retirado']]
-        : [['recebido','Recebido'], ['preparo','Em Preparo'], ['saiu_entrega','Saiu p/ Entrega'], ['finalizado','Entregue']];
-
-    etapas.forEach(function(etapa) {
-        const btn = document.createElement('button');
-        btn.textContent = etapa[1];
-        if (pedido.status === etapa[0]) btn.classList.add('ativo');
-        btn.onclick = function() { window.atualizarStatus(id, etapa[0]); };
-        botoesDiv.appendChild(btn);
+    const itens = pedido.itens || [];
+    let itensHtml = '<div class="itens-lista">';
+    itens.forEach(it => {
+        itensHtml += `<div class="item-linha"><span>${it.qtd}x ${it.nome}</span><span>${formatarMoeda(it.preco * it.qtd)}</span></div>`;
     });
+    itensHtml += '</div>';
+    htmlCorpo += itensHtml;
 
-    card.querySelector('[data-acao="conversar"]').onclick = function() {
-        window.enviarMensagemAvulsa(id);
-    };
+    htmlCorpo += `<div class="total-linha"><span>Total</span><b>${formatarMoeda(pedido.total)}</b></div>`;
+    htmlCorpo += `<span class="tag-pagamento"><i class="fas fa-credit-card"></i> ${pedido.pagamento || '—'}</span>`;
 
+    if (status === 'rejeitado' && pedido.motivoRejeicao) {
+        htmlCorpo += `<div class="motivo-rejeicao">Motivo: ${pedido.motivoRejeicao}</div>`;
+    }
+    if (pedido.statusAtualizadoEm) {
+        htmlCorpo += `<div class="historico-mini">Última atualização: ${new Date(pedido.statusAtualizadoEm).toLocaleString('pt-BR')}</div>`;
+    }
+
+    corpo.innerHTML = htmlCorpo;
+    card.appendChild(corpo);
+
+    const acoes = document.createElement('div');
+    acoes.className = 'pedido-acoes';
+
+    if (status === 'recebido' || status === 'preparando' || status === 'pronto' || status === 'saiu_entrega') {
+        const linhaBtns = document.createElement('div');
+        linhaBtns.className = 'linha-btns';
+
+        const btnAvancar = document.createElement('button');
+        btnAvancar.className = 'btn-acao btn-avancar';
+        let textoBtn = '';
+        if (status === 'recebido') textoBtn = '👍 Aceitar / Preparar';
+        else if (status === 'preparando') textoBtn = pedido.tipoEntrega === 'entrega' ? '🚀 Saiu p/ entrega' : '✅ Pronto p/ retirada';
+        else textoBtn = '🎉 Marcar entregue';
+        btnAvancar.innerHTML = textoBtn;
+        btnAvancar.onclick = () => avancarStatus(chave, status, pedido.tipoEntrega);
+        linhaBtns.appendChild(btnAvancar);
+
+        if (status === 'recebido') {
+            const btnRejeitar = document.createElement('button');
+            btnRejeitar.className = 'btn-acao btn-rejeitar';
+            btnRejeitar.innerHTML = '❌ Rejeitar';
+            btnRejeitar.onclick = () => abrirModalRejeitar(chave);
+            linhaBtns.appendChild(btnRejeitar);
+        }
+        acoes.appendChild(linhaBtns);
+    }
+
+    const btnWhats = document.createElement('button');
+    btnWhats.className = 'btn-acao btn-whats';
+    btnWhats.innerHTML = '<i class="fab fa-whatsapp"></i> Falar com cliente';
+    btnWhats.onclick = () => abrirWhatsCliente(pedido, status, pedido.motivoRejeicao || '');
+    acoes.appendChild(btnWhats);
+
+    card.appendChild(acoes);
     return card;
 }
 
-atualizarUiBiometria();
+window.renderizar = function(){
+    const lista = Object.entries(window._pedidos || {})
+        .map(([chave, pedido]) => ({ chave, ...pedido }))
+        .sort((a, b) => (b.criadoEm ? new Date(b.criadoEm).getTime() : 0) - (a.criadoEm ? new Date(a.criadoEm).getTime() : 0));
+
+    renderizarAbas(lista);
+
+    const termoBusca = document.getElementById('busca').value.trim();
+    const filtrada = lista.filter(p => pedidoPassaAba(p) && pedidoPassaFiltro(p, termoBusca));
+
+    const grid = document.getElementById('gridPedidos');
+    const vazio = document.getElementById('vazioMsg');
+    grid.innerHTML = '';
+
+    if (filtrada.length === 0) {
+        vazio.style.display = 'block';
+    } else {
+        vazio.style.display = 'none';
+        filtrada.forEach(p => grid.appendChild(criarCardPedido(p.chave, p)));
+    }
+};
+
+/* ==================== INICIALIZAÇÃO ==================== */
+function iniciarPainel(){
+    window.iniciarEscutaPedidos();
+    setInterval(() => { if (typeof window.renderizar === 'function') window.renderizar(); }, 60000);
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    let logado = false;
+    try { logado = sessionStorage.getItem('josiAdminOk') === '1'; } catch(e) {}
+    if (logado) {
+        document.getElementById('telaLogin').style.display = 'none';
+        iniciarPainel();
+        return;
+    }
+
+    if (biometriaCadastrada() && await biometriaDisponivelNoAparelho()) {
+        mostrarBlocoBiometria();
+    } else {
+        mostrarBlocoPin();
+    }
+});
 </script>
 </body>
 </html>
