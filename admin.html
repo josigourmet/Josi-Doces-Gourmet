@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -509,7 +508,7 @@ function sair(){
 const STATUS_INFO = {
     recebido:      { label: 'Recebido',            cor: '#c8860a', faixa: '#c8860a' },
     preparando:    { label: 'Em preparação',        cor: '#7c5cbf', faixa: '#7c5cbf' },
-    pronto:        { label: 'Pronto p/ retirada',   cor: '#0088c7', faixa: '#0088c7' },
+    pronto:        { label: 'Pronto',               cor: '#0088c7', faixa: '#0088c7' },
     saiu_entrega:  { label: 'Saiu para entrega',    cor: '#0088c7', faixa: '#0088c7' },
     entregue:      { label: 'Entregue',             cor: '#25D366', faixa: '#25D366' },
     rejeitado:     { label: 'Rejeitado',            cor: '#d64545', faixa: '#d64545' }
@@ -562,23 +561,36 @@ function telefoneParaWhats(telefone){
     return null;
 }
 
+/* Interpreta pedido.criadoEm de forma robusta: aceita timestamp numérico
+   (epoch ms) ou string "AAAA-MM-DD HH:MM:SS" / ISO. Quando a string não
+   tem fuso horário, trocamos o espaço por "T" para o navegador tratar
+   como horário local — isso evita horários "errados" por causa de fuso. */
+function parseDataCriacao(criadoEm){
+    if (!criadoEm) return null;
+    if (typeof criadoEm === 'number') return new Date(criadoEm);
+    let texto = String(criadoEm).trim();
+    if (texto.includes(' ') && !texto.includes('T')) texto = texto.replace(' ', 'T');
+    const data = new Date(texto);
+    return isNaN(data.getTime()) ? null : data;
+}
+
 function tempoDecorrido(criadoEm){
-    if (!criadoEm) return '';
-    const momento = new Date(criadoEm).getTime();
-    if (isNaN(momento)) return '';
-    const diffMin = Math.floor((Date.now() - momento) / 60000);
-    if (diffMin < 0) return 'agora mesmo';
-    if (diffMin < 1) return 'agora mesmo';
+    const data = parseDataCriacao(criadoEm);
+    if (!data) return '';
+    const diffSeg = Math.floor((Date.now() - data.getTime()) / 1000);
+    if (diffSeg < 60) return 'agora mesmo';
+    const diffMin = Math.floor(diffSeg / 60);
     if (diffMin < 60) return `há ${diffMin} min`;
-    const h = Math.floor(diffMin / 60);
-    return `há ${h}h${diffMin % 60 ? ' ' + (diffMin % 60) + 'min' : ''}`;
+    const diffH = Math.floor(diffMin / 60);
+    if (diffH < 24) return `há ${diffH}h${diffMin % 60 ? ' ' + (diffMin % 60) + 'min' : ''}`;
+    const diffDias = Math.floor(diffH / 24);
+    return `há ${diffDias} dia${diffDias > 1 ? 's' : ''}`;
 }
 
 function horaCriacao(pedido){
-    if (pedido.criadoEm) {
-        try { return new Date(pedido.criadoEm).toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); } catch(e){}
-    }
-    return '';
+    const data = parseDataCriacao(pedido.criadoEm);
+    if (!data) return '';
+    try { return data.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}); } catch(e){ return ''; }
 }
 
 /* ==================== NOTIFICAÇÃO SONORA ==================== */
@@ -625,11 +637,17 @@ function mensagemStatus(pedido, status, motivoTexto){
         case 'preparando':
             return `Oi ${nome}! 🍰 Seu pedido #${num} foi confirmado e já está em preparação na cozinha da Josi Doces. Assim que estiver pronto te aviso! 🤎`;
         case 'pronto':
+            if (pedido.tipoEntrega === 'entrega') {
+                return `Oi ${nome}! ✅ Seu pedido #${num} está pronto e já vai sair para entrega em instantes! 🚀🍰`;
+            }
             return `Oi ${nome}! ✅ Seu pedido #${num} está pronto para retirada! Pode vir buscar quando quiser. Endereço: Rua Marechal Floriano, 3197, Coronel Brito. 🍰`;
         case 'saiu_entrega':
             return `Oi ${nome}! 🚀 Seu pedido #${num} acabou de sair para entrega! Já já chega até você. 🤎`;
         case 'entregue':
-            return `Oi ${nome}! 🎉 Seu pedido #${num} foi entregue/retirado. Esperamos que aproveite muito! Obrigada por escolher a Josi Doces Gourmet 🍰🤎`;
+            if (pedido.tipoEntrega === 'entrega') {
+                return `Oi ${nome}! 🎉 Seu pedido #${num} foi entregue! Esperamos que aproveite muito! Obrigada por escolher a Josi Doces Gourmet 🍰🤎`;
+            }
+            return `Oi ${nome}! 🎉 Seu pedido #${num} foi retirado. Esperamos que aproveite muito! Obrigada por escolher a Josi Doces Gourmet 🍰🤎`;
         case 'rejeitado':
             return `Oi ${nome}, tudo bem? 😊 Infelizmente não conseguiremos atender seu pedido #${num}. ${motivoTexto || ''} Sinta-se à vontade para fazer um novo pedido dentro do nosso horário de atendimento. Desculpe o transtorno! 🤎`;
         default:
@@ -644,12 +662,17 @@ function abrirWhatsCliente(pedido, status, motivoTexto){
     window.open(`https://wa.me/${numero}?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
-/* ==================== AÇÕES DE STATUS ==================== */
+/* ==================== AÇÕES DE STATUS ====================
+   Fluxo agora tem mais uma etapa intermediária para os dois tipos
+   de pedido (retirada e entrega):
+   recebido -> preparando -> pronto -> (saiu_entrega, só se for entrega) -> entregue
+*/
 function avancarStatus(chave, statusAtual, tipoEntrega){
     let proximo;
     if (statusAtual === 'recebido') proximo = 'preparando';
-    else if (statusAtual === 'preparando') proximo = (tipoEntrega === 'entrega') ? 'saiu_entrega' : 'pronto';
-    else if (statusAtual === 'pronto' || statusAtual === 'saiu_entrega') proximo = 'entregue';
+    else if (statusAtual === 'preparando') proximo = 'pronto';
+    else if (statusAtual === 'pronto') proximo = (tipoEntrega === 'entrega') ? 'saiu_entrega' : 'entregue';
+    else if (statusAtual === 'saiu_entrega') proximo = 'entregue';
     else return;
 
     window.atualizarStatusPedido(chave, proximo).then(() => {
@@ -701,7 +724,10 @@ function pedidoPassaAba(pedido){
 
 function criarCardPedido(chave, pedido){
     const status = pedido.status || 'recebido';
-    const info = STATUS_INFO[status] || STATUS_INFO.recebido;
+    const info = Object.assign({}, STATUS_INFO[status] || STATUS_INFO.recebido);
+    if (status === 'entregue') {
+        info.label = (pedido.tipoEntrega === 'entrega') ? 'Entregue' : 'Retirado';
+    }
     const card = document.createElement('div');
     card.className = 'pedido-card';
 
@@ -714,7 +740,7 @@ function criarCardPedido(chave, pedido){
     head.className = 'pedido-head';
     head.innerHTML = `
         <div>
-            <div class="pedido-num">#${pedido.numeroPedido || '—'}</div>
+            <div class="pedido-num">#${pedido.numeroPedido || '—'}${pedido.nome ? ` <span style="font-weight:400;font-size:12.5px;color:var(--marrom-claro)">· ${pedido.nome}</span>` : ''}</div>
             <div class="pedido-hora">${horaCriacao(pedido)} · ${tempoDecorrido(pedido.criadoEm)}</div>
         </div>
         <span class="badge-status" style="background:${info.cor}">${info.label}</span>
@@ -764,7 +790,8 @@ function criarCardPedido(chave, pedido){
         btnAvancar.className = 'btn-acao btn-avancar';
         let textoBtn = '';
         if (status === 'recebido') textoBtn = '👍 Aceitar / Preparar';
-        else if (status === 'preparando') textoBtn = pedido.tipoEntrega === 'entrega' ? '🚀 Saiu p/ entrega' : '✅ Pronto p/ retirada';
+        else if (status === 'preparando') textoBtn = '📦 Marcar como pronto';
+        else if (status === 'pronto') textoBtn = pedido.tipoEntrega === 'entrega' ? '🚀 Saiu p/ entrega' : '🎉 Marcar entregue';
         else textoBtn = '🎉 Marcar entregue';
         btnAvancar.innerHTML = textoBtn;
         btnAvancar.onclick = () => avancarStatus(chave, status, pedido.tipoEntrega);
@@ -815,7 +842,8 @@ window.renderizar = function(){
 /* ==================== INICIALIZAÇÃO ==================== */
 function iniciarPainel(){
     window.iniciarEscutaPedidos();
-    setInterval(() => { if (typeof window.renderizar === 'function') window.renderizar(); }, 60000);
+    /* Atualiza a cada 20s para o "há X min" ficar mais preciso */
+    setInterval(() => { if (typeof window.renderizar === 'function') window.renderizar(); }, 20000);
 }
 
 window.addEventListener('DOMContentLoaded', async () => {
