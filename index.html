@@ -952,8 +952,8 @@
         <h2>⚠️ Horários de Funcionamento</h2>
         <p>Confira nossos horários para pedidos e agendamentos:</p>
         <ul style="text-align: left; font-size: 14px; color: #555;">
-            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos para entrega/retirada das 10h às 23h.</li>
-            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos para entrega/retirada das 10h às 17h.</li>
+            <li>🗓️ <b>Segunda a Sexta:</b><br>Pedidos para entrega/retirada das 08h às 17h.</li>
+            <li>🚀 <b>Sáb, Dom e Feriados:</b><br>Pedidos para entrega/retirada das 08h às 17h.</li>
             <li>⏰ <b>Atenção:</b> Agendamentos fora desses horários serão validados em horário comercial .</li>
         </ul>
         <a href="https://wa.me/5551985803243?text=Olá Josi! Tenho uma dúvida sobre agendamentos." target="_blank" class="btn-duvida">💬 Dúvidas no WhatsApp</a>
@@ -1354,9 +1354,9 @@ function verificarHorarioValidoParaAgendamento(dataStr, horaStr) {
     const ehFeriado = feriados.includes(dataFormatada);
     
     if (diaSemana >= 1 && diaSemana <= 5 && !ehFeriado) {
-        return (horaAtual >= 10 && horaAtual < 23);
+        return (horaAtual >= 08 && horaAtual < 17);
     } else {
-        return (horaAtual >= 10 && horaAtual < 17);
+        return (horaAtual >= 08 && horaAtual < 17);
     }
 }
 
