@@ -1725,9 +1725,10 @@ function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josid
    Se por qualquer motivo a gravação no Firebase falhar (rede
    instável, regra bloqueando etc.), o pedido NÃO é perdido:
    ele fica guardado no localStorage e o site tenta salvar de
-   novo sozinho na próxima vez que a página carregar, ou a cada
-   tentativa manual do cliente. Isso resolve o problema de
-   "pedido sumiu e não apareceu no painel".
+   novo sozinho na próxima vez que a página carregar, quando a
+   aba voltar a ficar visível, periodicamente enquanto estiver
+   aberta, ou a cada tentativa manual do cliente. Isso resolve
+   o problema de "pedido sumiu e não apareceu no painel".
    ============================================================ */
 const CHAVE_FILA_PENDENTES = 'pedidosPendentesJosi';
 
@@ -1755,6 +1756,15 @@ async function reenviarPedidosPendentes() {
         }
     }
 }
+
+// Reforço: tenta reenviar pendentes sempre que a aba volta a ficar
+// visível (ex.: o cliente volta do app do WhatsApp para o navegador)
+// e periodicamente enquanto a aba permanecer aberta — não depende
+// mais só do carregamento inicial da página.
+document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible') reenviarPedidosPendentes();
+});
+setInterval(reenviarPedidosPendentes, 15000);
 
 /* ============================================================
    MONTAGEM DO TEXTO DO PEDIDO (usado pelo botão do WhatsApp)
@@ -1821,9 +1831,15 @@ function montarTextoPedido(numeroPedido) {
 // window.open), para funcionar de forma confiável em navegadores de
 // celular. A "chave" do pedido (usada como número curto) é gerada na
 // hora, localmente, com window.criarPedidoComNumero — sem precisar de
-// nenhuma resposta de rede antes de abrir o WhatsApp. O pedido em si é
-// salvo no Firebase em segundo plano; se falhar, entra na fila de
-// pendentes acima e é reenviado automaticamente depois.
+// nenhuma resposta de rede antes de abrir o WhatsApp.
+//
+// A gravação do pedido em si é feita via REST + keepalive:true (função
+// window.salvarPedidoDireto), o que garante que o navegador tente
+// concluir o envio mesmo que a aba seja suspensa logo em seguida por
+// causa da troca para o app do WhatsApp. Antes, a gravação usava o SDK
+// do Firebase (websocket), que podia ser interrompido nesse instante e
+// fazia o pedido nunca chegar ao banco. Se mesmo assim falhar, o
+// pedido entra na fila de pendentes e é reenviado automaticamente.
 function finalizarZap() {
     const btnZap = document.getElementById("btnWhatsapp");
     if (btnZap.disabled) return;
@@ -1841,10 +1857,6 @@ function finalizarZap() {
 
     const numeroWhatsLoja = "5551985803243";
     const url = `https://wa.me/${numeroWhatsLoja}?text=${encodeURIComponent(resumo.texto)}`;
-
-    // Abre o WhatsApp na hora, dentro do próprio clique do usuário —
-    // isso evita o travamento em navegadores de celular.
-    window.open(url, '_blank');
 
     const dadosPedido = {
         nome: resumo.nome,
@@ -1866,7 +1878,9 @@ function finalizarZap() {
         criadoEm: new Date().toISOString()
     };
 
-    // Salva o pedido no Firebase por trás dos panos, sem atrasar o cliente.
+    // Dispara a gravação (REST + keepalive) ANTES de abrir o WhatsApp,
+    // para dar à requisição a maior chance possível de já estar em
+    // andamento no navegador quando a aba for trocada/suspensa.
     if (window.salvarPedidoDireto) {
         window.salvarPedidoDireto(chave, dadosPedido)
             .then(function() {
@@ -1880,6 +1894,10 @@ function finalizarZap() {
         console.error("window.salvarPedidoDireto não está disponível — guardando na fila para reenviar.");
         _guardarPedidoPendente(chave, dadosPedido);
     }
+
+    // Abre o WhatsApp dentro do próprio clique do usuário, o que evita
+    // bloqueios de pop-up em navegadores de celular.
+    window.open(url, '_blank');
 }
 
 function limparCarrinhoCompleto() {
@@ -1891,7 +1909,7 @@ function limparCarrinhoCompleto() {
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCHzkyYek4fV7fs_1f6FTA9o4o3ikJuhs0",
@@ -1909,13 +1927,11 @@ const db = getDatabase(app);
 
 /* ============================================================
    NUMERAÇÃO DE PEDIDOS — SEM SEQUÊNCIA, SEM ESPERA DE REDE
-   Não precisamos mais de um contador sequencial (que exigia uma
-   transação no banco ANTES de poder enviar o pedido, e podia
-   falhar/demorar). Em vez disso, cada pedido usa a própria
-   chave única que o Firebase já gera localmente com push()
-   — isso não repete NUNCA, mesmo com vários clientes pedindo ao
-   mesmo tempo, e não depende de nenhuma resposta de rede para
-   ficar pronto: o número já existe no instante do clique.
+   Cada pedido usa a própria chave única que o Firebase já gera
+   localmente com push() — isso não repete NUNCA, mesmo com vários
+   clientes pedindo ao mesmo tempo, e não depende de nenhuma
+   resposta de rede para ficar pronto: o número já existe no
+   instante do clique.
    ============================================================ */
 window.criarPedidoComNumero = function() {
     const novaRef = push(ref(db, "pedidos"));
@@ -1927,8 +1943,33 @@ window.criarPedidoComNumero = function() {
     return { chave, numero };
 };
 
+/* ============================================================
+   GRAVAÇÃO DO PEDIDO — REST + keepalive (em vez do SDK/websocket)
+   ------------------------------------------------------------
+   Antes, esta função usava o SDK do Firebase (set() via websocket).
+   O problema: assim que o cliente toca no botão do WhatsApp, o
+   navegador troca de app quase imediatamente — e pode suspender a
+   aba de origem ANTES do websocket concluir a gravação (principalmente
+   no primeiro pedido da sessão, quando a conexão ainda nem tinha sido
+   estabelecida). Resultado: o pedido nunca chegava ao banco.
+   
+   A chamada REST abaixo usa `fetch(..., { keepalive: true })`, que é
+   a forma padrão do navegador de garantir que uma requisição termine
+   de ser enviada mesmo que a página seja fechada ou suspensa logo em
+   seguida. Grava no mesmo caminho "pedidos/{chave}" de sempre, então
+   o painel administrativo continua funcionando sem nenhuma alteração.
+   ============================================================ */
 window.salvarPedidoDireto = function(chave, pedido) {
-    return set(ref(db, "pedidos/" + chave), pedido);
+    const url = `https://josigourmet-af3ff-default-rtdb.firebaseio.com/pedidos/${chave}.json`;
+    return fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(pedido),
+        keepalive: true
+    }).then(function(resp) {
+        if (!resp.ok) throw new Error('Firebase REST retornou status ' + resp.status);
+        return resp;
+    });
 };
 </script>
 
