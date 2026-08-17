@@ -44,7 +44,7 @@ Instruções de Comportamento da IA:
                 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
             },
             body: JSON.stringify({
-                model: 'llama-3.3-70b-versatile',
+                model: 'openai/gpt-oss-120b',
                 messages: [
                     { role: 'system', content: CONTEXTO_PROMPT_JOSI },
                     { role: 'user', content: mensagem }
@@ -53,6 +53,12 @@ Instruções de Comportamento da IA:
         });
 
         const dados = await resposta.json();
+
+        if (!resposta.ok) {
+            console.error('Groq retornou erro:', JSON.stringify(dados));
+            throw new Error((dados && dados.error && dados.error.message) || 'Erro na API da Groq');
+        }
+
         const textoIa = dados?.choices?.[0]?.message?.content;
 
         if (!textoIa) throw new Error('Resposta inesperada da IA');
@@ -62,6 +68,7 @@ Instruções de Comportamento da IA:
             body: JSON.stringify({ resposta: textoIa })
         };
     } catch (erro) {
+        console.error('Erro na function chat:', erro);
         return {
             statusCode: 500,
             body: JSON.stringify({ erro: 'Falha ao consultar a IA' })
