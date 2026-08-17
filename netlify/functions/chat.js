@@ -1,12 +1,23 @@
+const HEADERS_CORS = {
+    'Access-Control-Allow-Origin': 'https://josigourmet.github.io',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type'
+};
+
 exports.handler = async function (event) {
+    // Responde à pré-checagem (preflight) que o navegador manda antes do POST cross-origin
+    if (event.httpMethod === 'OPTIONS') {
+        return { statusCode: 204, headers: HEADERS_CORS, body: '' };
+    }
+
     if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, body: 'Method Not Allowed' };
+        return { statusCode: 405, headers: HEADERS_CORS, body: 'Method Not Allowed' };
     }
 
     try {
         const { mensagem } = JSON.parse(event.body);
         if (!mensagem || typeof mensagem !== 'string') {
-            return { statusCode: 400, body: JSON.stringify({ erro: 'Mensagem inválida' }) };
+            return { statusCode: 400, headers: HEADERS_CORS, body: JSON.stringify({ erro: 'Mensagem inválida' }) };
         }
 
         const CONTEXTO_PROMPT_JOSI = `Você é a assistente virtual super simpática e acolhedora da "Josi Doces Gourmet", localizada em Venâncio Aires.
@@ -65,12 +76,14 @@ Instruções de Comportamento da IA:
 
         return {
             statusCode: 200,
+            headers: HEADERS_CORS,
             body: JSON.stringify({ resposta: textoIa })
         };
     } catch (erro) {
         console.error('Erro na function chat:', erro);
         return {
             statusCode: 500,
+            headers: HEADERS_CORS,
             body: JSON.stringify({ erro: 'Falha ao consultar a IA' })
         };
     }
