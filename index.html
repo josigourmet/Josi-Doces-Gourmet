@@ -2039,9 +2039,6 @@ Instruções de Comportamento da IA:
 - Incentive gentilmente o cliente a escolher e adicionar os itens diretamente nas caixinhas de quantidade do site para montar o carrinho.
 - Se perguntarem coisas muito fora do assunto de confeitaria, mude de assunto ou decline educadamente dizendo que foca em adoçar a vida deles.`;
 
-const GROQ_API_KEY = "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";
-
-const GROQ_MODELO = "llama-3.3-70b-versatile";
 
 async function enviarMensagemIa() {
     const input = document.getElementById('chatInput');
@@ -2075,7 +2072,25 @@ async function enviarMensagemIa() {
     container.scrollTop = container.scrollHeight;
 
     try {
-        const url = `https://api.groq.com/openai/v1/chat/completions`;
+        const response = await fetch('/.netlify/functions/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ mensagem: texto })
+        });
+
+        const dados = await response.json();
+        msgDigitando.remove();
+
+        if (dados.resposta) {
+            const msgIa = document.createElement('div');
+            msgIa.className = 'msg ia';
+            msgIa.textContent = dados.resposta;
+            container.appendChild(msgIa);
+        } else {
+            throw new Error(dados.erro || 'Erro na API');
+        }
+
+    } catch (erro) {
 
         const response = await fetch(url, {
             method: 'POST',
