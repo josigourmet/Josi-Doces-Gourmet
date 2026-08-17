@@ -1,5 +1,5 @@
 const HEADERS_CORS = {
-    'Access-Control-Allow-Origin': 'https://josigourmet.github.io',
+    'Access-Control-Allow-Origin': 'https://josidocesgoumert.netlify.app',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type'
 };
