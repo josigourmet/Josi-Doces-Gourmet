@@ -20,8 +20,7 @@
                         https://*.firebaseio.com
                         https://firebaseinstallations.googleapis.com
                         wss://*.firebaseio.com
-                        https://*.googleapis.com
-                        https://api.groq.com;
+                        https://*.googleapis.com;
             frame-ancestors 'none';
         ">
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -1722,13 +1721,6 @@ function abrirMercadoPago() { window.open("https://link.mercadopago.com.br/josid
 
 /* ============================================================
    FILA DE PEDIDOS PENDENTES
-   Se por qualquer motivo a gravação no Firebase falhar (rede
-   instável, regra bloqueando etc.), o pedido NÃO é perdido:
-   ele fica guardado no localStorage e o site tenta salvar de
-   novo sozinho na próxima vez que a página carregar, quando a
-   aba voltar a ficar visível, periodicamente enquanto estiver
-   aberta, ou a cada tentativa manual do cliente. Isso resolve
-   o problema de "pedido sumiu e não apareceu no painel".
    ============================================================ */
 const CHAVE_FILA_PENDENTES = 'pedidosPendentesJosi';
 
@@ -1757,10 +1749,6 @@ async function reenviarPedidosPendentes() {
     }
 }
 
-// Reforço: tenta reenviar pendentes sempre que a aba volta a ficar
-// visível (ex.: o cliente volta do app do WhatsApp para o navegador)
-// e periodicamente enquanto a aba permanecer aberta — não depende
-// mais só do carregamento inicial da página.
 document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible') reenviarPedidosPendentes();
 });
@@ -1827,19 +1815,6 @@ function montarTextoPedido(numeroPedido) {
     };
 }
 
-// ✅ Abre o WhatsApp IMEDIATAMENTE no clique (sem nenhum await antes do
-// window.open), para funcionar de forma confiável em navegadores de
-// celular. A "chave" do pedido (usada como número curto) é gerada na
-// hora, localmente, com window.criarPedidoComNumero — sem precisar de
-// nenhuma resposta de rede antes de abrir o WhatsApp.
-//
-// A gravação do pedido em si é feita via REST + keepalive:true (função
-// window.salvarPedidoDireto), o que garante que o navegador tente
-// concluir o envio mesmo que a aba seja suspensa logo em seguida por
-// causa da troca para o app do WhatsApp. Antes, a gravação usava o SDK
-// do Firebase (websocket), que podia ser interrompido nesse instante e
-// fazia o pedido nunca chegar ao banco. Se mesmo assim falhar, o
-// pedido entra na fila de pendentes e é reenviado automaticamente.
 function finalizarZap() {
     const btnZap = document.getElementById("btnWhatsapp");
     if (btnZap.disabled) return;
@@ -1878,9 +1853,6 @@ function finalizarZap() {
         criadoEm: new Date().toISOString()
     };
 
-    // Dispara a gravação (REST + keepalive) ANTES de abrir o WhatsApp,
-    // para dar à requisição a maior chance possível de já estar em
-    // andamento no navegador quando a aba for trocada/suspensa.
     if (window.salvarPedidoDireto) {
         window.salvarPedidoDireto(chave, dadosPedido)
             .then(function() {
@@ -1895,8 +1867,6 @@ function finalizarZap() {
         _guardarPedidoPendente(chave, dadosPedido);
     }
 
-    // Abre o WhatsApp dentro do próprio clique do usuário, o que evita
-    // bloqueios de pop-up em navegadores de celular.
     window.open(url, '_blank');
 }
 
@@ -1925,40 +1895,13 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-/* ============================================================
-   NUMERAÇÃO DE PEDIDOS — SEM SEQUÊNCIA, SEM ESPERA DE REDE
-   Cada pedido usa a própria chave única que o Firebase já gera
-   localmente com push() — isso não repete NUNCA, mesmo com vários
-   clientes pedindo ao mesmo tempo, e não depende de nenhuma
-   resposta de rede para ficar pronto: o número já existe no
-   instante do clique.
-   ============================================================ */
 window.criarPedidoComNumero = function() {
     const novaRef = push(ref(db, "pedidos"));
     const chave = novaRef.key;
-    // Número 100% numérico (sem letras), gerado na hora a partir do
-    // horário do pedido — não precisa de nenhuma resposta de rede
-    // nem de contador sequencial no banco.
     const numero = Date.now().toString().slice(-6);
     return { chave, numero };
 };
 
-/* ============================================================
-   GRAVAÇÃO DO PEDIDO — REST + keepalive (em vez do SDK/websocket)
-   ------------------------------------------------------------
-   Antes, esta função usava o SDK do Firebase (set() via websocket).
-   O problema: assim que o cliente toca no botão do WhatsApp, o
-   navegador troca de app quase imediatamente — e pode suspender a
-   aba de origem ANTES do websocket concluir a gravação (principalmente
-   no primeiro pedido da sessão, quando a conexão ainda nem tinha sido
-   estabelecida). Resultado: o pedido nunca chegava ao banco.
-   
-   A chamada REST abaixo usa `fetch(..., { keepalive: true })`, que é
-   a forma padrão do navegador de garantir que uma requisição termine
-   de ser enviada mesmo que a página seja fechada ou suspensa logo em
-   seguida. Grava no mesmo caminho "pedidos/{chave}" de sempre, então
-   o painel administrativo continua funcionando sem nenhuma alteração.
-   ============================================================ */
 window.salvarPedidoDireto = function(chave, pedido) {
     const url = `https://josigourmet-af3ff-default-rtdb.firebaseio.com/pedidos/${chave}.json`;
     return fetch(url, {
@@ -1973,7 +1916,7 @@ window.salvarPedidoDireto = function(chave, pedido) {
 };
 </script>
 
-<!-- Logica JavaScript de Funcionamento do Chatbot IA com Groq API -->
+<!-- Logica JavaScript de Funcionamento do Chatbot IA (via Netlify Function, sem chave exposta) -->
 <script>
 function toggleChat() {
     const janela = document.getElementById('chatJanela');
@@ -2010,35 +1953,6 @@ function abrirChatAutomatico() {
     container.appendChild(msg);
     container.scrollTop = container.scrollHeight;
 }
-
-const CONTEXTO_PROMPT_JOSI = `Você é a assistente virtual super simpática e acolhedora da "Josi Doces Gourmet", localizada em Venâncio Aires.
-Seu objetivo principal é ajudar os clientes do site com dúvidas sobre o cardápio, entregas e pedidos.
-
-Nossos produtos e preços oficiais listados no site são:
-- Torta de bolacha no pote: R$ 10,00 (Sabores: Nata Ninho, Doce de leite com chocolate amargo e Bombom)
-- Torta de Bolacha Grande 1 kg: R$ 55,00
-- Bolo grande: R$ 35,00 (Sabores: Chocolate, Beijinhos e Brigadeiro, Cenoura com brigadeiro, Chocolate amargo, Doce de leite)
-- Bolo no pote: R$ 10,00 (Sabores: Beijinho, Coco, Doce de leite, Brigadeiro, Cenoura com brigadeiro)
-- Torta grande (A partir de 1 kg): A partir de R$ 60,00
-- Bolo no Pote com Pudim: R$ 14,00
-- Bolo de Stikadinho no Pote: R$ 12,00
-
-Regras Importantes da Loja:
-- Oferecemos Frete Grátis + 5% de desconto automático para qualquer compra a partir de R$ 50,00.
-- Atendimento e Entregas: Segunda a Sexta das 10h às 23h. Sábados, Domingos e Feriados das 10h às 17h.
-- Endereço físico para retirada no local: Rua Marechal Floriano, 3197, bairro Coronel Brito.
-- O prazo estimado para o preparo e entrega/retirada após a confirmação do pedido é de 40 a 60 minutos (solicitamos agendamento com pelo menos 1 hora de antecedência no site).
-- Nosso WhatsApp para dúvidas, orçamentos de eventos ou qualquer outro contato é (51) 98580-3243.
-
-Nossa história: A Josi Doces Gourmet começou em 19 de abril de 2026, de forma simples, entre panelas e sonhos na cozinha de casa. O que era um hobby se transformou em paixão ao ver o sorriso de quem provava os doces. Hoje, cada torta de bolacha e bolo que sai da cozinha carrega essa essência: o sabor autêntico do doce feito à mão, com a qualidade de produtos gourmet premium. A loja se orgulha de ser feita com amor, usar ingredientes premium e produzir tudo sob encomenda para garantir o máximo frescor.
-
-Instruções de Comportamento da IA:
-- Responda sempre de forma curta, prestativa e muito fofa. Use muitos emojis de doces (🍰, 🤎, ✨, 🍬, 🧁).
-- Se o cliente perguntar o número de WhatsApp ou quiser falar diretamente com a loja, informe (51) 98580-3243 e, se fizer sentido, ofereça o link: https://wa.me/5551985803243
-- Se o cliente perguntar sobre a história da loja, como ela começou, ou desde quando existe, conte a história acima de forma breve, calorosa e emocionante, sem inventar detalhes que não foram informados.
-- Incentive gentilmente o cliente a escolher e adicionar os itens diretamente nas caixinhas de quantidade do site para montar o carrinho.
-- Se perguntarem coisas muito fora do assunto de confeitaria, mude de assunto ou decline educadamente dizendo que foca em adoçar a vida deles.`;
-
 
 async function enviarMensagemIa() {
     const input = document.getElementById('chatInput');
@@ -2091,40 +2005,6 @@ async function enviarMensagemIa() {
         }
 
     } catch (erro) {
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${GROQ_API_KEY}`
-            },
-            body: JSON.stringify({
-                model: GROQ_MODELO,
-                messages: [
-                    { role: 'system', content: CONTEXTO_PROMPT_JOSI },
-                    { role: 'user', content: texto }
-                ]
-            })
-        });
-
-        const dados = await response.json();
-        msgDigitando.remove();
-
-        const respostaIa = dados && dados.choices && dados.choices[0] &&
-                            dados.choices[0].message && dados.choices[0].message.content;
-
-        if (respostaIa) {
-            const msgIa = document.createElement('div');
-            msgIa.className = 'msg ia';
-            msgIa.textContent = respostaIa;
-            container.appendChild(msgIa);
-        } else if (dados && dados.error) {
-            throw new Error(dados.error.message || 'Erro na API');
-        } else {
-            throw new Error('Formato de resposta inesperado');
-        }
-
-    } catch (erro) {
         console.error("Erro na integração com a IA:", erro);
         if (msgDigitando.parentNode) msgDigitando.remove();
         const msgErro = document.createElement('div');
@@ -2140,4 +2020,4 @@ async function enviarMensagemIa() {
 }
 </script>
 </body>
-    </html>
+</html>
