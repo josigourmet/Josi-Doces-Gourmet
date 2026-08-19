@@ -1,37 +1,38 @@
 const ORIGENS_PERMITIDAS = [
-    'https://josidocesgoumert.netlify.app',
     'https://josigourmet.github.io'
 ];
 
-function montarHeadersCors(origemRecebida) {
+function aplicarCors(req, res) {
+    const origemRecebida = req.headers.origin;
     const origem = ORIGENS_PERMITIDAS.includes(origemRecebida)
         ? origemRecebida
         : ORIGENS_PERMITIDAS[0];
 
-    return {
-        'Access-Control-Allow-Origin': origem,
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Vary': 'Origin'
-    };
+    res.setHeader('Access-Control-Allow-Origin', origem);
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Vary', 'Origin');
 }
 
-exports.handler = async function (event) {
-    const HEADERS_CORS = montarHeadersCors(event.headers && (event.headers.origin || event.headers.Origin));
+module.exports = async function handler(req, res) {
+    aplicarCors(req, res);
 
     // Responde à pré-checagem (preflight) que o navegador manda antes do POST cross-origin
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 204, headers: HEADERS_CORS, body: '' };
+    if (req.method === 'OPTIONS') {
+        res.status(204).end();
+        return;
     }
 
-    if (event.httpMethod !== 'POST') {
-        return { statusCode: 405, headers: HEADERS_CORS, body: 'Method Not Allowed' };
+    if (req.method !== 'POST') {
+        res.status(405).json({ erro: 'Method Not Allowed' });
+        return;
     }
 
     try {
-        const { mensagem } = JSON.parse(event.body);
+        const { mensagem } = req.body || {};
         if (!mensagem || typeof mensagem !== 'string') {
-            return { statusCode: 400, headers: HEADERS_CORS, body: JSON.stringify({ erro: 'Mensagem inválida' }) };
+            res.status(400).json({ erro: 'Mensagem inválida' });
+            return;
         }
 
         const CONTEXTO_PROMPT_JOSI = `Você é a assistente virtual super simpática e acolhedora da "Josi Doces Gourmet", localizada em Venâncio Aires.
@@ -88,17 +89,9 @@ Instruções de Comportamento da IA:
 
         if (!textoIa) throw new Error('Resposta inesperada da IA');
 
-        return {
-            statusCode: 200,
-            headers: HEADERS_CORS,
-            body: JSON.stringify({ resposta: textoIa })
-        };
+        res.status(200).json({ resposta: textoIa });
     } catch (erro) {
         console.error('Erro na function chat:', erro);
-        return {
-            statusCode: 500,
-            headers: HEADERS_CORS,
-            body: JSON.stringify({ erro: 'Falha ao consultar a IA' })
-        };
+        res.status(500).json({ erro: 'Falha ao consultar a IA' });
     }
 };
