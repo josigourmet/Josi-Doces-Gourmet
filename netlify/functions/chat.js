@@ -1,10 +1,24 @@
-const HEADERS_CORS = {
-    'Access-Control-Allow-Origin': 'https://josidocesgoumert.netlify.app',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type'
-};
+const ORIGENS_PERMITIDAS = [
+    'https://josidocesgoumert.netlify.app',
+    'https://josigourmet.github.io'
+];
+
+function montarHeadersCors(origemRecebida) {
+    const origem = ORIGENS_PERMITIDAS.includes(origemRecebida)
+        ? origemRecebida
+        : ORIGENS_PERMITIDAS[0];
+
+    return {
+        'Access-Control-Allow-Origin': origem,
+        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Vary': 'Origin'
+    };
+}
 
 exports.handler = async function (event) {
+    const HEADERS_CORS = montarHeadersCors(event.headers && (event.headers.origin || event.headers.Origin));
+
     // Responde à pré-checagem (preflight) que o navegador manda antes do POST cross-origin
     if (event.httpMethod === 'OPTIONS') {
         return { statusCode: 204, headers: HEADERS_CORS, body: '' };
