@@ -21,7 +21,7 @@
                         https://firebaseinstallations.googleapis.com
                         wss://*.firebaseio.com
                         https://*.googleapis.com
-                        https://josidocesgoumert.netlify.app;
+                        https://*.vercel.app;
             frame-ancestors 'none';
         ">
     <meta http-equiv="X-Frame-Options" content="DENY">
@@ -1987,7 +1987,7 @@ async function enviarMensagemIa() {
     container.scrollTop = container.scrollHeight;
 
     try {
-        const response = await fetch('https://josidocesgoumert.netlify.app/.netlify/functions/chat', {
+        const response = await fetch('https://SEU-PROJETO.vercel.app/api/chat', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ mensagem: texto })
